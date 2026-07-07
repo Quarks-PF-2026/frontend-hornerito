@@ -1,0 +1,81 @@
+// Design tokens — Hornerito
+// Paleta inspirada en el hornero (Furnarius rufus). Extraída de Hornerito.dc.html + paleta_hornero.svg.
+
+:root {
+  // ---- Marca / escala tonal canela ----
+  --hn-canela-50: #f5e9d8;
+  --hn-canela-100: #edd8b0; // crema (pecho)
+  --hn-canela-200: #d4a46a;
+  --hn-canela-400: #c1783a; // canela — primario / CTA
+  --hn-canela-600: #a04e22; // terracota — alas y cola
+  --hn-canela-700: #7a4420; // tierra — barro del nido
+  --hn-canela-800: #522d14;
+  --hn-canela-900: #2e180a;
+
+  // ---- Roles ----
+  --hn-primary: #c1783a;
+  --hn-primary-strong: #a04e22;
+  --hn-primary-contrast: #ffffff;
+  --hn-accent: #7baec4; // celeste pampa
+
+  // ---- Superficies / fondo ----
+  --hn-app-bg-from: #f0e6d2;
+  --hn-app-bg-to: #e3d6be;
+  --hn-surface: #fbf6ee; // marco / superficie principal
+  --hn-card: #ffffff;
+  --hn-input-bg: #fffdf9;
+  --hn-cream-soft: #f3eadb;
+
+  // ---- Texto ----
+  --hn-ink: #2e180a;
+  --hn-ink-2: #3a2a1a;
+  --hn-text: #5c4a38;
+  --hn-text-2: #7c6a54;
+  --hn-muted: #9a8c7a;
+  --hn-muted-2: #b6a88f;
+
+  // ---- Bordes ----
+  --hn-border: #e4d9c8;
+  --hn-border-soft: #efe6d6;
+  --hn-border-line: #f1e9da;
+
+  // ---- Estados ----
+  --hn-success: #3f8b5c;
+  --hn-success-ink: #2c6b45;
+  --hn-success-bg: #e6f0e7;
+  --hn-success-border: #b6d8c0;
+
+  --hn-warning-ink: #8a5e12;
+  --hn-warning-bg: #fbefd4;
+  --hn-warning-border: #ebcf88;
+  --hn-warning-strong: #c58a1e;
+
+  --hn-danger: #c24a36;
+  --hn-danger-ink: #9e3826;
+  --hn-danger-bg: #fae7e2;
+  --hn-danger-border: #e6b6a8;
+
+  // ---- Categorías de insumos ----
+  --hn-cat-secos: #f5e9d8;
+  --hn-cat-frescos: #eaf2f6;
+  --hn-cat-limpieza: #e6f0e7;
+  --hn-cat-higiene: #f1ecf6;
+  --hn-cat-bebidas: #fbefd4;
+
+  // ---- Tipografía ----
+  --hn-font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --hn-font-head: 'Bitter', Georgia, 'Times New Roman', serif;
+
+  // ---- Radios ----
+  --hn-radius-sm: 10px;
+  --hn-radius-md: 14px;
+  --hn-radius-lg: 18px;
+  --hn-radius-xl: 22px;
+  --hn-radius-pill: 999px;
+
+  // ---- Sombras ----
+  --hn-shadow-card: 0 6px 18px -12px rgba(90, 50, 10, 0.25);
+  --hn-shadow-cta: 0 8px 20px -6px rgba(160, 78, 34, 0.55);
+  --hn-shadow-fab: 0 12px 26px -8px rgba(122, 68, 32, 0.7);
+  --hn-shadow-frame: 0 30px 80px -20px rgba(70, 40, 10, 0.35);
+}

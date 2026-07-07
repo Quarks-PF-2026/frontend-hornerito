@@ -1,0 +1,139 @@
+@if (modal.isOpen()) {
+  <hn-bottom-sheet (closed)="modal.close()">
+    <!-- ===== Formulario ===== -->
+    @if (modal.isForm()) {
+      <div class="form">
+        <div class="title hn-head">{{ modal.title() }}</div>
+        <div class="subtitle">{{ modal.subtitle() }}</div>
+
+        @for (fld of modal.fields(); track fld.key) {
+          <div class="field">
+            <label class="hn-label">{{ fld.label }}</label>
+
+            @switch (fld.type) {
+              @case ('textarea') {
+                <textarea
+                  class="hn-textarea"
+                  rows="4"
+                  [placeholder]="fld.placeholder"
+                  [value]="fld.value"
+                  (input)="onInput(fld.key, $event)"
+                ></textarea>
+              }
+              @case ('select') {
+                <select class="hn-select" [value]="fld.value" (change)="onInput(fld.key, $event)">
+                  @for (opt of fld.options; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+              }
+              @case ('date') {
+                <input
+                  class="hn-input"
+                  type="date"
+                  [value]="fld.value"
+                  (input)="onInput(fld.key, $event)"
+                />
+              }
+              @case ('image') {
+                <div
+                  class="image"
+                  [style.borderColor]="fld.imgBorder"
+                  [style.background]="fld.imgBg"
+                  (click)="modal.imageClick(fld.key)"
+                >
+                  <div class="image-ico">{{ fld.imgIcon }}</div>
+                  <div class="image-label">{{ fld.imgLabel }}</div>
+                </div>
+              }
+              @default {
+                <input
+                  class="hn-input"
+                  type="text"
+                  [attr.inputmode]="fld.inputmode"
+                  [placeholder]="fld.placeholder"
+                  [value]="fld.value"
+                  (input)="onInput(fld.key, $event)"
+                />
+              }
+            }
+
+            @if (fld.error) {
+              <div class="hn-field-error">{{ fld.error }}</div>
+            }
+          </div>
+        }
+
+        <div class="row">
+          <button class="hn-btn hn-btn--white btn" type="button" (click)="modal.close()">Cancelar</button>
+          <button class="hn-btn hn-btn--primary btn save" type="button" (click)="modal.save()">
+            {{ modal.saveLabel() }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ===== Confirmar eliminación ===== -->
+    @if (modal.isConfirm()) {
+      <div class="confirm">
+        <div class="confirm-ico">🗑️</div>
+        <div class="confirm-title hn-head">{{ modal.confirmTitle }}</div>
+        <div class="confirm-text">{{ modal.confirmText }}</div>
+        <div class="row">
+          <button class="hn-btn hn-btn--white btn" type="button" (click)="modal.close()">Cancelar</button>
+          <button class="hn-btn hn-btn--danger btn" type="button" (click)="modal.confirmAction()">Eliminar</button>
+        </div>
+      </div>
+    }
+
+    <!-- ===== Vista pública ===== -->
+    @if (modal.isPreview()) {
+      <div class="preview">
+        <div class="preview-head">
+          <div class="tag">VISTA PÚBLICA</div>
+          <div class="tag-note">Como la ven donantes y voluntarios</div>
+        </div>
+        <div class="pub-card">
+          <div class="pub-cover">
+            <div class="pub-avatar">🍲</div>
+          </div>
+          <div class="pub-body">
+            <div class="pub-name-row">
+              <div class="pub-name hn-head">{{ org().name }}</div>
+              @if (org().status === 'validada') {
+                <span class="check" title="Validado">✓</span>
+              }
+            </div>
+            <div class="pub-desc">{{ org().desc }}</div>
+            <div class="pub-meta">
+              <div class="pub-meta-row"><span>📍</span><span>{{ org().address }}</span></div>
+              <div class="pub-meta-row"><span>📞</span><span>{{ org().contact }}</span></div>
+            </div>
+            @if (openNeeds().length > 0) {
+              <div class="pub-needs">
+                <div class="pub-needs-title">Necesidades abiertas</div>
+                <div class="pub-needs-list">
+                  @for (n of openNeeds(); track n.id) {
+                    <div>
+                      <div class="pub-need-row">
+                        <span class="pub-need-name">{{ n.icon }} {{ n.supply }}</span>
+                        <span [style.color]="n.barColor" class="pub-need-pct">{{ n.pct }}%</span>
+                      </div>
+                      <hn-progress-bar [pct]="n.pct" [color]="n.barColor" [height]="8" />
+                    </div>
+                  }
+                </div>
+                <button class="hn-btn hn-btn--primary help" type="button">Quiero ayudar</button>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="preview-foot">
+          <button class="hn-btn hn-btn--white btn block" type="button" (click)="modal.close()">
+            Cerrar vista previa
+          </button>
+        </div>
+      </div>
+    }
+  </hn-bottom-sheet>
+}

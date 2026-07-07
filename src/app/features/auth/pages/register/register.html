@@ -1,0 +1,91 @@
+<div class="scroll hn-scroll">
+  <div class="top">
+    <button class="hn-btn hn-btn--white back" type="button" (click)="goLogin()">‹</button>
+    <div class="hn-head title">Crear cuenta</div>
+  </div>
+
+  <div class="body">
+    <p class="lead">Registrate como referente de un comedor o merendero comunitario.</p>
+
+    @if (serverErr()) {
+      <div class="banner banner--error">
+        <div class="ico">⚠️</div>
+        <div class="banner-error-text">{{ serverErr() }}</div>
+      </div>
+    }
+
+    <label class="hn-label" for="r-name">Nombre y apellido</label>
+    <input
+      id="r-name"
+      class="hn-input"
+      placeholder="Ej: María González"
+      [value]="name()"
+      (input)="name.set($any($event.target).value)"
+    />
+    @if (errors()['name']) {
+      <div class="hn-field-error">{{ errors()['name'] }}</div>
+    }
+    <div class="gap"></div>
+
+    <label class="hn-label" for="r-email">Correo electrónico</label>
+    <input
+      id="r-email"
+      class="hn-input"
+      type="email"
+      inputmode="email"
+      placeholder="vos@ejemplo.com"
+      [value]="email()"
+      (input)="email.set($any($event.target).value)"
+    />
+    @if (errors()['email']) {
+      <div class="hn-field-error">{{ errors()['email'] }}</div>
+    }
+    <div class="gap"></div>
+
+    <label class="hn-label" for="r-pass">Contraseña</label>
+    <input
+      id="r-pass"
+      class="hn-input"
+      type="password"
+      placeholder="Mínimo 8 caracteres"
+      [value]="pass()"
+      (input)="pass.set($any($event.target).value)"
+    />
+    @if (errors()['pass']) {
+      <div class="hn-field-error">{{ errors()['pass'] }}</div>
+    }
+    <div class="gap"></div>
+
+    <label class="hn-label" for="r-confirm">Repetir contraseña</label>
+    <input
+      id="r-confirm"
+      class="hn-input"
+      type="password"
+      placeholder="Volvé a escribir la contraseña"
+      [value]="confirm()"
+      (input)="confirm.set($any($event.target).value)"
+    />
+    @if (errors()['confirm']) {
+      <div class="hn-field-error">{{ errors()['confirm'] }}</div>
+    }
+    <div class="gap-lg"></div>
+
+    <div class="terms" (click)="toggleTerms()">
+      <div class="check" [class.on]="terms()">{{ terms() ? '✓' : '' }}</div>
+      <div class="terms-text">
+        Acepto los <span>términos y condiciones</span> y la política de privacidad de Hornerito.
+      </div>
+    </div>
+    @if (errors()['terms']) {
+      <div class="hn-field-error mt">{{ errors()['terms'] }}</div>
+    }
+
+    <button class="hn-btn hn-btn--primary hn-btn--block cta" type="button" (click)="submit()">
+      Crear cuenta
+    </button>
+    <div class="switch">
+      ¿Ya tenés cuenta?
+      <span (click)="goLogin()">Iniciar sesión</span>
+    </div>
+  </div>
+</div>

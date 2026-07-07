@@ -1,0 +1,14 @@
+<div class="wrap">
+  <div class="icon">✉️</div>
+  <h1 class="hn-head">Revisá tu correo</h1>
+  <p class="text">
+    Te enviamos un correo de verificación a<br />
+    <b>{{ email() || 'tu correo' }}</b>.<br />
+    Validá tu email para empezar a usar Hornerito.
+  </p>
+  <div class="pill">¡Cuenta creada con éxito!</div>
+  <button class="hn-btn hn-btn--primary cta" type="button" (click)="goLogin()">
+    Ir a iniciar sesión
+  </button>
+  <div class="resend">¿No te llegó? <span>Reenviar correo</span></div>
+</div>

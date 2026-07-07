@@ -1,0 +1,35 @@
+<div class="list">
+  @for (v of views(); track v.id) {
+    <div class="need hn-card" [style.opacity]="v.cardOpacity">
+      <div class="head">
+        <div class="head-left">
+          <div class="ico">{{ v.icon }}</div>
+          <div class="head-titles">
+            <div class="supply">{{ v.supply }}</div>
+            <div class="deadline">Vence {{ v.deadline }}</div>
+          </div>
+        </div>
+        <hn-badge [label]="v.badge" [bg]="v.badgeBg" [ink]="v.badgeInk" />
+      </div>
+
+      <div class="progress">
+        <div class="progress-row">
+          <span class="covered">{{ v.covered }} de {{ v.required }} {{ v.unit }}</span>
+          <span class="pct" [style.color]="v.barColor">{{ v.pct }}%</span>
+        </div>
+        <hn-progress-bar [pct]="v.pct" [color]="v.barColor" [height]="10" />
+      </div>
+
+      @if (v.open) {
+        <div class="actions">
+          <button class="hn-btn hn-btn--primary main" type="button" (click)="progress(v.id)">Actualizar progreso</button>
+          <button class="hn-btn hn-btn--icon sq" type="button" (click)="edit(v.id)">✎</button>
+          <button class="hn-btn hn-btn--icon sq muted" type="button" title="Cerrar necesidad" (click)="close(v.id)">⨯</button>
+        </div>
+      }
+      @if (v.closed) {
+        <div class="closed">{{ v.closedNote }}</div>
+      }
+    </div>
+  }
+</div>

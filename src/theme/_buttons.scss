@@ -1,0 +1,79 @@
+// Botones — Hornerito. Clases utilitarias; la altura/flex se ajusta por contexto en cada uso.
+
+.hn-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--hn-font-body);
+  font-weight: 700;
+  border-radius: var(--hn-radius-md);
+  line-height: 1;
+  transition:
+    filter 0.15s ease,
+    transform 0.05s ease;
+  text-decoration: none;
+}
+.hn-btn:active {
+  transform: translateY(1px);
+}
+.hn-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.hn-btn--block {
+  width: 100%;
+}
+
+// Primario / CTA
+.hn-btn--primary {
+  background: var(--hn-primary);
+  color: var(--hn-primary-contrast);
+  box-shadow: var(--hn-shadow-cta);
+}
+.hn-btn--primary:hover {
+  filter: brightness(1.03);
+}
+
+// Primario fuerte (FAB / acentos)
+.hn-btn--strong {
+  background: var(--hn-primary-strong);
+  color: #fff;
+}
+
+// Secundario claro (fondo crema)
+.hn-btn--outline {
+  background: var(--hn-surface);
+  color: var(--hn-primary-strong);
+  border: 1.5px solid var(--hn-border);
+}
+
+// Secundario sobre blanco
+.hn-btn--white {
+  background: #fff;
+  color: var(--hn-canela-700);
+  border: 1.5px solid var(--hn-border);
+}
+
+// Peligro sólido
+.hn-btn--danger {
+  background: var(--hn-danger);
+  color: #fff;
+}
+
+// Peligro suave
+.hn-btn--danger-soft {
+  background: var(--hn-danger-bg);
+  color: var(--hn-danger-ink);
+}
+
+// Ícono cuadrado neutro
+.hn-btn--icon {
+  background: var(--hn-surface);
+  color: var(--hn-canela-700);
+  border: 1.5px solid var(--hn-border);
+  gap: 0;
+}

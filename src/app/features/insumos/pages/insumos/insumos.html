@@ -1,0 +1,28 @@
+<div class="intro">Catálogo de insumos que tu comedor gestiona o necesita.</div>
+
+<div class="list">
+  @for (s of views(); track s.id) {
+    <div class="supply hn-card" [style.opacity]="s.opacity">
+      <div class="ico" [style.background]="s.catBg">{{ s.icon }}</div>
+      <div class="info">
+        <div class="name">
+          {{ s.name }}
+          @if (s.inactive) {
+            <span class="baja">BAJA</span>
+          }
+        </div>
+        <div class="meta">{{ s.category }} · {{ s.unit }}</div>
+      </div>
+      <button class="hn-btn hn-btn--icon sq" type="button" (click)="edit(s.id)">✎</button>
+      <button
+        class="hn-btn hn-btn--icon sq"
+        type="button"
+        [style.color]="s.toggleInk"
+        [title]="s.toggleTitle"
+        (click)="toggle(s.id)"
+      >
+        {{ s.toggleIcon }}
+      </button>
+    </div>
+  }
+</div>

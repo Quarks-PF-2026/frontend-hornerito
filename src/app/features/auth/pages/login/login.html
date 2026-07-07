@@ -1,0 +1,75 @@
+<div class="scroll hn-scroll">
+  <header>
+    <div class="logo-badge">
+      <img src="assets/hornerito-bird.svg" alt="Hornerito" />
+    </div>
+    <div class="brand">Hornerito</div>
+    <div class="tagline">Conectamos comedores y merenderos<br />con quienes quieren ayudar</div>
+  </header>
+
+  <div class="body">
+    <h1 class="hn-head">Iniciar sesión</h1>
+    <p class="lead">Ingresá para gestionar tu comedor.</p>
+
+    @if (unverified()) {
+      <div class="banner banner--warn">
+        <div class="ico">✉️</div>
+        <div>
+          <div class="banner-title">Verificá tu correo</div>
+          <div class="banner-text">
+            Tu cuenta existe pero todavía no validaste tu email. Revisá tu casilla antes de ingresar.
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (loginErr()) {
+      <div class="banner banner--error">
+        <div class="ico">⚠️</div>
+        <div class="banner-error-text">{{ loginErr() }}</div>
+      </div>
+    }
+
+    <label class="hn-label" for="email">Correo electrónico</label>
+    <input
+      id="email"
+      class="hn-input mb"
+      type="email"
+      inputmode="email"
+      autocomplete="off"
+      placeholder="vos@ejemplo.com"
+      [value]="email()"
+      (input)="email.set($any($event.target).value)"
+    />
+
+    <label class="hn-label" for="pass">Contraseña</label>
+    <input
+      id="pass"
+      class="hn-input mb-lg"
+      type="password"
+      autocomplete="off"
+      placeholder="Tu contraseña"
+      [value]="pass()"
+      (input)="pass.set($any($event.target).value)"
+      (keyup.enter)="submit()"
+    />
+
+    <button class="hn-btn hn-btn--primary hn-btn--block cta" type="button" (click)="submit()">
+      Iniciar sesión
+    </button>
+
+    <div class="switch">
+      ¿No tenés cuenta?
+      <span (click)="goRegister()">Crear cuenta</span>
+    </div>
+
+    <div class="demo">
+      <div class="demo-title">Datos de prueba</div>
+      <div class="demo-text">
+        ✔ Ingreso ok: <b>referente&#64;comedor.org</b> / <b>hornerito123</b><br />
+        ✉ Sin verificar: <b>pendiente&#64;comedor.org</b><br />
+        ✖ Cualquier otro dato muestra el error genérico
+      </div>
+    </div>
+  </div>
+</div>

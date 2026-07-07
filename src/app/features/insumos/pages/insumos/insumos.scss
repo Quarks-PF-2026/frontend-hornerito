@@ -1,0 +1,59 @@
+.intro {
+  font-size: 13px;
+  color: var(--hn-muted);
+  margin-bottom: 11px;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.supply {
+  border-radius: 15px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ico {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+.info {
+  flex: 1;
+  min-width: 0;
+}
+.name {
+  font-weight: 700;
+  font-size: 15.5px;
+  color: var(--hn-ink);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.baja {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--hn-muted);
+  background: var(--hn-border-line);
+  padding: 2px 7px;
+  border-radius: var(--hn-radius-pill);
+}
+.meta {
+  font-size: 12.5px;
+  color: var(--hn-muted);
+  margin-top: 2px;
+}
+.sq {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--hn-radius-sm);
+  font-size: 15px;
+  flex-shrink: 0;
+}

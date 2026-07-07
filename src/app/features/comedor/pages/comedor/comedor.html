@@ -1,0 +1,51 @@
+<!-- Estado de la organización -->
+<div class="status" [style.background]="st().bg" [style.borderColor]="st().border">
+  <div class="status-row">
+    <div class="status-ico" [style.background]="st().iconBg">{{ st().icon }}</div>
+    <div class="status-titles">
+      <div class="status-kicker" [style.color]="st().ink">Estado de la organización</div>
+      <div class="status-label hn-head" [style.color]="st().ink">{{ st().label }}</div>
+    </div>
+  </div>
+  @if (org().status === 'pendiente') {
+    <div class="status-note">
+      Un administrador está revisando los datos de tu comedor. Te avisaremos cuando se valide.
+    </div>
+  }
+  @if (org().status === 'rechazada') {
+    <div class="reject">
+      <div class="reject-title">Motivo del rechazo</div>
+      <div class="reject-text">{{ org().rejectReason }}</div>
+    </div>
+  }
+</div>
+
+<!-- Switch demo admin -->
+<div class="seg">
+  <div class="seg-label">Vista admin</div>
+  <div class="seg-btns">
+    <button type="button" (click)="setStatus('pendiente')" [style.background]="seg().pendBg" [style.color]="seg().pendInk">Pendiente</button>
+    <button type="button" (click)="setStatus('validada')" [style.background]="seg().valBg" [style.color]="seg().valInk">Validada</button>
+    <button type="button" (click)="setStatus('rechazada')" [style.background]="seg().rejBg" [style.color]="seg().rejInk">Rechazada</button>
+  </div>
+</div>
+
+<!-- Perfil -->
+<div class="profile hn-card">
+  <div class="cover"></div>
+  <div class="profile-body">
+    <div class="avatar">🍲</div>
+    <div class="name hn-head">{{ org().name }}</div>
+    <div class="desc">{{ org().desc }}</div>
+    <div class="meta">
+      <div class="meta-row"><span class="emoji">📍</span><span>{{ org().address }}</span></div>
+      <div class="meta-row"><span class="emoji">📞</span><span>{{ org().contact }}</span></div>
+    </div>
+    <div class="actions">
+      <button class="hn-btn hn-btn--primary act" type="button" (click)="edit()">Editar datos</button>
+      <button class="hn-btn hn-btn--outline act" type="button" (click)="preview()">Vista pública</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot">Así te ven donantes y voluntarios cuando<br />tu comedor está validado.</div>

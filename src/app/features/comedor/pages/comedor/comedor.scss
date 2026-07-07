@@ -1,0 +1,161 @@
+.status {
+  border-radius: var(--hn-radius-lg);
+  padding: 16px 18px;
+  border: 1.5px solid;
+  margin-bottom: 8px;
+}
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.status-ico {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--hn-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.status-titles {
+  flex: 1;
+}
+.status-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+  line-height: 1;
+}
+.status-label {
+  font-size: 18px;
+  line-height: 1.2;
+}
+.status-note {
+  color: #8a5e12;
+  font-size: 13.5px;
+  margin-top: 10px;
+  line-height: 1.45;
+}
+.reject {
+  margin-top: 10px;
+  background: #fff;
+  border-radius: var(--hn-radius-sm);
+  padding: 10px 12px;
+}
+.reject-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--hn-danger-ink);
+}
+.reject-text {
+  color: #7c4a3c;
+  font-size: 13.5px;
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+.seg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hn-cream-soft);
+  border: 1px dashed #d9c4a0;
+  border-radius: var(--hn-radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 18px;
+}
+.seg-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9c7c4e;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+.seg-btns {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+.seg-btns button {
+  flex: 1;
+  height: 32px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--hn-font-body);
+}
+
+.profile {
+  overflow: hidden;
+}
+.cover {
+  height: 80px;
+  background: linear-gradient(120deg, #edd8b0, #d4a46a);
+}
+.profile-body {
+  padding: 0 18px 18px;
+}
+.avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 20px;
+  background: #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.2);
+  margin-top: -38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 36px;
+}
+.name {
+  font-size: 21px;
+  margin-top: 12px;
+}
+.desc {
+  color: #5c4a38;
+  font-size: 14.5px;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.meta {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.meta-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: #5c4a38;
+}
+.meta-row .emoji {
+  font-size: 16px;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+.act {
+  flex: 1;
+  height: 48px;
+  font-size: 15px;
+  border-radius: 13px;
+  box-shadow: none;
+}
+
+.foot {
+  text-align: center;
+  color: var(--hn-muted-2);
+  font-size: 12.5px;
+  margin-top: 14px;
+  line-height: 1.4;
+}

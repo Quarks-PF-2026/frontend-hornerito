@@ -1,0 +1,14 @@
+/**
+ * Tema Ionic — Hornerito
+ * El diseño es de modo claro únicamente, por eso NO importamos la paleta oscura
+ * del sistema. Alineamos las variables de Ionic con los tokens de Hornerito.
+ */
+
+:root {
+  --ion-font-family: var(--hn-font-body);
+  --ion-background-color: var(--hn-surface);
+  --ion-text-color: var(--hn-ink);
+  --ion-color-primary: var(--hn-primary);
+  --ion-color-primary-shade: var(--hn-primary-strong);
+  --ion-color-primary-contrast: #ffffff;
+}

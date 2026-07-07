@@ -1,0 +1,28 @@
+@if (posts().length > 0) {
+  <div class="list">
+    @for (post of posts(); track post.id) {
+      <article class="hn-card post">
+        @if (post.hasImage) {
+          <div class="image">foto de la publicación</div>
+        }
+        <div class="post-body">
+          <div class="post-head">
+            <div class="post-title hn-head">{{ post.title }}</div>
+            <div class="post-date">{{ post.date }}</div>
+          </div>
+          <div class="post-content">{{ post.content }}</div>
+          <div class="post-actions">
+            <button class="hn-btn hn-btn--white act" type="button" (click)="edit(post.id)">Editar</button>
+            <button class="hn-btn hn-btn--danger-soft act" type="button" (click)="remove(post.id)">Eliminar</button>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+} @else {
+  <div class="empty">
+    <div class="empty-ico">📣</div>
+    <div class="empty-title hn-head">Todavía no hay publicaciones</div>
+    <div class="empty-text">Compartí novedades, agradecimientos o<br />actividades de tu comedor.</div>
+  </div>
+}

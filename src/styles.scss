@@ -1,0 +1,136 @@
+/* Estilos globales — Hornerito */
+@use './theme/tokens';
+@use './theme/buttons';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--hn-font-body);
+  color: var(--hn-ink);
+  background: #e9decb;
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+::placeholder {
+  color: var(--hn-muted-2);
+}
+
+/* Host que rellena el marco y permite scroll interno */
+.hn-fill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Ocultar scrollbars manteniendo scroll (como el diseño .hscroll) */
+.hn-scroll {
+  scrollbar-width: none;
+}
+.hn-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* ---- Tipografía utilitaria ---- */
+.hn-head {
+  font-family: var(--hn-font-head);
+  font-weight: 700;
+  color: var(--hn-ink);
+  margin: 0;
+}
+
+/* ---- Inputs / labels compartidos ---- */
+.hn-label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--hn-ink-2);
+  margin-bottom: 7px;
+}
+
+.hn-input,
+.hn-textarea,
+.hn-select {
+  width: 100%;
+  font-size: 16px;
+  color: var(--hn-ink);
+  background: var(--hn-input-bg);
+  border: 1.5px solid var(--hn-border);
+  border-radius: var(--hn-radius-md);
+}
+
+.hn-input,
+.hn-select {
+  height: 54px;
+  padding: 0 16px;
+}
+
+.hn-textarea {
+  padding: 13px 16px;
+  line-height: 1.5;
+  resize: none;
+}
+
+.hn-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237c6a54' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+.hn-field-error {
+  color: var(--hn-danger);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* ---- Card ---- */
+.hn-card {
+  background: var(--hn-card);
+  border: 1px solid var(--hn-border-soft);
+  border-radius: var(--hn-radius-lg);
+  box-shadow: var(--hn-shadow-card);
+}
+
+/* ---- Animaciones del diseño ---- */
+@keyframes hn-sheet {
+  from {
+    transform: translateY(28px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes hn-fade {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}

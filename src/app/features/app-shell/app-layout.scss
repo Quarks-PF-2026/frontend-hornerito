@@ -1,0 +1,56 @@
+.content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 18px 18px 110px;
+}
+
+.fab {
+  position: absolute;
+  right: 20px;
+  bottom: 92px;
+  height: 54px;
+  padding: 0 22px 0 18px;
+  border-radius: var(--hn-radius-pill);
+  background: var(--hn-primary-strong);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: var(--hn-shadow-fab);
+  z-index: 20;
+}
+.fab .plus {
+  font-size: 23px;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+@media (min-width: 1024px) {
+  :host(.hn-fill) {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "side top"
+      "side main";
+  }
+  hn-top-bar {
+    grid-area: top;
+  }
+  .content {
+    grid-area: main;
+    padding: 28px 36px 40px;
+  }
+  hn-bottom-nav {
+    grid-area: side;
+  }
+  .fab {
+    right: 36px;
+    bottom: 32px;
+  }
+}
