@@ -3,7 +3,10 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "schematicCollections": ["@ionic/angular-toolkit"]
+    "schematicCollections": [
+      "@ionic/angular-toolkit"
+    ],
+    "analytics": "3b8b7f15-28b5-4417-a972-66b7ab050019"
   },
   "newProjectRoot": "projects",
   "projects": {

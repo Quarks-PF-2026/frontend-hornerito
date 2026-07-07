@@ -24,9 +24,9 @@ import { RouterOutlet } from '@angular/router';
       .hn-frame {
         position: relative;
         width: 100%;
-        max-width: 440px;
+        max-width: none;
         height: 100dvh;
-        max-height: 940px;
+        max-height: none;
         background: var(--hn-surface);
         display: flex;
         flex-direction: column;
@@ -36,11 +36,6 @@ import { RouterOutlet } from '@angular/router';
       @media (min-width: 1024px) {
         .hn-page {
           align-items: stretch;
-        }
-        .hn-frame {
-          max-width: 1280px;
-          max-height: none;
-          margin: 0 auto;
         }
       }
     `,
