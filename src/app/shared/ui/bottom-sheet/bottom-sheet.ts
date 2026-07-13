@@ -38,6 +38,35 @@ import { ChangeDetectionStrategy, Component, output } from '@angular/core';
         background: #e0d4c0;
         margin: 8px auto 4px;
       }
+
+      @media (min-width: 768px) {
+        .backdrop {
+          justify-content: center;
+          align-items: center;
+        }
+        .sheet {
+          width: 100%;
+          max-width: 560px;
+          max-height: 85vh;
+          border-radius: var(--hn-radius-lg, 20px);
+          padding-top: 0;
+          animation: hn-modal 0.18s ease;
+        }
+        .handle {
+          display: none;
+        }
+      }
+
+      @keyframes hn-modal {
+        from {
+          opacity: 0;
+          transform: scale(0.96) translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
     `,
   ],
 })

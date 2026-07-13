@@ -2,6 +2,11 @@
 .form {
   padding: 8px 22px 28px;
 }
+@media (min-width: 768px) {
+  .form {
+    padding-top: 24px;
+  }
+}
 .title {
   font-size: 22px;
   margin-bottom: 4px;
