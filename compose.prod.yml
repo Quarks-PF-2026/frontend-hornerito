@@ -1,0 +1,6 @@
+services:
+  frontend:
+    build:
+      target: production
+    ports:
+      - "80:80"

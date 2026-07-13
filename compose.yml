@@ -1,0 +1,6 @@
+services:
+  frontend:
+    build:
+      context: .
+    container_name: hornerito-frontend
+    restart: unless-stopped
