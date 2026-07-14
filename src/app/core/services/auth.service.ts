@@ -22,7 +22,7 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly apiUrl = environment.apiUrl;
 
-  private readonly _authenticated = signal(false);
+  private readonly _authenticated = signal(!!localStorage.getItem('accessToken'));
   readonly authenticated = this._authenticated.asReadonly();
 
   /** Correo del último registro, para la pantalla de verificación. */
@@ -48,7 +48,10 @@ export class AuthService {
 
   login(email: string, pass: string): Observable<LoginResult> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password: pass }).pipe(
-      tap(() => this._authenticated.set(true)),
+      tap((res) => {
+        localStorage.setItem('accessToken', res.accessToken);
+        this._authenticated.set(true);
+      }),
       map((): LoginResult => ({ ok: true, unverified: false, error: '' })),
       catchError((err: HttpErrorResponse) => {
         const unverified = Boolean(err.error?.unverified);
@@ -61,6 +64,7 @@ export class AuthService {
   }
 
   logout(): void {
+    localStorage.removeItem('accessToken');
     this._authenticated.set(false);
     this.router.navigateByUrl('/login');
   }

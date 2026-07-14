@@ -84,7 +84,12 @@ export class ModalService {
     const o = this.orgSvc.org();
     this.open(
       { kind: 'org', mode: 'edit' },
-      { name: o.name, desc: o.desc, address: o.address, contact: o.contact },
+      {
+        name: o?.name ?? '',
+        description: o?.description ?? '',
+        address: o?.address ?? '',
+        contact: o?.contact ?? '',
+      },
     );
   }
   previewOrg(): void {
@@ -221,10 +226,9 @@ export class ModalService {
       case 'org':
         return [
           this.text('name', 'Nombre del comedor', 'Ej: Comedor Manos del Barrio', e),
-          this.area('desc', 'Descripción', '¿A quiénes ayudan y cómo?', e),
+          this.area('description', 'Descripción', '¿A quiénes ayudan y cómo?', e),
           this.text('address', 'Dirección', 'Calle, número, ciudad', e),
           this.text('contact', 'Contacto', 'Teléfono y/o correo', e),
-          this.image('logo', 'Logo', '🍲', 'Tocá para subir el logo del comedor', '#E4D9C8', '#FFFDF9'),
         ];
       case 'post':
         return [
@@ -303,7 +307,6 @@ export class ModalService {
   /** Click en campo de imagen. */
   imageClick(key: string): void {
     if (key === 'hasImage') this.setField('hasImage', !this.bool('hasImage'));
-    else if (key === 'logo') this.toast.show('Subida de logo (demo)');
   }
 
   // ---------------- guardado ----------------
@@ -314,18 +317,24 @@ export class ModalService {
 
     if (m.kind === 'org') {
       const name = this.str('name');
+      const description = this.str('description');
       const address = this.str('address');
+      const contact = this.str('contact');
       if (!name.trim()) errs['name'] = 'El nombre es obligatorio.';
+      if (!description.trim()) errs['description'] = 'La descripción es obligatoria.';
       if (!address.trim()) errs['address'] = 'La dirección es obligatoria. No se puede guardar sin dirección.';
+      if (!contact.trim()) errs['contact'] = 'El contacto es obligatorio.';
       if (this.fail(errs)) return;
-      const { resent } = this.orgSvc.update({
-        name,
-        desc: this.str('desc'),
-        address,
-        contact: this.str('contact'),
+      const resent = this.orgSvc.org()?.status === 'rejected';
+      this.orgSvc.save({ name, description, address, contact }).subscribe({
+        next: () => {
+          this.close();
+          this.toast.show(resent ? 'Guardado · reenviado a validación' : 'Cambios guardados');
+        },
+        error: () => {
+          this._errors.set({ name: 'No se pudo guardar. Intentá de nuevo.' });
+        },
       });
-      this.close();
-      this.toast.show(resent ? 'Guardado · reenviado a validación' : 'Cambios guardados');
       return;
     }
 

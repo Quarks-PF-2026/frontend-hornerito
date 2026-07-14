@@ -21,11 +21,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/app-shell/app-layout').then((m) => m.AppLayout),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'comedor' },
+      { path: '', pathMatch: 'full', redirectTo: 'organizacion' },
       {
-        path: 'comedor',
+        path: 'organizacion',
         loadComponent: () =>
-          import('./features/comedor/pages/comedor/comedor').then((m) => m.ComedorPage),
+          import('./features/organizacion/pages/organizacion/organizacion').then(
+            (m) => m.OrganizacionPage,
+          ),
       },
       {
         path: 'publicaciones',

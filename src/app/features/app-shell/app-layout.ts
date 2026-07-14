@@ -16,7 +16,7 @@ interface TabMeta {
 }
 
 const TABS: Record<string, TabMeta> = {
-  comedor: { kicker: 'Tu organización', title: 'Mi comedor', fab: 'Editar' },
+  organizacion: { kicker: 'Tu organización', title: 'Mi comedor', fab: 'Editar' },
   publicaciones: { kicker: 'Difusión', title: 'Publicaciones', fab: 'Publicar' },
   necesidades: { kicker: 'Lo que hace falta', title: 'Necesidades', fab: 'Necesidad' },
   insumos: { kicker: 'Catálogo', title: 'Insumos', fab: 'Insumo' },
@@ -36,7 +36,7 @@ export class AppLayout {
   private readonly modal = inject(ModalService);
 
   private readonly tab = signal(this.currentTab());
-  readonly meta = computed(() => TABS[this.tab()] ?? TABS['comedor']);
+  readonly meta = computed(() => TABS[this.tab()] ?? TABS['organizacion']);
 
   constructor() {
     this.router.events
@@ -49,7 +49,7 @@ export class AppLayout {
 
   private currentTab(): string {
     const segs = this.router.url.split('?')[0].split('/').filter(Boolean);
-    return segs[segs.length - 1] || 'comedor';
+    return segs[segs.length - 1] || 'organizacion';
   }
 
   logout(): void {

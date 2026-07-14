@@ -1,10 +1,10 @@
-export type OrgStatus = 'pendiente' | 'validada' | 'rechazada';
+export type OrgStatus = 'pending' | 'validated' | 'rejected';
 
 export interface Org {
   name: string;
-  desc: string;
+  description: string;
   address: string;
   contact: string;
   status: OrgStatus;
-  rejectReason: string;
+  rejectReason: string | null;
 }

@@ -1,0 +1,50 @@
+@if (org(); as o) {
+  <!-- Estado de la organización -->
+  <div class="status" [style.background]="st()!.bg" [style.borderColor]="st()!.border">
+    <div class="status-row">
+      <div class="status-ico" [style.background]="st()!.iconBg">{{ st()!.icon }}</div>
+      <div class="status-titles">
+        <div class="status-kicker" [style.color]="st()!.ink">Estado de la organización</div>
+        <div class="status-label hn-head" [style.color]="st()!.ink">{{ st()!.label }}</div>
+      </div>
+    </div>
+    @if (o.status === 'pending') {
+      <div class="status-note">
+        Un administrador está revisando los datos de tu comedor. Te avisaremos cuando se valide.
+      </div>
+    }
+    @if (o.status === 'rejected') {
+      <div class="reject">
+        <div class="reject-title">Motivo del rechazo</div>
+        <div class="reject-text">{{ o.rejectReason }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- Perfil -->
+  <div class="profile hn-card">
+    <div class="cover"></div>
+    <div class="profile-body">
+      <div class="avatar">🍲</div>
+      <div class="name hn-head">{{ o.name }}</div>
+      <div class="desc">{{ o.description }}</div>
+      <div class="meta">
+        <div class="meta-row"><span class="emoji">📍</span><span>{{ o.address }}</span></div>
+        <div class="meta-row"><span class="emoji">📞</span><span>{{ o.contact }}</span></div>
+      </div>
+      <div class="actions">
+        <button class="hn-btn hn-btn--primary act" type="button" (click)="edit()">Editar datos</button>
+        <button class="hn-btn hn-btn--outline act" type="button" (click)="preview()">Vista pública</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">Así te ven donantes y voluntarios cuando<br />tu comedor está validado.</div>
+} @else {
+  <div class="empty hn-card">
+    <div class="empty-icon">🍲</div>
+    <div class="empty-title hn-head">Todavía no cargaste tu organización</div>
+    <div class="empty-text">Completá los datos de tu comedor para que donantes y voluntarios puedan conocerlo.</div>
+    <button class="hn-btn hn-btn--primary" type="button" (click)="edit()">Cargar datos</button>
+  </div>
+}

@@ -32,7 +32,7 @@
   line-height: 1.2;
 }
 .status-note {
-  color: #8a5e12;
+  color: var(--hn-warning-ink);
   font-size: 13.5px;
   margin-top: 10px;
   line-height: 1.45;
@@ -55,38 +55,23 @@
   line-height: 1.45;
 }
 
-.seg {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--hn-cream-soft);
-  border: 1px dashed #d9c4a0;
-  border-radius: var(--hn-radius-sm);
-  padding: 8px 10px;
-  margin-bottom: 18px;
+.empty {
+  padding: 32px 24px;
+  text-align: center;
 }
-.seg-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: #9c7c4e;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  flex-shrink: 0;
+.empty-icon {
+  font-size: 40px;
 }
-.seg-btns {
-  display: flex;
-  gap: 6px;
-  flex: 1;
+.empty-title {
+  font-size: 19px;
+  margin-top: 10px;
 }
-.seg-btns button {
-  flex: 1;
-  height: 32px;
-  border-radius: 9px;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: var(--hn-font-body);
+.empty-text {
+  color: var(--hn-muted-2);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 8px;
+  margin-bottom: 20px;
 }
 
 .profile {

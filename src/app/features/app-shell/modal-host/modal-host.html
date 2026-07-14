@@ -87,7 +87,7 @@
     }
 
     <!-- ===== Vista pública ===== -->
-    @if (modal.isPreview()) {
+    @if (modal.isPreview() && org(); as o) {
       <div class="preview">
         <div class="preview-head">
           <div class="tag">VISTA PÚBLICA</div>
@@ -99,15 +99,15 @@
           </div>
           <div class="pub-body">
             <div class="pub-name-row">
-              <div class="pub-name hn-head">{{ org().name }}</div>
-              @if (org().status === 'validada') {
+              <div class="pub-name hn-head">{{ o.name }}</div>
+              @if (o.status === 'validated') {
                 <span class="check" title="Validado">✓</span>
               }
             </div>
-            <div class="pub-desc">{{ org().desc }}</div>
+            <div class="pub-desc">{{ o.description }}</div>
             <div class="pub-meta">
-              <div class="pub-meta-row"><span>📍</span><span>{{ org().address }}</span></div>
-              <div class="pub-meta-row"><span>📞</span><span>{{ org().contact }}</span></div>
+              <div class="pub-meta-row"><span>📍</span><span>{{ o.address }}</span></div>
+              <div class="pub-meta-row"><span>📞</span><span>{{ o.contact }}</span></div>
             </div>
             @if (openNeeds().length > 0) {
               <div class="pub-needs">
