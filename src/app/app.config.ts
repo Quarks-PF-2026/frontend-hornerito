@@ -5,6 +5,7 @@ import {
   isDevMode,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -15,6 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    provideHttpClient(),
     provideIonicAngular({}),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

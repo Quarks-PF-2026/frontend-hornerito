@@ -1,5 +1,8 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { Observable, catchError, map, of, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { emailOk } from '../util/format';
 
 export interface LoginResult {
@@ -8,13 +11,16 @@ export interface LoginResult {
   error: string;
 }
 
+interface LoginResponse {
+  accessToken: string;
+  user: { id: string; name: string; email: string };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-
-  /** Credenciales demo (según diseño). */
-  readonly EXISTING = 'referente@comedor.org';
-  readonly UNVERIFIED = 'pendiente@comedor.org';
+  private readonly apiUrl = environment.apiUrl;
 
   private readonly _authenticated = signal(false);
   readonly authenticated = this._authenticated.asReadonly();
@@ -24,23 +30,34 @@ export class AuthService {
 
   emailOk = emailOk;
 
-  login(email: string, pass: string): LoginResult {
-    if (!email || !pass) {
-      return { ok: false, unverified: false, error: 'Completá tu correo y tu contraseña.' };
-    }
-    const e = email.trim().toLowerCase();
-    if (e === this.UNVERIFIED) {
-      return { ok: false, unverified: true, error: '' };
-    }
-    if (e === this.EXISTING && pass === 'hornerito123') {
-      this._authenticated.set(true);
-      return { ok: true, unverified: false, error: '' };
-    }
-    return {
-      ok: false,
-      unverified: false,
-      error: 'Correo o contraseña incorrectos. Revisá los datos e intentá de nuevo.',
-    };
+  register(
+    name: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+    acceptedTerms: boolean,
+  ): Observable<{ email: string }> {
+    return this.http.post<{ email: string }>(`${this.apiUrl}/auth/register`, {
+      name,
+      email,
+      password,
+      confirmPassword,
+      acceptedTerms,
+    });
+  }
+
+  login(email: string, pass: string): Observable<LoginResult> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password: pass }).pipe(
+      tap(() => this._authenticated.set(true)),
+      map((): LoginResult => ({ ok: true, unverified: false, error: '' })),
+      catchError((err: HttpErrorResponse) => {
+        const unverified = Boolean(err.error?.unverified);
+        const error = unverified
+          ? ''
+          : (err.error?.message ?? 'Correo o contraseña incorrectos. Revisá los datos e intentá de nuevo.');
+        return of<LoginResult>({ ok: false, unverified, error });
+      }),
+    );
   }
 
   logout(): void {

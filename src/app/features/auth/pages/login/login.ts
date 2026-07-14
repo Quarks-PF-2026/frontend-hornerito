@@ -19,13 +19,19 @@ export class LoginPage {
   readonly unverified = signal(false);
 
   submit(): void {
-    const r = this.auth.login(this.email(), this.pass());
-    if (r.ok) {
-      this.router.navigateByUrl('/app');
+    if (!this.email() || !this.pass()) {
+      this.loginErr.set('Completá tu correo y tu contraseña.');
+      this.unverified.set(false);
       return;
     }
-    this.loginErr.set(r.error);
-    this.unverified.set(r.unverified);
+    this.auth.login(this.email(), this.pass()).subscribe((r) => {
+      if (r.ok) {
+        this.router.navigateByUrl('/app');
+        return;
+      }
+      this.loginErr.set(r.error);
+      this.unverified.set(r.unverified);
+    });
   }
 
   goRegister(): void {

@@ -1,10 +1,20 @@
 <div class="scroll hn-scroll">
+  <div class="side">
+    <div class="logo-badge">
+      <img src="assets/hornerito-bird.svg" alt="Hornerito" />
+    </div>
+    <div class="brand">Hornerito</div>
+    <div class="tagline">Sumá tu comedor o merendero<br />a la red que conecta con quienes quieren ayudar</div>
+  </div>
+
   <div class="top">
     <button class="hn-btn hn-btn--white back" type="button" (click)="goLogin()">‹</button>
     <div class="hn-head title">Crear cuenta</div>
   </div>
 
   <div class="body">
+    <button class="hn-btn hn-btn--outline back-desktop" type="button" (click)="goLogin()">‹ Volver</button>
+    <h1 class="hn-head desktop-title">Crear cuenta</h1>
     <p class="lead">Registrate como referente de un comedor o merendero comunitario.</p>
 
     @if (serverErr()) {
@@ -80,8 +90,13 @@
       <div class="hn-field-error mt">{{ errors()['terms'] }}</div>
     }
 
-    <button class="hn-btn hn-btn--primary hn-btn--block cta" type="button" (click)="submit()">
-      Crear cuenta
+    <button
+      class="hn-btn hn-btn--primary hn-btn--block cta"
+      type="button"
+      [disabled]="submitting()"
+      (click)="submit()"
+    >
+      {{ submitting() ? 'Creando cuenta…' : 'Crear cuenta' }}
     </button>
     <div class="switch">
       ¿Ya tenés cuenta?

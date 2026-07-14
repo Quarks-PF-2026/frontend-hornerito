@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -20,6 +21,7 @@ export class RegisterPage {
   readonly terms = signal(false);
   readonly errors = signal<Record<string, string>>({});
   readonly serverErr = signal('');
+  readonly submitting = signal(false);
 
   toggleTerms(): void {
     this.terms.update((v) => !v);
@@ -35,8 +37,6 @@ export class RegisterPage {
     if (!name.trim()) errs['name'] = 'Ingresá tu nombre y apellido.';
     if (!email.trim()) errs['email'] = 'Ingresá tu correo electrónico.';
     else if (!this.auth.emailOk(email.trim())) errs['email'] = 'El correo no tiene un formato válido.';
-    else if (email.trim().toLowerCase() === this.auth.EXISTING)
-      errs['email'] = 'Este correo ya está en uso. ¿Querés iniciar sesión?';
     if (!pass) errs['pass'] = 'Ingresá una contraseña.';
     else if (pass.length < 8) errs['pass'] = 'La contraseña debe tener al menos 8 caracteres.';
     if (!confirm) errs['confirm'] = 'Repetí la contraseña.';
@@ -50,8 +50,24 @@ export class RegisterPage {
     }
     this.errors.set({});
     this.serverErr.set('');
-    this.auth.registeredEmail.set(email);
-    this.router.navigateByUrl('/verify');
+    this.submitting.set(true);
+    this.auth.register(name.trim(), email.trim(), pass, confirm, this.terms()).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.auth.registeredEmail.set(email);
+        this.router.navigateByUrl('/verify');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
+        if (err.status === 409) {
+          this.errors.set({ email: 'Este correo ya está en uso. ¿Querés iniciar sesión?' });
+        } else {
+          this.serverErr.set(
+            err.error?.message ?? 'No pudimos crear tu cuenta. Intentá de nuevo en unos minutos.',
+          );
+        }
+      },
+    });
   }
 
   goLogin(): void {

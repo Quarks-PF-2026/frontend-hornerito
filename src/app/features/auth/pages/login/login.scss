@@ -119,27 +119,6 @@ h1 {
   text-underline-offset: 3px;
 }
 
-.demo {
-  margin-top: 26px;
-  background: var(--hn-cream-soft);
-  border: 1px dashed #d9c4a0;
-  border-radius: var(--hn-radius-md);
-  padding: 13px 15px;
-}
-.demo-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #9c7c4e;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.demo-text {
-  font-size: 13px;
-  color: var(--hn-text-2);
-  line-height: 1.6;
-}
-
 /* ---- Desktop: panel partido en vez de columna angosta estirada ---- */
 @media (min-width: 1024px) {
   .scroll {
