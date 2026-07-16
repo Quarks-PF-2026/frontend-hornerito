@@ -8,12 +8,7 @@ import { SuppliesService } from './supplies.service';
 export class NeedsService {
   private readonly suppliesSvc = inject(SuppliesService);
 
-  private readonly _needs = signal<Need[]>([
-    { id: 1, supplyId: 1, required: 50, covered: 30, deadline: '2026-07-15', closedManual: false },
-    { id: 2, supplyId: 2, required: 40, covered: 40, deadline: '2026-07-10', closedManual: false },
-    { id: 3, supplyId: 4, required: 24, covered: 6, deadline: '2026-07-20', closedManual: false },
-    { id: 4, supplyId: 3, required: 30, covered: 12, deadline: '2026-07-18', closedManual: false },
-  ]);
+  private readonly _needs = signal<Need[]>([]);
   readonly needs = this._needs.asReadonly();
   private nextId = 5;
 

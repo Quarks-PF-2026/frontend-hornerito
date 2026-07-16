@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CATS, UNITS } from '../models/catalog';
 import { OrgService } from './org.service';
@@ -33,7 +34,7 @@ export interface FormField {
 interface ModalState {
   kind: ModalKind;
   mode?: 'new' | 'edit';
-  id?: number | null;
+  id?: number | string | null;
   sub?: 'post';
 }
 
@@ -132,7 +133,7 @@ export class ModalService {
   newSupply(): void {
     this.open({ kind: 'supply', mode: 'new' }, { name: '', category: CATS[0], unit: UNITS[0] });
   }
-  editSupply(id: number): void {
+  editSupply(id: string): void {
     const s = this.suppliesSvc.find(id);
     if (!s) return;
     this.open({ kind: 'supply', mode: 'edit', id }, { name: s.name, category: s.category, unit: s.unit });
@@ -184,7 +185,7 @@ export class ModalService {
       case 'need':
         return 'Indicá qué insumo necesitás y cuánto.';
       case 'progress': {
-        const n = m.id != null ? this.needsSvc.find(m.id) : undefined;
+        const n = m.id != null ? this.needsSvc.find(m.id as number) : undefined;
         const sup = n ? this.suppliesSvc.find(n.supplyId) : undefined;
         return n
           ? `Cantidad cubierta de ${n.required} ${sup ? sup.unit.toLowerCase() : ''} de ${sup ? sup.name : ''}`
@@ -350,7 +351,7 @@ export class ModalService {
         this.close();
         this.toast.show('Publicación creada');
       } else {
-        this.postsSvc.update(m.id!, data);
+        this.postsSvc.update(m.id as number, data);
         this.close();
         this.toast.show('Publicación actualizada');
       }
@@ -363,13 +364,13 @@ export class ModalService {
       if (!this.str('required') || isNaN(req) || req <= 0) errs['required'] = 'Ingresá una cantidad mayor a cero.';
       if (!deadline) errs['deadline'] = 'Elegí una fecha límite.';
       if (this.fail(errs)) return;
-      const data = { supplyId: parseInt(this.str('supplyId'), 10), required: req, deadline };
+      const data = { supplyId: this.str('supplyId'), required: req, deadline };
       if (m.mode === 'new') {
         this.needsSvc.add(data);
         this.close();
         this.toast.show('Necesidad creada');
       } else {
-        this.needsSvc.update(m.id!, data);
+        this.needsSvc.update(m.id as number, data);
         this.close();
         this.toast.show('Necesidad actualizada');
       }
@@ -382,7 +383,7 @@ export class ModalService {
         this._errors.set({ covered: 'Ingresá una cantidad válida.' });
         return;
       }
-      const { completed } = this.needsSvc.setProgress(m.id!, cov);
+      const { completed } = this.needsSvc.setProgress(m.id as number, cov);
       this.close();
       this.toast.show(completed ? '¡Necesidad completada! 🎉' : 'Progreso actualizado');
       return;
@@ -391,26 +392,33 @@ export class ModalService {
     if (m.kind === 'supply') {
       const name = this.str('name');
       if (!name.trim()) errs['name'] = 'El nombre es obligatorio.';
-      else if (this.suppliesSvc.existsName(name, m.id ?? undefined))
-        errs['name'] = 'Ya existe un insumo con ese nombre.';
       if (this.fail(errs)) return;
       const data = { name: name.trim(), category: this.str('category'), unit: this.str('unit') };
-      if (m.mode === 'new') {
-        this.suppliesSvc.add(data);
-        this.close();
-        this.toast.show('Insumo agregado al catálogo');
-      } else {
-        this.suppliesSvc.update(m.id!, data);
-        this.close();
-        this.toast.show('Insumo actualizado');
-      }
+      const request$ =
+        m.mode === 'new'
+          ? this.suppliesSvc.create(data)
+          : this.suppliesSvc.update(String(m.id!), data);
+      request$.subscribe({
+        next: () => {
+          this.close();
+          this.toast.show(m.mode === 'new' ? 'Insumo agregado al catálogo' : 'Insumo actualizado');
+        },
+        error: (err: HttpErrorResponse) => {
+          this._errors.set({
+            name:
+              err.status === 409
+                ? (err.error?.message ?? 'Ya existe un insumo con ese nombre.')
+                : 'No se pudo guardar. Intentá de nuevo.',
+          });
+        },
+      });
     }
   }
 
   confirmAction(): void {
     const m = this._modal();
     if (m?.kind === 'confirm' && m.sub === 'post') {
-      this.postsSvc.remove(m.id!);
+      this.postsSvc.remove(m.id as number);
       this.close();
       this.toast.show('Publicación eliminada');
     }

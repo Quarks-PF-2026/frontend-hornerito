@@ -1,5 +1,5 @@
 export interface Supply {
-  id: number;
+  id: string;
   name: string;
   category: string;
   unit: string;

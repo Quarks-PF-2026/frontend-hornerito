@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, of, tap } from 'rxjs';
+import { Observable, catchError, map, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Org } from '../models/org.model';
 
@@ -15,7 +15,8 @@ export class OrgService {
   readonly org = this._org.asReadonly();
 
   load(): Observable<Org | null> {
-    return this.http.get<Org>(`${this.apiUrl}/organization/me`).pipe(
+    return this.http.get<Org[]>(`${this.apiUrl}/organization/me`).pipe(
+      map((orgs) => orgs[0] ?? null),
       tap((org) => this._org.set(org)),
       catchError((err: HttpErrorResponse) => {
         if (err.status === 404) {

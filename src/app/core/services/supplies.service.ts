@@ -1,47 +1,49 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { Supply } from '../models/supply.model';
+
+export type SupplyPatch = Pick<Supply, 'name' | 'category' | 'unit'>;
 
 @Injectable({ providedIn: 'root' })
 export class SuppliesService {
-  private readonly _supplies = signal<Supply[]>([
-    { id: 1, name: 'Arroz', category: 'Alimentos secos', unit: 'Kilogramos', active: true },
-    { id: 2, name: 'Leche', category: 'Frescos', unit: 'Litros', active: true },
-    { id: 3, name: 'Aceite', category: 'Alimentos secos', unit: 'Litros', active: true },
-    { id: 4, name: 'Fideos', category: 'Alimentos secos', unit: 'Paquetes', active: true },
-    { id: 5, name: 'Yerba', category: 'Alimentos secos', unit: 'Kilogramos', active: true },
-    { id: 6, name: 'Lavandina', category: 'Limpieza', unit: 'Litros', active: false },
-  ]);
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+
+  private readonly _supplies = signal<Supply[]>([]);
   readonly supplies = this._supplies.asReadonly();
   readonly active = computed(() => this._supplies().filter((s) => s.active));
-  private nextId = 7;
 
-  add(data: Pick<Supply, 'name' | 'category' | 'unit'>): void {
-    this._supplies.update((list) => [...list, { id: this.nextId++, active: true, ...data }]);
+  load(): Observable<Supply[]> {
+    return this.http
+      .get<Supply[]>(`${this.apiUrl}/supplies`)
+      .pipe(tap((supplies) => this._supplies.set(supplies)));
   }
 
-  update(id: number, data: Pick<Supply, 'name' | 'category' | 'unit'>): void {
-    this._supplies.update((list) => list.map((s) => (s.id === id ? { ...s, ...data } : s)));
-  }
-
-  /** Alterna alta/baja. Devuelve true si quedó activo. */
-  toggle(id: number): boolean {
-    let nowActive = false;
-    this._supplies.update((list) =>
-      list.map((s) => {
-        if (s.id !== id) return s;
-        nowActive = !s.active;
-        return { ...s, active: nowActive };
-      }),
+  create(data: SupplyPatch): Observable<Supply> {
+    return this.http.post<Supply>(`${this.apiUrl}/supplies`, data).pipe(
+      tap((supply) => this._supplies.update((list) => [...list, supply])),
     );
-    return nowActive;
   }
 
-  find(id: number): Supply | undefined {
+  update(id: string, data: SupplyPatch): Observable<Supply> {
+    return this.http.put<Supply>(`${this.apiUrl}/supplies/${id}`, data).pipe(
+      tap((supply) =>
+        this._supplies.update((list) => list.map((s) => (s.id === id ? supply : s))),
+      ),
+    );
+  }
+
+  toggle(id: string): Observable<Supply> {
+    return this.http.patch<Supply>(`${this.apiUrl}/supplies/${id}/toggle`, {}).pipe(
+      tap((supply) =>
+        this._supplies.update((list) => list.map((s) => (s.id === id ? supply : s))),
+      ),
+    );
+  }
+
+  find(id: string): Supply | undefined {
     return this._supplies().find((s) => s.id === id);
-  }
-
-  existsName(name: string, exceptId?: number): boolean {
-    const n = name.trim().toLowerCase();
-    return this._supplies().some((s) => s.name.trim().toLowerCase() === n && s.id !== exceptId);
   }
 }

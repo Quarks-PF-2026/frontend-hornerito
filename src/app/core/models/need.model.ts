@@ -1,6 +1,6 @@
 export interface Need {
   id: number;
-  supplyId: number;
+  supplyId: string;
   required: number;
   covered: number;
   deadline: string; // ISO yyyy-mm-dd

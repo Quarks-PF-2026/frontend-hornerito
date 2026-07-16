@@ -15,6 +15,10 @@ export class InsumosPage {
   private readonly modal = inject(ModalService);
   private readonly toast = inject(ToastService);
 
+  constructor() {
+    this.suppliesSvc.load().subscribe();
+  }
+
   readonly views = computed(() =>
     this.suppliesSvc.supplies().map((s) => ({
       id: s.id,
@@ -31,11 +35,12 @@ export class InsumosPage {
     })),
   );
 
-  edit(id: number): void {
+  edit(id: string): void {
     this.modal.editSupply(id);
   }
-  toggle(id: number): void {
-    const nowActive = this.suppliesSvc.toggle(id);
-    this.toast.show(nowActive ? 'Insumo reactivado' : 'Insumo dado de baja');
+  toggle(id: string): void {
+    this.suppliesSvc.toggle(id).subscribe((supply) => {
+      this.toast.show(supply.active ? 'Insumo reactivado' : 'Insumo dado de baja');
+    });
   }
 }
