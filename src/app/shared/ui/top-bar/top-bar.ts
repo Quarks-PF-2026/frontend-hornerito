@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'hn-top-bar',
@@ -12,7 +12,6 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
         <div class="kicker">{{ kicker() }}</div>
         <div class="title hn-head">{{ title() }}</div>
       </div>
-      <button class="logout" type="button" title="Salir" (click)="logout.emit()">⎋</button>
     </div>
   `,
   styles: [
@@ -58,24 +57,10 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .logout {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        border: 1px solid #eaded0;
-        background: #fff;
-        color: var(--hn-muted);
-        cursor: pointer;
-        font-size: 17px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
     `,
   ],
 })
 export class TopBar {
   readonly kicker = input('');
   readonly title = input('');
-  readonly logout = output<void>();
 }

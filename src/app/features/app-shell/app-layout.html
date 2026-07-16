@@ -1,4 +1,4 @@
-<hn-top-bar [kicker]="meta().kicker" [title]="meta().title" (logout)="logout()" />
+<hn-top-bar [kicker]="meta().kicker" [title]="meta().title" />
 
 <div class="content hn-scroll">
   <router-outlet />
@@ -8,6 +8,6 @@
   <span class="plus">+</span>{{ meta().fab }}
 </button>
 
-<hn-bottom-nav />
+<hn-bottom-nav (logout)="logout()" />
 <app-modal-host />
 <hn-toast />

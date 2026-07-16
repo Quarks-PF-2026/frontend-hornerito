@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -31,6 +31,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span>Insumos</span>
       </a>
+      <button class="logout" type="button" (click)="logout.emit()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" />
+        </svg>
+        <span>Cerrar sesión</span>
+      </button>
     </nav>
   `,
   styles: [
@@ -64,6 +70,20 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         font-size: 11px;
         font-weight: 700;
       }
+      .logout {
+        flex: 1;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 6px 0;
+        color: var(--hn-muted-2);
+        background: none;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+      }
       @media (min-width: 1024px) {
         .nav {
           flex-direction: column;
@@ -88,8 +108,23 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         span {
           font-size: 14px;
         }
+        .logout {
+          flex: 0 0 auto;
+          flex-direction: row;
+          justify-content: flex-start;
+          gap: 12px;
+          padding: 12px 14px;
+          border-radius: 12px;
+          margin-top: auto;
+        }
+        .logout:hover {
+          background: var(--hn-danger-bg);
+          color: var(--hn-danger-ink);
+        }
       }
     `,
   ],
 })
-export class BottomNav {}
+export class BottomNav {
+  readonly logout = output<void>();
+}
