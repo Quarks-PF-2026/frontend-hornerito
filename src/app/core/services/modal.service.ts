@@ -116,18 +116,22 @@ export class ModalService {
       { supplyId: first ? String(first.id) : '', required: '', deadline: '' },
     );
   }
-  editNeed(id: number): void {
+  editNeed(id: string): void {
     const n = this.needsSvc.find(id);
     if (!n) return;
     this.open(
       { kind: 'need', mode: 'edit', id },
-      { supplyId: String(n.supplyId), required: String(n.required), deadline: n.deadline },
+      {
+        supplyId: String(n.supplyId),
+        required: String(n.requiredQuantity),
+        deadline: n.deadline,
+      },
     );
   }
-  progress(id: number): void {
+  progress(id: string): void {
     const n = this.needsSvc.find(id);
     if (!n) return;
-    this.open({ kind: 'progress', mode: 'edit', id }, { covered: String(n.covered) });
+    this.open({ kind: 'progress', mode: 'edit', id }, { covered: String(n.coveredQuantity) });
   }
 
   newSupply(): void {
@@ -185,10 +189,10 @@ export class ModalService {
       case 'need':
         return 'Indicá qué insumo necesitás y cuánto.';
       case 'progress': {
-        const n = m.id != null ? this.needsSvc.find(m.id as number) : undefined;
+        const n = m.id != null ? this.needsSvc.find(m.id as string) : undefined;
         const sup = n ? this.suppliesSvc.find(n.supplyId) : undefined;
         return n
-          ? `Cantidad cubierta de ${n.required} ${sup ? sup.unit.toLowerCase() : ''} de ${sup ? sup.name : ''}`
+          ? `Cantidad cubierta de ${n.requiredQuantity} ${sup ? sup.unit.toLowerCase() : ''} de ${sup ? sup.name : ''}`
           : '';
       }
       case 'supply':
@@ -364,16 +368,20 @@ export class ModalService {
       if (!this.str('required') || isNaN(req) || req <= 0) errs['required'] = 'Ingresá una cantidad mayor a cero.';
       if (!deadline) errs['deadline'] = 'Elegí una fecha límite.';
       if (this.fail(errs)) return;
-      const data = { supplyId: this.str('supplyId'), required: req, deadline };
-      if (m.mode === 'new') {
-        this.needsSvc.add(data);
-        this.close();
-        this.toast.show('Necesidad creada');
-      } else {
-        this.needsSvc.update(m.id as number, data);
-        this.close();
-        this.toast.show('Necesidad actualizada');
-      }
+      const data = { supplyId: this.str('supplyId'), requiredQuantity: req, deadline };
+      const request$ =
+        m.mode === 'new'
+          ? this.needsSvc.create(data)
+          : this.needsSvc.update(m.id as string, data);
+      request$.subscribe({
+        next: () => {
+          this.close();
+          this.toast.show(m.mode === 'new' ? 'Necesidad creada' : 'Necesidad actualizada');
+        },
+        error: () => {
+          this._errors.set({ supplyId: 'No se pudo guardar. Intentá de nuevo.' });
+        },
+      });
       return;
     }
 
@@ -383,9 +391,16 @@ export class ModalService {
         this._errors.set({ covered: 'Ingresá una cantidad válida.' });
         return;
       }
-      const { completed } = this.needsSvc.setProgress(m.id as number, cov);
-      this.close();
-      this.toast.show(completed ? '¡Necesidad completada! 🎉' : 'Progreso actualizado');
+      this.needsSvc.setProgress(m.id as string, cov).subscribe({
+        next: (need) => {
+          const completed = need.coveredQuantity >= need.requiredQuantity;
+          this.close();
+          this.toast.show(completed ? '¡Necesidad completada! 🎉' : 'Progreso actualizado');
+        },
+        error: () => {
+          this._errors.set({ covered: 'No se pudo actualizar. Intentá de nuevo.' });
+        },
+      });
       return;
     }
 

@@ -1,15 +1,15 @@
 export interface Need {
-  id: number;
+  id: string;
   supplyId: string;
-  required: number;
-  covered: number;
+  requiredQuantity: number;
+  coveredQuantity: number;
   deadline: string; // ISO yyyy-mm-dd
-  closedManual: boolean;
+  closedManually: boolean;
 }
 
 /** Vista derivada de una necesidad, con estilos y textos calculados. */
 export interface NeedView {
-  id: number;
+  id: string;
   supply: string;
   unit: string;
   icon: string;

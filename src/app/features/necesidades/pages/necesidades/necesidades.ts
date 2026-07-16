@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NeedsService } from '../../../../core/services/needs.service';
 import { ModalService } from '../../../../core/services/modal.service';
+import { SuppliesService } from '../../../../core/services/supplies.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 import { Badge } from '../../../../shared/ui/badge/badge';
@@ -14,18 +15,26 @@ import { Badge } from '../../../../shared/ui/badge/badge';
 })
 export class NecesidadesPage {
   private readonly needsSvc = inject(NeedsService);
+  private readonly suppliesSvc = inject(SuppliesService);
   private readonly modal = inject(ModalService);
   private readonly toast = inject(ToastService);
   readonly views = this.needsSvc.views;
 
-  progress(id: number): void {
+  constructor() {
+    this.suppliesSvc.load().subscribe();
+    this.needsSvc.load().subscribe();
+  }
+
+  progress(id: string): void {
     this.modal.progress(id);
   }
-  edit(id: number): void {
+  edit(id: string): void {
     this.modal.editNeed(id);
   }
-  close(id: number): void {
-    this.needsSvc.close(id);
-    this.toast.show('Necesidad cerrada manualmente');
+  close(id: string): void {
+    this.needsSvc.close(id).subscribe({
+      next: () => this.toast.show('Necesidad cerrada manualmente'),
+      error: () => this.toast.show('No se pudo cerrar la necesidad'),
+    });
   }
 }
