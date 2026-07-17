@@ -8,7 +8,7 @@ import { SuppliesService } from './supplies.service';
 import { ToastService } from './toast.service';
 
 export type ModalKind = 'org' | 'post' | 'need' | 'progress' | 'supply' | 'confirm' | 'preview';
-export type FieldType = 'text' | 'textarea' | 'select' | 'image' | 'date';
+export type FieldType = 'text' | 'textarea' | 'select' | 'date';
 
 export interface SelectOption {
   value: string;
@@ -24,11 +24,6 @@ export interface FormField {
   inputmode: string;
   options: SelectOption[];
   error: string;
-  // sólo image:
-  imgIcon: string;
-  imgLabel: string;
-  imgBorder: string;
-  imgBg: string;
 }
 
 interface ModalState {
@@ -98,14 +93,14 @@ export class ModalService {
   }
 
   newPost(): void {
-    this.open({ kind: 'post', mode: 'new' }, { title: '', content: '', hasImage: false });
+    this.open({ kind: 'post', mode: 'new' }, { title: '', content: '' });
   }
-  editPost(id: number): void {
+  editPost(id: string): void {
     const p = this.postsSvc.find(id);
     if (!p) return;
-    this.open({ kind: 'post', mode: 'edit', id }, { title: p.title, content: p.content, hasImage: p.hasImage });
+    this.open({ kind: 'post', mode: 'edit', id }, { title: p.title, content: p.content });
   }
-  confirmDeletePost(id: number): void {
+  confirmDeletePost(id: string): void {
     this.open({ kind: 'confirm', sub: 'post', id });
   }
 
@@ -226,7 +221,6 @@ export class ModalService {
     const m = this._modal();
     if (!m) return [];
     const e = this._errors();
-    const hasImg = this.bool('hasImage');
     switch (m.kind) {
       case 'org':
         return [
@@ -239,14 +233,6 @@ export class ModalService {
         return [
           this.text('title', 'Título', 'Ej: Campaña de invierno', e),
           this.area('content', 'Contenido', 'Escribí el detalle de la publicación...', e),
-          this.image(
-            'hasImage',
-            'Imagen (opcional)',
-            hasImg ? '🖼️' : '📷',
-            hasImg ? 'Imagen agregada · tocá para quitar' : 'Tocá para agregar una imagen',
-            hasImg ? '#B6D8C0' : '#E4D9C8',
-            hasImg ? '#EEF6EF' : '#FFFDF9',
-          ),
         ];
       case 'need': {
         const opts = this.suppliesSvc
@@ -280,10 +266,6 @@ export class ModalService {
       inputmode: 'text',
       options: [],
       error: e[key] ?? '',
-      imgIcon: '',
-      imgLabel: '',
-      imgBorder: '',
-      imgBg: '',
     };
   }
   private text(key: string, label: string, ph: string, e: Record<string, string>, inputmode = 'text'): FormField {
@@ -297,21 +279,6 @@ export class ModalService {
   }
   private date(key: string, label: string, e: Record<string, string>): FormField {
     return { ...this.base(key, label, e), type: 'date', placeholder: 'AAAA-MM-DD' };
-  }
-  private image(key: string, label: string, icon: string, imgLabel: string, border: string, bg: string): FormField {
-    return {
-      ...this.base(key, label, {}),
-      type: 'image',
-      imgIcon: icon,
-      imgLabel,
-      imgBorder: border,
-      imgBg: bg,
-    };
-  }
-
-  /** Click en campo de imagen. */
-  imageClick(key: string): void {
-    if (key === 'hasImage') this.setField('hasImage', !this.bool('hasImage'));
   }
 
   // ---------------- guardado ----------------
@@ -349,16 +316,18 @@ export class ModalService {
       if (!title.trim()) errs['title'] = 'El título es obligatorio.';
       if (!content.trim()) errs['content'] = 'El contenido no puede estar vacío.';
       if (this.fail(errs)) return;
-      const data = { title, content, hasImage: this.bool('hasImage') };
-      if (m.mode === 'new') {
-        this.postsSvc.add(data);
-        this.close();
-        this.toast.show('Publicación creada');
-      } else {
-        this.postsSvc.update(m.id as number, data);
-        this.close();
-        this.toast.show('Publicación actualizada');
-      }
+      const data = { title, content };
+      const request$ =
+        m.mode === 'new' ? this.postsSvc.create(data) : this.postsSvc.update(m.id as string, data);
+      request$.subscribe({
+        next: () => {
+          this.close();
+          this.toast.show(m.mode === 'new' ? 'Publicación creada' : 'Publicación actualizada');
+        },
+        error: () => {
+          this._errors.set({ title: 'No se pudo guardar. Intentá de nuevo.' });
+        },
+      });
       return;
     }
 
@@ -433,9 +402,16 @@ export class ModalService {
   confirmAction(): void {
     const m = this._modal();
     if (m?.kind === 'confirm' && m.sub === 'post') {
-      this.postsSvc.remove(m.id as number);
-      this.close();
-      this.toast.show('Publicación eliminada');
+      this.postsSvc.remove(m.id as string).subscribe({
+        next: () => {
+          this.close();
+          this.toast.show('Publicación eliminada');
+        },
+        error: () => {
+          this.close();
+          this.toast.show('No se pudo eliminar la publicación');
+        },
+      });
     }
   }
 

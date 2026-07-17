@@ -1,42 +1,46 @@
-import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { Post } from '../models/post.model';
+
+export type PostPatch = Pick<Post, 'title' | 'content'>;
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
-  private readonly _posts = signal<Post[]>([
-    {
-      id: 1,
-      title: '¡Gracias por las donaciones de invierno!',
-      content:
-        'Esta semana recibimos frazadas y alimentos no perecederos. Gracias a cada vecino y vecina que se acercó. Seguimos necesitando leche y aceite.',
-      date: '24 jun',
-      hasImage: true,
-    },
-    {
-      id: 2,
-      title: 'Merienda reforzada los miércoles',
-      content:
-        'Desde junio sumamos merienda reforzada los miércoles a la tarde. Si querés colaborar con la copa de leche, escribinos.',
-      date: '18 jun',
-      hasImage: false,
-    },
-  ]);
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+
+  private readonly _posts = signal<Post[]>([]);
   readonly posts = this._posts.asReadonly();
-  private nextId = 3;
 
-  add(data: Pick<Post, 'title' | 'content' | 'hasImage'>): void {
-    this._posts.update((list) => [{ id: this.nextId++, date: 'hoy', ...data }, ...list]);
+  load(): Observable<Post[]> {
+    return this.http
+      .get<Post[]>(`${this.apiUrl}/posts`)
+      .pipe(tap((posts) => this._posts.set(posts)));
   }
 
-  update(id: number, data: Pick<Post, 'title' | 'content' | 'hasImage'>): void {
-    this._posts.update((list) => list.map((p) => (p.id === id ? { ...p, ...data } : p)));
+  create(data: PostPatch): Observable<Post> {
+    return this.http
+      .post<Post>(`${this.apiUrl}/posts`, data)
+      .pipe(tap((post) => this._posts.update((list) => [post, ...list])));
   }
 
-  remove(id: number): void {
-    this._posts.update((list) => list.filter((p) => p.id !== id));
+  update(id: string, data: PostPatch): Observable<Post> {
+    return this.http.put<Post>(`${this.apiUrl}/posts/${id}`, data).pipe(
+      tap((post) =>
+        this._posts.update((list) => list.map((p) => (p.id === id ? post : p))),
+      ),
+    );
   }
 
-  find(id: number): Post | undefined {
+  remove(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/posts/${id}`).pipe(
+      tap(() => this._posts.update((list) => list.filter((p) => p.id !== id))),
+    );
+  }
+
+  find(id: string): Post | undefined {
     return this._posts().find((p) => p.id === id);
   }
 }

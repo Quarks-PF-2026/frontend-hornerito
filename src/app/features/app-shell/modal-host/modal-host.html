@@ -35,17 +35,6 @@
                   (input)="onInput(fld.key, $event)"
                 />
               }
-              @case ('image') {
-                <div
-                  class="image"
-                  [style.borderColor]="fld.imgBorder"
-                  [style.background]="fld.imgBg"
-                  (click)="modal.imageClick(fld.key)"
-                >
-                  <div class="image-ico">{{ fld.imgIcon }}</div>
-                  <div class="image-label">{{ fld.imgLabel }}</div>
-                </div>
-              }
               @default {
                 <input
                   class="hn-input"

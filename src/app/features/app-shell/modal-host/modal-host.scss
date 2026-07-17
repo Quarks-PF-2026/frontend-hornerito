@@ -19,23 +19,6 @@
 .field {
   margin-bottom: 16px;
 }
-.image {
-  cursor: pointer;
-  border: 1.5px dashed var(--hn-border);
-  border-radius: 13px;
-  padding: 18px;
-  text-align: center;
-  color: #9a7b4e;
-}
-.image-ico {
-  font-size: 26px;
-}
-.image-label {
-  font-size: 13.5px;
-  font-weight: 600;
-  margin-top: 4px;
-}
-
 .row {
   display: flex;
   gap: 10px;
