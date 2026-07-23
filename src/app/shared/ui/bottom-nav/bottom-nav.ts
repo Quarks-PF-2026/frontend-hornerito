@@ -25,6 +25,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span>Necesidades</span>
       </a>
+      <a routerLink="/app/puntos" routerLinkActive="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" />
+        </svg>
+        <span>Puntos</span>
+      </a>
       <a routerLink="/app/insumos" routerLinkActive="active">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 16V8l-9-5-9 5v8l9 5 9-5z" /><path d="M3.3 7 12 12l8.7-5M12 22V12" />
@@ -51,27 +57,36 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       }
       a {
         flex: 1;
+        min-width: 0;
         text-decoration: none;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 3px;
-        padding: 6px 0;
+        padding: 6px 2px;
         color: var(--hn-muted-2);
       }
       a.active {
         color: var(--hn-primary-strong);
       }
       svg {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
       }
+      /* 5 tabs + logout: el texto se achica y trunca para no desbordar en 360px. */
       span {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
+        letter-spacing: -0.2px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .logout {
         flex: 1;
+        min-width: 0;
         text-decoration: none;
         display: flex;
         flex-direction: column;
@@ -105,8 +120,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         a.active {
           background: var(--hn-cream-soft);
         }
+        svg {
+          width: 24px;
+          height: 24px;
+        }
         span {
           font-size: 14px;
+          letter-spacing: normal;
         }
         .logout {
           flex: 0 0 auto;

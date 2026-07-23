@@ -4,9 +4,11 @@
   <router-outlet />
 </div>
 
-<button class="fab" type="button" (click)="fab()">
-  <span class="plus">+</span>{{ meta().fab }}
-</button>
+@if (showFab()) {
+  <button class="fab" type="button" (click)="fab()">
+    <span class="plus">+</span>{{ meta().fab }}
+  </button>
+}
 
 <hn-bottom-nav (logout)="logout()" />
 <app-modal-host />

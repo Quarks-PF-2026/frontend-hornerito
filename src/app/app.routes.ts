@@ -44,6 +44,21 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'puntos',
+        loadComponent: () =>
+          import('./features/puntos/pages/puntos/puntos').then((m) => m.PuntosPage),
+      },
+      {
+        path: 'puntos/nuevo',
+        loadComponent: () =>
+          import('./features/puntos/pages/punto-form/punto-form').then((m) => m.PuntoFormPage),
+      },
+      {
+        path: 'puntos/:id/editar',
+        loadComponent: () =>
+          import('./features/puntos/pages/punto-form/punto-form').then((m) => m.PuntoFormPage),
+      },
+      {
         path: 'insumos',
         loadComponent: () =>
           import('./features/insumos/pages/insumos/insumos').then((m) => m.InsumosPage),

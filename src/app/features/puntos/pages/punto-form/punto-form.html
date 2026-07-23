@@ -1,0 +1,149 @@
+@if (draft(); as d) {
+  <div class="form">
+    <button class="back" type="button" (click)="back()">← Volver a puntos</button>
+    <div class="title hn-head">
+      {{ d.mode === 'new' ? 'Nuevo punto de recolección' : 'Editar punto' }}
+    </div>
+    <div class="subtitle">Los donantes ven estos datos al coordinar una entrega física.</div>
+
+    <div class="field">
+      <label class="hn-label">Nombre del punto</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Ej: Sede central"
+        [value]="d.name"
+        (input)="onField('name', $event)"
+      />
+      @if (errors()['name']) {
+        <div class="hn-field-error">{{ errors()['name'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Dirección</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Calle, número, ciudad"
+        [value]="d.addressLine"
+        (input)="onAddress($event)"
+      />
+      @if (searching()) {
+        <div class="hint">Buscando direcciones…</div>
+      }
+      @if (results().length) {
+        <div class="results">
+          @for (r of results(); track r.label) {
+            <button class="result" type="button" (click)="pickResult(r)">{{ r.label }}</button>
+          }
+        </div>
+      }
+      @if (errors()['addressLine']) {
+        <div class="hn-field-error">{{ errors()['addressLine'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Ubicación en el mapa</label>
+      <hn-map-picker
+        [latitude]="d.latitude"
+        [longitude]="d.longitude"
+        (picked)="onMapPick($event)"
+      />
+      <div class="hint">Tocá el mapa o arrastrá el pin para ajustar la ubicación exacta.</div>
+      @if (errors()['latitude']) {
+        <div class="hn-field-error">{{ errors()['latitude'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Horario de atención</label>
+      <div class="days">
+        @for (day of d.schedule; track day.day) {
+          <div class="day" [class.day--closed]="day.closed">
+            <button class="day-name" type="button" (click)="toggleDay(day.day)">
+              <span class="check">{{ day.closed ? '☐' : '☑' }}</span>
+              {{ dayLabels[day.day] }}
+            </button>
+            @if (day.closed) {
+              <span class="closed">Cerrado</span>
+            } @else {
+              <div class="times">
+                <input
+                  class="hn-input time"
+                  type="time"
+                  [value]="day.open"
+                  (input)="onTime(day.day, 'open', $event)"
+                />
+                <span class="sep">a</span>
+                <input
+                  class="hn-input time"
+                  type="time"
+                  [value]="day.close"
+                  (input)="onTime(day.day, 'close', $event)"
+                />
+              </div>
+            }
+          </div>
+        }
+      </div>
+      @if (errors()['schedule']) {
+        <div class="hn-field-error">{{ errors()['schedule'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Teléfono</label>
+      <input
+        class="hn-input"
+        type="tel"
+        inputmode="tel"
+        placeholder="Ej: 353 4123456"
+        [value]="d.phone"
+        (input)="onField('phone', $event)"
+      />
+      @if (errors()['phone']) {
+        <div class="hn-field-error">{{ errors()['phone'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Correo (opcional)</label>
+      <input
+        class="hn-input"
+        type="email"
+        inputmode="email"
+        placeholder="contacto@comedor.org"
+        [value]="d.email"
+        (input)="onField('email', $event)"
+      />
+      @if (errors()['email']) {
+        <div class="hn-field-error">{{ errors()['email'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Persona de referencia (opcional)</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Ej: María González"
+        [value]="d.contactName"
+        (input)="onField('contactName', $event)"
+      />
+    </div>
+
+    <div class="row">
+      <button class="hn-btn hn-btn--white btn" type="button" (click)="back()">Cancelar</button>
+      <button
+        class="hn-btn hn-btn--primary btn save"
+        type="button"
+        [disabled]="saving()"
+        (click)="save()"
+      >
+        {{ d.mode === 'new' ? 'Crear punto' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+}
