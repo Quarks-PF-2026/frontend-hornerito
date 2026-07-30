@@ -10,6 +10,9 @@ describe('AuthService', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    // El servicio arranca leyendo la sesión de localStorage: sin limpiar, un
+    // test filtra su token al siguiente.
+    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });

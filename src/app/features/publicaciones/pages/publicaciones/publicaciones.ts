@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { AuthService } from '../../../../core/services/auth.service';
 import { PostsService } from '../../../../core/services/posts.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { fmtDate } from '../../../../core/util/format';
@@ -10,6 +11,8 @@ import { fmtDate } from '../../../../core/util/format';
   styleUrl: './publicaciones.scss',
 })
 export class PublicacionesPage {
+  private readonly auth = inject(AuthService);
+  readonly canWrite = this.auth.canWriteContent;
   private readonly postsSvc = inject(PostsService);
   private readonly modal = inject(ModalService);
   readonly posts = this.postsSvc.posts;

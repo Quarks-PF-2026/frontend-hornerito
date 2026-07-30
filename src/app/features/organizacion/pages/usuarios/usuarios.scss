@@ -1,0 +1,163 @@
+.intro {
+  font-size: 13px;
+  color: var(--hn-muted);
+  margin-bottom: 11px;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+.filters .hn-input,
+.filters .hn-select {
+  height: 46px;
+}
+.invite {
+  height: 46px;
+  font-size: 15px;
+}
+@media (min-width: 768px) {
+  .filters {
+    grid-template-columns: 1fr 200px auto;
+    align-items: center;
+  }
+  .invite {
+    padding: 0 20px;
+  }
+}
+
+.section {
+  font-size: 15px;
+  margin: 22px 0 10px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.member {
+  border-radius: 15px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--hn-radius-pill);
+  background: var(--hn-cream-soft);
+  color: var(--hn-primary-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.avatar.pending {
+  background: var(--hn-warning-bg);
+  color: var(--hn-warning-ink);
+}
+.info {
+  flex: 1;
+  min-width: 0;
+}
+.name {
+  font-weight: 700;
+  font-size: 15.5px;
+  color: var(--hn-ink);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--hn-muted);
+  background: var(--hn-border-line);
+  padding: 2px 7px;
+  border-radius: var(--hn-radius-pill);
+}
+.meta {
+  font-size: 12.5px;
+  color: var(--hn-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.role {
+  width: 152px;
+  height: 40px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.role-fixed {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hn-text-2);
+  flex-shrink: 0;
+}
+.sq {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--hn-radius-sm);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.empty {
+  padding: 34px 24px;
+  text-align: center;
+}
+.empty-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+.empty-title {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.empty-text {
+  font-size: 13.5px;
+  color: var(--hn-text-2);
+}
+
+/* Panel de invitación — mismo layout que los formularios del modal-host. */
+.form {
+  padding: 8px 22px 28px;
+}
+@media (min-width: 768px) {
+  .form {
+    padding-top: 24px;
+  }
+}
+.title {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.subtitle {
+  color: var(--hn-text-2);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.field {
+  margin-bottom: 16px;
+}
+.row {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.btn {
+  flex: 1;
+  height: 52px;
+  font-size: 15px;
+  border-radius: var(--hn-radius-md);
+  box-shadow: none;
+}

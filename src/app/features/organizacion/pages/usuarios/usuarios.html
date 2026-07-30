@@ -1,0 +1,128 @@
+<div class="intro">Quién puede entrar a tu organización y qué puede hacer.</div>
+
+<div class="filters">
+  <input
+    class="hn-input"
+    type="search"
+    placeholder="Buscar por nombre o correo"
+    [value]="search()"
+    (input)="onSearch($event)"
+  />
+  <select class="hn-select" [value]="roleFilter()" (change)="onRoleFilter($event)">
+    @for (opt of roleOptions; track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+  <button class="hn-btn hn-btn--primary invite" type="button" (click)="openInvite()">
+    Invitar usuario
+  </button>
+</div>
+
+<div class="list">
+  @for (m of views(); track m.userId) {
+    <div class="member hn-card" [style.opacity]="m.opacity">
+      <div class="avatar">{{ m.initial }}</div>
+      <div class="info">
+        <div class="name">
+          {{ m.name }}
+          @if (!m.active) {
+            <span class="tag">INACTIVO</span>
+          }
+        </div>
+        <div class="meta">{{ m.email }}</div>
+      </div>
+
+      @if (m.editable) {
+        <select class="hn-select role" [value]="m.role" (change)="changeRole(m.userId, $event)">
+          @for (opt of assignableRoles; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <button
+          class="hn-btn hn-btn--icon sq"
+          type="button"
+          [style.color]="m.toggleInk"
+          [title]="m.toggleTitle"
+          (click)="toggle(m.userId)"
+        >
+          {{ m.toggleIcon }}
+        </button>
+      } @else {
+        <span class="role-fixed">{{ m.roleLabel }}</span>
+      }
+    </div>
+  }
+
+  @if (empty()) {
+    <div class="empty hn-card">
+      <div class="empty-icon">👥</div>
+      <div class="empty-title hn-head">Ningún usuario coincide</div>
+      <div class="empty-text">Probá con otro nombre, correo o rol.</div>
+    </div>
+  }
+</div>
+
+@if (invitations().length) {
+  <div class="section hn-head">Invitaciones pendientes</div>
+  <div class="list">
+    @for (i of invitations(); track i.id) {
+      <div class="member hn-card">
+        <div class="avatar pending">✉</div>
+        <div class="info">
+          <div class="name">{{ i.email }}</div>
+          <div class="meta">Invitado como {{ roleLabel(i.role) }}</div>
+        </div>
+        <button
+          class="hn-btn hn-btn--icon sq"
+          type="button"
+          title="Cancelar invitación"
+          (click)="cancelInvitation(i.id)"
+        >
+          ✕
+        </button>
+      </div>
+    }
+  </div>
+}
+
+@if (inviteOpen()) {
+  <hn-bottom-sheet (closed)="closeInvite()">
+    <div class="form">
+      <div class="title hn-head">Invitar usuario</div>
+      <div class="subtitle">Le llega un correo con un link para unirse a tu organización.</div>
+
+      <div class="field">
+        <label class="hn-label">Correo</label>
+        <input
+          class="hn-input"
+          type="email"
+          inputmode="email"
+          placeholder="persona@correo.com"
+          [value]="inviteEmail()"
+          (input)="onInviteEmail($event)"
+        />
+        @if (inviteError()) {
+          <div class="hn-field-error">{{ inviteError() }}</div>
+        }
+      </div>
+
+      <div class="field">
+        <label class="hn-label">Rol</label>
+        <select class="hn-select" [value]="inviteRole()" (change)="onInviteRole($event)">
+          @for (opt of assignableRoles; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="row">
+        <button class="hn-btn hn-btn--white btn" type="button" (click)="closeInvite()">
+          Cancelar
+        </button>
+        <button class="hn-btn hn-btn--primary btn" type="button" (click)="sendInvite()">
+          Enviar invitación
+        </button>
+      </div>
+    </div>
+  </hn-bottom-sheet>
+}

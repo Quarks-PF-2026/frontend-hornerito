@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CollectionPointsService } from '../../../../core/services/collection-points.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { Badge } from '../../../../shared/ui/badge/badge';
@@ -12,6 +13,8 @@ import { Badge } from '../../../../shared/ui/badge/badge';
   styleUrl: './puntos.scss',
 })
 export class PuntosPage {
+  private readonly auth = inject(AuthService);
+  readonly canWrite = this.auth.canWriteContent;
   private readonly pointsSvc = inject(CollectionPointsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);

@@ -21,6 +21,7 @@ const TABS: Record<string, TabMeta> = {
   necesidades: { kicker: 'Lo que hace falta', title: 'Necesidades', fab: 'Necesidad' },
   puntos: { kicker: 'Dónde entregar', title: 'Puntos de recolección', fab: 'Punto' },
   insumos: { kicker: 'Catálogo', title: 'Insumos', fab: 'Insumo' },
+  usuarios: { kicker: 'Tu equipo', title: 'Usuarios', fab: '' },
 };
 
 @Component({
@@ -39,8 +40,22 @@ export class AppLayout {
   private readonly tab = signal(this.currentTab());
   private readonly subView = signal(this.isSubView());
   readonly meta = computed(() => TABS[this.tab()] ?? TABS['organizacion']);
-  /** El FAB se muestra en las listas, no dentro de un formulario ruteado. */
-  readonly showFab = computed(() => !this.subView());
+  /**
+   * El FAB se muestra en las listas (no dentro de un formulario ruteado) y solo
+   * si el rol puede escribir en ese módulo.
+   */
+  readonly showFab = computed(() => {
+    if (this.subView()) return false;
+    switch (this.tab()) {
+      // Usuarios trae su propio botón "Invitar usuario".
+      case 'usuarios':
+        return false;
+      case 'organizacion':
+        return this.auth.isOwner();
+      default:
+        return this.auth.canWriteContent();
+    }
+  });
 
   constructor() {
     this.router.events
@@ -67,6 +82,8 @@ export class AppLayout {
     const tabIndex = segs.findIndex((seg) => TABS[seg]);
     return tabIndex >= 0 && tabIndex < segs.length - 1;
   }
+
+  readonly canManageMembers = this.auth.canManageMembers;
 
   logout(): void {
     this.auth.logout();

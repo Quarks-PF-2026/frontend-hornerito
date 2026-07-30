@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { OrgStatus } from '../../../../core/models/org.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { OrgService } from '../../../../core/services/org.service';
 import { ModalService } from '../../../../core/services/modal.service';
 
@@ -48,8 +49,10 @@ const STATUS: Record<OrgStatus, StatusStyle> = {
 export class OrganizacionPage {
   private readonly orgSvc = inject(OrgService);
   private readonly modal = inject(ModalService);
+  private readonly auth = inject(AuthService);
 
   readonly org = this.orgSvc.org;
+  readonly canEditOrg = this.auth.isOwner;
   readonly st = computed(() => {
     const o = this.org();
     return o ? STATUS[o.status] : null;

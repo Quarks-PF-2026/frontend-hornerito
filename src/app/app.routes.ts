@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { memberManagerGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -11,6 +12,11 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () =>
       import('./features/auth/pages/register/register').then((m) => m.RegisterPage),
+  },
+  {
+    path: 'invitacion',
+    loadComponent: () =>
+      import('./features/auth/pages/invitacion/invitacion').then((m) => m.InvitacionPage),
   },
   {
     path: 'verify',
@@ -28,6 +34,12 @@ export const routes: Routes = [
           import('./features/organizacion/pages/organizacion/organizacion').then(
             (m) => m.OrganizacionPage,
           ),
+      },
+      {
+        path: 'usuarios',
+        canActivate: [memberManagerGuard],
+        loadComponent: () =>
+          import('./features/organizacion/pages/usuarios/usuarios').then((m) => m.UsuariosPage),
       },
       {
         path: 'publicaciones',

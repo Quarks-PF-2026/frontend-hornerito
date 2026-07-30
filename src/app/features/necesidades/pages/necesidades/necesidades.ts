@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { AuthService } from '../../../../core/services/auth.service';
 import { NeedsService } from '../../../../core/services/needs.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { SuppliesService } from '../../../../core/services/supplies.service';
@@ -14,6 +15,8 @@ import { Badge } from '../../../../shared/ui/badge/badge';
   styleUrl: './necesidades.scss',
 })
 export class NecesidadesPage {
+  private readonly auth = inject(AuthService);
+  readonly canWrite = this.auth.canWriteContent;
   private readonly needsSvc = inject(NeedsService);
   private readonly suppliesSvc = inject(SuppliesService);
   private readonly modal = inject(ModalService);

@@ -25,18 +25,20 @@
         }
       </div>
 
-      <div class="actions">
-        <button class="hn-btn hn-btn--outline main" type="button" (click)="edit(v.id)">Editar</button>
-        @if (v.active) {
-          <button class="hn-btn hn-btn--danger-soft" type="button" (click)="deactivate(v.id)">
-            Desactivar
-          </button>
-        } @else {
-          <button class="hn-btn hn-btn--primary" type="button" (click)="activate(v.id)">
-            Reactivar
-          </button>
-        }
-      </div>
+      @if (canWrite()) {
+        <div class="actions">
+          <button class="hn-btn hn-btn--outline main" type="button" (click)="edit(v.id)">Editar</button>
+          @if (v.active) {
+            <button class="hn-btn hn-btn--danger-soft" type="button" (click)="deactivate(v.id)">
+              Desactivar
+            </button>
+          } @else {
+            <button class="hn-btn hn-btn--primary" type="button" (click)="activate(v.id)">
+              Reactivar
+            </button>
+          }
+        </div>
+      }
 
       @if (!v.active) {
         <div class="inactive-note">

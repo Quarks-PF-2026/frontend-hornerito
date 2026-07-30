@@ -29,12 +29,22 @@
       <div class="name hn-head">{{ o.name }}</div>
       <div class="desc">{{ o.description }}</div>
       <div class="meta">
-        <div class="meta-row"><span class="emoji">📍</span><span>{{ o.address }}</span></div>
-        <div class="meta-row"><span class="emoji">📞</span><span>{{ o.contact }}</span></div>
+        <div class="meta-row">
+          <span class="emoji">📍</span><span>{{ o.address }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="emoji">📞</span><span>{{ o.contact }}</span>
+        </div>
       </div>
       <div class="actions">
-        <button class="hn-btn hn-btn--primary act" type="button" (click)="edit()">Editar datos</button>
-        <button class="hn-btn hn-btn--outline act" type="button" (click)="preview()">Vista pública</button>
+        @if (canEditOrg()) {
+          <button class="hn-btn hn-btn--primary act" type="button" (click)="edit()">
+            Editar datos
+          </button>
+        }
+        <button class="hn-btn hn-btn--outline act" type="button" (click)="preview()">
+          Vista pública
+        </button>
       </div>
     </div>
   </div>
@@ -44,7 +54,9 @@
   <div class="empty hn-card">
     <div class="empty-icon">🍲</div>
     <div class="empty-title hn-head">Todavía no cargaste tu organización</div>
-    <div class="empty-text">Completá los datos de tu comedor para que donantes y voluntarios puedan conocerlo.</div>
+    <div class="empty-text">
+      Completá los datos de tu comedor para que donantes y voluntarios puedan conocerlo.
+    </div>
     <button class="hn-btn hn-btn--primary" type="button" (click)="edit()">Cargar datos</button>
   </div>
 }
