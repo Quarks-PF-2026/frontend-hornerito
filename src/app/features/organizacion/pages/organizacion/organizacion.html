@@ -23,9 +23,32 @@
 
   <!-- Perfil -->
   <div class="profile hn-card">
-    <div class="cover"></div>
+    <div class="cover">
+      <hn-image-upload
+        ownerType="organization"
+        [ownerId]="o.id"
+        purpose="cover"
+        [url]="coverUrl()"
+        [editable]="canEditImages()"
+        [maxBytes]="8000000"
+        fallback=""
+        alt="Portada de la organización"
+        (uploaded)="onImageUploaded($event)"
+      />
+    </div>
     <div class="profile-body">
-      <div class="avatar">🍲</div>
+      <div class="avatar">
+        <hn-image-upload
+          ownerType="organization"
+          [ownerId]="o.id"
+          purpose="logo"
+          [url]="logoUrl()"
+          [editable]="canEditImages()"
+          fallback="🍲"
+          alt="Logo de la organización"
+          (uploaded)="onImageUploaded($event)"
+        />
+      </div>
       <div class="name hn-head">{{ o.name }}</div>
       <div class="desc">{{ o.description }}</div>
       <div class="meta">
