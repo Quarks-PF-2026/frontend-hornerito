@@ -17,13 +17,44 @@ const DEFAULT_ZOOM = 15;
 const PICKED_ZOOM = 16;
 
 /**
- * Selector de ubicación sobre OpenStreetMap. El pin se coloca tocando el mapa
- * o arrastrándolo; emite las coordenadas elegidas.
+ * Ícono propio (SVG tipo gota): evita los assets de Leaflet, que el bundler no
+ * resuelve. Borde blanco + sombra para que se vea sobre cualquier fondo (calle
+ * o campo). El markup va inline porque Leaflet inyecta este nodo fuera del
+ * scope de estilos del componente.
+ */
+function pinIcon(): L.DivIcon {
+  return L.divIcon({
+    className: '',
+    html:
+      '<svg width="30" height="40" viewBox="0 0 30 40" ' +
+      'style="filter:drop-shadow(0 3px 4px rgba(46,24,10,.5))">' +
+      '<path d="M15 1C7.8 1 2 6.8 2 14c0 9 13 25 13 25s13-16 13-25' +
+      'C28 6.8 22.2 1 15 1z" fill="#a04e22" stroke="#fff" ' +
+      'stroke-width="2.5"/>' +
+      '<circle cx="15" cy="14" r="5" fill="#fff"/></svg>',
+    iconSize: [30, 40],
+    iconAnchor: [15, 39],
+  });
+}
+
+/** Punto a mostrar en modo solo lectura. */
+export interface MapMarker {
+  lat: number;
+  lng: number;
+  label: string;
+}
+
+/**
+ * Mapa sobre OpenStreetMap con dos modos:
+ * - edición (default): un pin que se coloca tocando el mapa o arrastrándolo,
+ *   y que emite las coordenadas elegidas;
+ * - solo lectura (`readonly`): muestra los `markers` recibidos y encuadra la
+ *   vista sobre todos ellos, sin interacción de edición.
  */
 @Component({
   selector: 'hn-map-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<div class="map" #host></div>`,
+  template: `<div class="map" [class.readonly]="readonly()" #host></div>`,
   styles: [
     `
       :host {
@@ -37,6 +68,9 @@ const PICKED_ZOOM = 16;
         z-index: 0;
         cursor: crosshair;
       }
+      .map.readonly {
+        cursor: grab;
+      }
       @media (min-width: 768px) {
         .map {
           height: 280px;
@@ -48,11 +82,15 @@ const PICKED_ZOOM = 16;
 export class MapPicker implements OnDestroy {
   readonly latitude = input<number | null>(null);
   readonly longitude = input<number | null>(null);
+  /** Sin edición: el mapa solo muestra `markers`. */
+  readonly readonly = input(false);
+  readonly markers = input<MapMarker[]>([]);
   readonly picked = output<{ lat: number; lng: number }>();
 
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('host');
   private map: L.Map | null = null;
   private marker: L.Marker | null = null;
+  private readonlyMarkers: L.Marker[] = [];
   private tileLayer: L.TileLayer | null = null;
   /**
    * True mientras el cambio de lat/lng lo originó el propio mapa (click o
@@ -73,13 +111,22 @@ export class MapPicker implements OnDestroy {
     effect(() => {
       const lat = this.latitude();
       const lng = this.longitude();
-      if (!this.map || lat === null || lng === null) return;
+      if (!this.map || this.readonly() || lat === null || lng === null) return;
       if (this.selfUpdate) {
         this.selfUpdate = false;
         return;
       }
       this.placeMarker(lat, lng);
       this.map.setView([lat, lng], Math.max(this.map.getZoom(), PICKED_ZOOM));
+    });
+
+    // En modo lectura los puntos suelen llegar después de crear el mapa (vienen
+    // de una request), así que se repintan cada vez que cambian.
+    effect(() => {
+      this.markers();
+      if (this.map && this.readonly()) {
+        this.showMarkers();
+      }
     });
   }
 
@@ -131,6 +178,11 @@ export class MapPicker implements OnDestroy {
       attribution: '© OpenStreetMap',
     }).addTo(this.map);
 
+    if (this.readonly()) {
+      this.showMarkers();
+      return;
+    }
+
     this.map.on('click', (event: L.LeafletMouseEvent) => {
       this.placeMarker(event.latlng.lat, event.latlng.lng);
       this.selfUpdate = true;
@@ -142,6 +194,29 @@ export class MapPicker implements OnDestroy {
     }
   }
 
+  /** Modo lectura: un pin por punto y encuadre sobre todos. */
+  private showMarkers(): void {
+    if (!this.map) return;
+    for (const marker of this.readonlyMarkers) {
+      marker.remove();
+    }
+    this.readonlyMarkers = [];
+
+    const points = this.markers();
+    if (points.length === 0) return;
+
+    for (const point of points) {
+      this.readonlyMarkers.push(
+        L.marker([point.lat, point.lng], { icon: pinIcon() })
+          .bindPopup(point.label)
+          .addTo(this.map),
+      );
+    }
+
+    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng] as L.LatLngTuple));
+    this.map.fitBounds(bounds, { padding: [32, 32], maxZoom: PICKED_ZOOM });
+  }
+
   private placeMarker(lat: number, lng: number): void {
     if (!this.map) return;
     if (this.marker) {
@@ -150,22 +225,7 @@ export class MapPicker implements OnDestroy {
     }
     this.marker = L.marker([lat, lng], {
       draggable: true,
-      // Ícono propio (SVG tipo gota): evita los assets de Leaflet, que el
-      // bundler no resuelve. Borde blanco + sombra para que se vea sobre
-      // cualquier fondo (calle o campo). El markup va inline porque Leaflet
-      // inyecta este nodo fuera del scope de estilos del componente.
-      icon: L.divIcon({
-        className: '',
-        html:
-          '<svg width="30" height="40" viewBox="0 0 30 40" ' +
-          'style="filter:drop-shadow(0 3px 4px rgba(46,24,10,.5))">' +
-          '<path d="M15 1C7.8 1 2 6.8 2 14c0 9 13 25 13 25s13-16 13-25' +
-          'C28 6.8 22.2 1 15 1z" fill="#a04e22" stroke="#fff" ' +
-          'stroke-width="2.5"/>' +
-          '<circle cx="15" cy="14" r="5" fill="#fff"/></svg>',
-        iconSize: [30, 40],
-        iconAnchor: [15, 39],
-      }),
+      icon: pinIcon(),
     }).addTo(this.map);
 
     this.marker.on('dragend', () => {

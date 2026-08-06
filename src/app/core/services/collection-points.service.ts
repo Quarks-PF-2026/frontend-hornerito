@@ -6,9 +6,9 @@ import {
   CollectionPoint,
   CollectionPointPatch,
   CollectionPointView,
-  DAY_LABELS,
   ScheduleDay,
   defaultSchedule,
+  scheduleLines,
 } from '../models/collection-point.model';
 import { ToastService } from './toast.service';
 
@@ -256,7 +256,7 @@ export class CollectionPointsService {
       phone: p.phone,
       email: p.email,
       contactName: p.contactName,
-      scheduleLines: this.scheduleLines(p.schedule),
+      scheduleLines: scheduleLines(p.schedule),
       active: p.active,
       badge: p.active ? 'Activo' : 'Inactivo',
       badgeBg: p.active ? '#E6F0E7' : '#EFE7DC',
@@ -265,36 +265,4 @@ export class CollectionPointsService {
     };
   }
 
-  /** Agrupa días consecutivos con el mismo horario: "Lun a Vie · 09:00 a 18:00". */
-  private scheduleLines(schedule: ScheduleDay[]): string[] {
-    const days = [...schedule].sort((a, b) => a.day - b.day).filter((d) => !d.closed);
-    const lines: string[] = [];
-    let start: ScheduleDay | null = null;
-    let prev: ScheduleDay | null = null;
-
-    const flush = () => {
-      if (!start || !prev) return;
-      const range =
-        start.day === prev.day
-          ? DAY_LABELS[start.day]
-          : `${DAY_LABELS[start.day]} a ${DAY_LABELS[prev.day]}`;
-      lines.push(`${range} · ${start.open} a ${start.close}`);
-    };
-
-    for (const day of days) {
-      const continues =
-        prev !== null &&
-        day.day === prev.day + 1 &&
-        day.open === prev.open &&
-        day.close === prev.close;
-      if (!continues) {
-        flush();
-        start = day;
-      }
-      prev = day;
-    }
-    flush();
-
-    return lines.length ? lines : ['Sin horario cargado'];
-  }
 }

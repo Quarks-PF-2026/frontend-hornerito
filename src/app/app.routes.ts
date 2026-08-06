@@ -3,7 +3,26 @@ import { authGuard } from './core/guards/auth.guard';
 import { memberManagerGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./features/public/public-layout').then((m) => m.PublicLayout),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/public/pages/explorar/explorar').then((m) => m.ExplorarPage),
+      },
+      {
+        path: 'organizacion/:id',
+        loadComponent: () =>
+          import(
+            './features/public/pages/organizacion-publica/organizacion-publica'
+          ).then((m) => m.OrganizacionPublicaPage),
+      },
+    ],
+  },
   {
     path: 'login',
     loadComponent: () => import('./features/auth/pages/login/login').then((m) => m.LoginPage),
@@ -77,5 +96,5 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: 'login' },
+  { path: '**', redirectTo: '' },
 ];

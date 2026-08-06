@@ -1,0 +1,109 @@
+@if (failed()) {
+  <div class="notice hn-card">
+    <p class="notice-title hn-head">No encontramos esta organización</p>
+    <p>Puede que haya cambiado de dirección o que todavía no esté publicada.</p>
+    <div class="notice-actions">
+      <button class="hn-btn hn-btn--outline" type="button" (click)="retry()">Reintentar</button>
+      <a class="hn-btn hn-btn--primary" routerLink="/">Volver al inicio</a>
+    </div>
+  </div>
+} @else if (loading()) {
+  <p class="quiet center">Cargando…</p>
+} @else if (org(); as o) {
+  <header class="head">
+    <div class="cover" [style.background-image]="o.coverUrl ? 'url(' + o.coverUrl + ')' : null"></div>
+
+    <div class="identity">
+      <div class="avatar">
+        @if (o.logoUrl) {
+          <img [src]="o.logoUrl" alt="" />
+        } @else {
+          <span>{{ initials() }}</span>
+        }
+      </div>
+      <h1 class="hn-head">{{ o.name }}</h1>
+      <p class="address">📍 {{ o.address }}</p>
+      <p class="desc">{{ o.description }}</p>
+
+      @if (contactOpen()) {
+        <p class="contact">
+          Escribile o llamala:
+          @if (contactHref()) {
+            <a [href]="contactHref()">{{ o.contact }}</a>
+          } @else {
+            <span>{{ o.contact }}</span>
+          }
+        </p>
+      } @else {
+        <button class="hn-btn hn-btn--primary" type="button" (click)="showContact()">
+          Cómo ayudar
+        </button>
+      }
+    </div>
+  </header>
+
+  <section class="block">
+    <h2 class="hn-head">Necesita ahora</h2>
+    @if (needs().length) {
+      <div class="needs">
+        @for (need of needs(); track need.id) {
+          <article class="need hn-card">
+            <div class="need-head">
+              <span class="ico" aria-hidden="true">{{ need.icon }}</span>
+              <div>
+                <p class="supply">{{ need.supply }}</p>
+                <p class="deadline">Hasta el {{ need.deadline }}</p>
+              </div>
+            </div>
+            <div class="need-progress">
+              <div class="row">
+                <span>{{ need.covered }} de {{ need.required }} {{ need.unit }}</span>
+                <span class="pct">{{ need.pct }}%</span>
+              </div>
+              <hn-progress-bar [pct]="need.pct" [color]="need.color" [height]="10" />
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="quiet">Ahora mismo no tiene pedidos abiertos. Volvé a mirar en unos días.</p>
+    }
+  </section>
+
+  <section class="block">
+    <h2 class="hn-head">Dónde llevarlo</h2>
+    @if (points().length) {
+      <hn-map-picker class="map" [readonly]="true" [markers]="markers()" />
+      <div class="points">
+        @for (point of points(); track point.id) {
+          <article class="point hn-card">
+            <p class="point-name">{{ point.name }}</p>
+            <p class="point-address">{{ point.addressLine }}</p>
+            <ul class="hours">
+              @for (line of point.scheduleLines; track line) {
+                <li>🕘 {{ line }}</li>
+              }
+            </ul>
+            <a class="phone" [href]="'tel:' + point.phone">📞 {{ point.phone }}</a>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="quiet">Todavía no publicó puntos de recolección. Coordiná por contacto.</p>
+    }
+  </section>
+
+  @if (o.posts.length) {
+    <section class="block">
+      <h2 class="hn-head">Novedades</h2>
+      <div class="posts">
+        @for (post of o.posts; track post.id) {
+          <article class="post hn-card">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+          </article>
+        }
+      </div>
+    </section>
+  }
+}

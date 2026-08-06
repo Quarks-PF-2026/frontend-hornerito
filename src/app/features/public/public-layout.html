@@ -1,0 +1,19 @@
+<header class="bar">
+  <a class="brand" routerLink="/">
+    <span class="mark"><img src="assets/hornerito-bird.svg" alt="" /></span>
+    <span class="names">
+      <span class="name hn-head">Hornerito</span>
+      <span class="claim">Comedores y organizaciones cerca tuyo</span>
+    </span>
+  </a>
+
+  @if (authenticated()) {
+    <a class="hn-btn hn-btn--outline" routerLink="/app">Mi organización</a>
+  } @else {
+    <a class="hn-btn hn-btn--primary" routerLink="/login">Ingresar</a>
+  }
+</header>
+
+<div class="content hn-scroll">
+  <router-outlet />
+</div>
