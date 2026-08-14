@@ -45,7 +45,7 @@
     <label class="hn-label" for="pass">Contraseña</label>
     <input
       id="pass"
-      class="hn-input mb-lg"
+      class="hn-input mb-sm"
       type="password"
       autocomplete="off"
       placeholder="Tu contraseña"
@@ -53,6 +53,10 @@
       (input)="pass.set($any($event.target).value)"
       (keyup.enter)="submit()"
     />
+
+    <div class="forgot-link mb-lg">
+      <span (click)="goForgotPassword()">¿Olvidaste tu contraseña?</span>
+    </div>
 
     <button class="hn-btn hn-btn--primary hn-btn--block cta" type="button" (click)="submit()">
       Iniciar sesión

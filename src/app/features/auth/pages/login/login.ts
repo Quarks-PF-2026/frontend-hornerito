@@ -37,4 +37,8 @@ export class LoginPage {
   goRegister(): void {
     this.router.navigateByUrl('/register');
   }
+
+  goForgotPassword(): void {
+    this.router.navigateByUrl('/forgot-password');
+  }
 }

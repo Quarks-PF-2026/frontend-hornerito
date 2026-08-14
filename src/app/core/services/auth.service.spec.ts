@@ -84,4 +84,72 @@ describe('AuthService', () => {
       });
     });
   });
+
+  describe('forgotPassword', () => {
+    it('posts email to /auth/forgot-password', () => {
+      let result: { message: string } | undefined;
+      service.forgotPassword('user@example.com').subscribe((r) => (result = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/forgot-password`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ email: 'user@example.com' });
+      req.flush({ message: 'Si el correo está registrado...' });
+
+      expect(result?.message).toContain('Si el correo está registrado');
+    });
+  });
+
+  describe('verifyResetToken', () => {
+    it('returns true when token is valid', () => {
+      let valid: boolean | undefined;
+      service.verifyResetToken('valid-token').subscribe((r) => (valid = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/verify-reset-token?token=valid-token`);
+      expect(req.request.method).toBe('GET');
+      req.flush(null);
+
+      expect(valid).toBe(true);
+    });
+
+    it('returns false when token is invalid or expired', () => {
+      let valid: boolean | undefined;
+      service.verifyResetToken('invalid-token').subscribe((r) => (valid = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/verify-reset-token?token=invalid-token`);
+      req.flush({ message: 'Expiró' }, { status: 400, statusText: 'Bad Request' });
+
+      expect(valid).toBe(false);
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('returns ok: true when reset succeeds', () => {
+      let result: { ok: boolean; error: string } | undefined;
+      service.resetPassword('token', 'newpass123', 'newpass123').subscribe((r) => (result = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/reset-password`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        token: 'token',
+        password: 'newpass123',
+        confirmPassword: 'newpass123',
+      });
+      req.flush(null);
+
+      expect(result).toEqual({ ok: true, error: '' });
+    });
+
+    it('returns error message when reset fails', () => {
+      let result: { ok: boolean; error: string } | undefined;
+      service.resetPassword('token', 'newpass123', 'newpass123').subscribe((r) => (result = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/reset-password`);
+      req.flush(
+        { message: 'El enlace expiró.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+      expect(result).toEqual({ ok: false, error: 'El enlace expiró.' });
+    });
+  });
 });

@@ -103,4 +103,35 @@ export class AuthService {
     this._authenticated.set(false);
     this.router.navigateByUrl('/login');
   }
+
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  verifyResetToken(token: string): Observable<boolean> {
+    return this.http
+      .get<void>(`${this.apiUrl}/auth/verify-reset-token`, { params: { token } })
+      .pipe(
+        map(() => true),
+        catchError(() => of(false)),
+      );
+  }
+
+  resetPassword(
+    token: string,
+    password: string,
+    confirmPassword: string,
+  ): Observable<{ ok: boolean; error: string }> {
+    return this.http
+      .post<void>(`${this.apiUrl}/auth/reset-password`, { token, password, confirmPassword })
+      .pipe(
+        map(() => ({ ok: true, error: '' })),
+        catchError((err: HttpErrorResponse) => {
+          const error =
+            err.error?.message ??
+            'No se pudo restablecer la contraseña. Intentá de nuevo.';
+          return of({ ok: false, error });
+        }),
+      );
+  }
 }
