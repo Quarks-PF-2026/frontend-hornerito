@@ -1,0 +1,172 @@
+@if (draft(); as d) {
+  <div class="form">
+    <button class="back" type="button" (click)="back()">← Volver a voluntariado</button>
+    <div class="title hn-head">
+      {{ d.mode === 'new' ? 'Nueva actividad de voluntariado' : 'Editar actividad' }}
+    </div>
+    <div class="subtitle">Tus voluntarios ven estos datos para decidir si se anotan.</div>
+
+    <div class="field">
+      <label class="hn-label">Título</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Ej: Merienda del sábado"
+        [value]="d.title"
+        (input)="onField('title', $event)"
+      />
+      @if (errors()['title']) {
+        <div class="hn-field-error">{{ errors()['title'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Descripción</label>
+      <textarea
+        class="hn-textarea"
+        rows="4"
+        placeholder="Qué se va a hacer, qué hace falta llevar, a qué hora terminar"
+        [value]="d.description"
+        (input)="onField('description', $event)"
+      ></textarea>
+      @if (errors()['description']) {
+        <div class="hn-field-error">{{ errors()['description'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Fecha y hora</label>
+      <input
+        class="hn-input"
+        type="datetime-local"
+        [value]="d.startsAt"
+        (input)="onField('startsAt', $event)"
+      />
+      @if (errors()['startsAt']) {
+        <div class="hn-field-error">{{ errors()['startsAt'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Lugar</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Ej: Bv. Sarmiento 1450, Villa María"
+        [value]="d.location"
+        (input)="onField('location', $event)"
+      />
+      @if (errors()['location']) {
+        <div class="hn-field-error">{{ errors()['location'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Tipo de voluntario</label>
+      <div class="type-row">
+        <!--
+          El estado seleccionado va en cada `option`, no en `[value]` del select:
+          al crear un tipo nuevo Angular actualizaría el value antes de que el
+          `@for` haya creado su `option` y el select quedaría en "Sin tipo".
+        -->
+        <select class="hn-select" (change)="onField('volunteerTypeId', $event)">
+          <option value="" [selected]="!d.volunteerTypeId">Sin tipo</option>
+          @for (t of types(); track t.id) {
+            <option [value]="t.id" [selected]="t.id === d.volunteerTypeId">
+              {{ t.name }}{{ t.active ? '' : ' (de baja)' }}
+            </option>
+          }
+        </select>
+        <button
+          class="hn-btn hn-btn--icon sq"
+          type="button"
+          title="Nuevo tipo"
+          (click)="openNewType()"
+        >
+          ＋
+        </button>
+        <button
+          class="hn-btn hn-btn--icon sq"
+          type="button"
+          title="Editar tipo"
+          [disabled]="!d.volunteerTypeId"
+          (click)="openEditType()"
+        >
+          ✎
+        </button>
+      </div>
+      <div class="hint">Clasifica el perfil de colaboración que hace falta. Es opcional.</div>
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Cupos</label>
+      <input
+        class="hn-input"
+        type="number"
+        min="1"
+        max="1000"
+        placeholder="Ej: 8"
+        [value]="d.capacity"
+        (input)="onField('capacity', $event)"
+      />
+      <div class="hint">
+        El cupo se descuenta cuando aceptás una postulación, no cuando alguien se anota.
+      </div>
+      @if (errors()['capacity']) {
+        <div class="hn-field-error">{{ errors()['capacity'] }}</div>
+      }
+    </div>
+
+    <div class="row">
+      <button class="hn-btn hn-btn--white btn" type="button" (click)="back()">Cancelar</button>
+      <button
+        class="hn-btn hn-btn--primary btn save"
+        type="button"
+        [disabled]="saving()"
+        (click)="save()"
+      >
+        {{ d.mode === 'new' ? 'Publicar actividad' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+}
+
+@if (typeSheet(); as t) {
+  <hn-bottom-sheet (closed)="closeTypeSheet()">
+    <div class="sheet-form">
+      <div class="title hn-head">
+        {{ t.mode === 'new' ? 'Nuevo tipo de voluntario' : 'Editar tipo de voluntario' }}
+      </div>
+      <div class="subtitle">El catálogo es de tu organización y se reusa en cada actividad.</div>
+
+      <div class="field">
+        <label class="hn-label">Nombre</label>
+        <input
+          class="hn-input"
+          type="text"
+          placeholder="Ej: Cocina"
+          [value]="t.name"
+          (input)="onTypeName($event)"
+        />
+        @if (t.error) {
+          <div class="hn-field-error">{{ t.error }}</div>
+        }
+      </div>
+
+      @if (t.mode === 'edit') {
+        <button class="hn-btn hn-btn--danger-soft toggle-type" type="button" (click)="toggleType()">
+          {{ t.active ? 'Dar de baja' : 'Reactivar' }}
+        </button>
+      }
+
+      <div class="row">
+        <button class="hn-btn hn-btn--white btn" type="button" (click)="closeTypeSheet()">
+          Cancelar
+        </button>
+        <button class="hn-btn hn-btn--primary btn" type="button" (click)="saveType()">
+          {{ t.mode === 'new' ? 'Agregar tipo' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </hn-bottom-sheet>
+}

@@ -1,0 +1,82 @@
+.form {
+  max-width: 620px;
+  margin: 0 auto;
+}
+.back {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hn-primary-strong);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+}
+.title {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.subtitle {
+  color: var(--hn-text-2);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.field {
+  margin-bottom: 16px;
+}
+.hint {
+  font-size: 12.5px;
+  color: var(--hn-muted);
+  margin-top: 6px;
+}
+
+.type-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .hn-select {
+    flex: 1;
+    min-width: 0;
+  }
+}
+.sq {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+}
+
+.toggle-type {
+  width: 100%;
+  height: 46px;
+  font-size: 15px;
+  border-radius: var(--hn-radius-md);
+  box-shadow: none;
+}
+
+/* Contenido del sheet de tipos: el `.form` de arriba es el de la página. */
+.sheet-form {
+  padding: 8px 22px 28px;
+}
+@media (min-width: 768px) {
+  .sheet-form {
+    padding-top: 24px;
+  }
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.btn {
+  flex: 1;
+  height: 52px;
+  font-size: 15px;
+  border-radius: var(--hn-radius-md);
+  box-shadow: none;
+}
+.btn.save {
+  flex: 1.6;
+}

@@ -1,0 +1,78 @@
+<div class="list">
+  @for (v of views(); track v.id) {
+    <div class="opportunity hn-card" [style.opacity]="v.cardOpacity">
+      <div class="head">
+        <div class="head-titles">
+          <div class="name">{{ v.title }}</div>
+          <div class="when">🗓️ {{ v.when }}</div>
+        </div>
+        <hn-badge [label]="v.badge" [bg]="v.badgeBg" [ink]="v.badgeInk" />
+      </div>
+
+      <div class="description">{{ v.description }}</div>
+
+      <div class="meta">
+        <span>📍 {{ v.location }}</span>
+        @if (v.volunteerTypeName) {
+          <span>🏷️ {{ v.volunteerTypeName }}</span>
+        }
+        <span>🙋 {{ v.cupos }}</span>
+      </div>
+
+      @if (canWrite()) {
+        <div class="actions">
+          <button class="hn-btn hn-btn--outline main" type="button" (click)="applications(v.id)">
+            Postulaciones
+            @if (v.pendingCount) {
+              <span class="pending">{{ v.pendingCount }}</span>
+            }
+          </button>
+          @if (v.status === 'open') {
+            <button class="hn-btn hn-btn--white" type="button" (click)="edit(v.id)">Editar</button>
+            <button class="hn-btn hn-btn--danger-soft" type="button" (click)="close(v.id)">
+              Cerrar
+            </button>
+          }
+        </div>
+        @if (v.status === 'open') {
+          <button class="hn-btn hn-btn--danger-soft cancel" type="button" (click)="cancel(v.id)">
+            Cancelar actividad
+          </button>
+        }
+      } @else if (!v.myApplicationStatus && v.isOpen) {
+        <div class="actions">
+          <button class="hn-btn hn-btn--primary hn-btn--block" type="button" (click)="apply(v.id)">
+            Postularme
+          </button>
+        </div>
+      }
+
+      @if (v.myApplicationStatus === 'pending') {
+        <div class="note">El comedor todavía no resolvió tu postulación.</div>
+      } @else if (v.myApplicationStatus === 'accepted') {
+        <div class="note">Te aceptaron 🎉 Te esperan el día de la actividad.</div>
+      } @else if (v.myApplicationStatus === 'rejected') {
+        <div class="note">Esta vez no quedaste. Mirá las otras actividades abiertas.</div>
+      } @else if (!v.isOpen && !canWrite()) {
+        <div class="note">Esta actividad ya no acepta nuevas postulaciones.</div>
+      }
+    </div>
+  } @empty {
+    <div class="empty hn-card">
+      <div class="empty-ico">🙋</div>
+      <div class="empty-title hn-head">Todavía no hay actividades de voluntariado</div>
+      <div class="empty-text">
+        @if (canWrite()) {
+          Publicá una actividad con cupos para que tus voluntarios puedan anotarse.
+        } @else {
+          Cuando el comedor publique una actividad la vas a ver acá.
+        }
+      </div>
+      @if (canWrite()) {
+        <button class="hn-btn hn-btn--primary" type="button" (click)="newOpportunity()">
+          Crear la primera
+        </button>
+      }
+    </div>
+  }
+</div>

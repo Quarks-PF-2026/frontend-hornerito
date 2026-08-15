@@ -5,8 +5,7 @@ import { memberManagerGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./features/public/public-layout').then((m) => m.PublicLayout),
+    loadComponent: () => import('./features/public/public-layout').then((m) => m.PublicLayout),
     children: [
       {
         path: '',
@@ -17,9 +16,9 @@ export const routes: Routes = [
       {
         path: 'organizacion/:id',
         loadComponent: () =>
-          import(
-            './features/public/pages/organizacion-publica/organizacion-publica'
-          ).then((m) => m.OrganizacionPublicaPage),
+          import('./features/public/pages/organizacion-publica/organizacion-publica').then(
+            (m) => m.OrganizacionPublicaPage,
+          ),
       },
     ],
   },
@@ -91,9 +90,7 @@ export const routes: Routes = [
       {
         path: 'donaciones',
         loadComponent: () =>
-          import('./features/donaciones/pages/donaciones/donaciones').then(
-            (m) => m.DonacionesPage,
-          ),
+          import('./features/donaciones/pages/donaciones/donaciones').then((m) => m.DonacionesPage),
       },
       {
         path: 'donaciones/nueva',
@@ -116,6 +113,34 @@ export const routes: Routes = [
         path: 'puntos/:id/editar',
         loadComponent: () =>
           import('./features/puntos/pages/punto-form/punto-form').then((m) => m.PuntoFormPage),
+      },
+      {
+        path: 'voluntariado',
+        loadComponent: () =>
+          import('./features/voluntariado/pages/oportunidades/oportunidades').then(
+            (m) => m.OportunidadesPage,
+          ),
+      },
+      {
+        path: 'voluntariado/nueva',
+        loadComponent: () =>
+          import('./features/voluntariado/pages/oportunidad-form/oportunidad-form').then(
+            (m) => m.OportunidadFormPage,
+          ),
+      },
+      {
+        path: 'voluntariado/:id/editar',
+        loadComponent: () =>
+          import('./features/voluntariado/pages/oportunidad-form/oportunidad-form').then(
+            (m) => m.OportunidadFormPage,
+          ),
+      },
+      {
+        path: 'voluntariado/:id/postulaciones',
+        loadComponent: () =>
+          import('./features/voluntariado/pages/postulaciones/postulaciones').then(
+            (m) => m.PostulacionesPage,
+          ),
       },
       {
         path: 'insumos',
