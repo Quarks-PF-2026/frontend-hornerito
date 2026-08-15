@@ -66,6 +66,20 @@ export class AuthService {
     });
   }
 
+  /** Consume el token del correo de verificación. false si venció o ya se usó. */
+  verifyEmail(token: string): Observable<boolean> {
+    return this.http.get<void>(`${this.apiUrl}/auth/verify`, { params: { token } }).pipe(
+      map(() => true),
+      catchError(() => of(false)),
+    );
+  }
+
+  resendVerification(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/resend-verification`, {
+      email,
+    });
+  }
+
   login(email: string, pass: string): Observable<LoginResult> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password: pass }).pipe(
       tap((res) => this.startSession(res.accessToken, res.role, res.user.email)),

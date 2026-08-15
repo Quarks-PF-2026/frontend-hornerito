@@ -1,14 +1,66 @@
 <div class="wrap">
-  <div class="icon">✉️</div>
-  <h1 class="hn-head">Revisá tu correo</h1>
-  <p class="text">
-    Te enviamos un correo de verificación a<br />
-    <b>{{ email() || 'tu correo' }}</b>.<br />
-    Validá tu email para empezar a usar Hornerito.
-  </p>
-  <div class="pill">¡Cuenta creada con éxito!</div>
-  <button class="hn-btn hn-btn--primary cta" type="button" (click)="goLogin()">
-    Ir a iniciar sesión
-  </button>
-  <div class="resend">¿No te llegó? <span>Reenviar correo</span></div>
+  @if (checking()) {
+    <div class="icon">⏳</div>
+    <h1 class="hn-head">Verificando tu cuenta…</h1>
+    <p class="text">Dame un segundo mientras confirmamos tu correo.</p>
+  } @else if (verified()) {
+    <div class="icon">✅</div>
+    <h1 class="hn-head">¡Cuenta verificada!</h1>
+    <p class="text">Ya podés iniciar sesión y empezar a usar Hornerito.</p>
+    <div class="pill">Verificación completa</div>
+    <button class="hn-btn hn-btn--primary cta" type="button" (click)="goLogin()">
+      Ir a iniciar sesión
+    </button>
+  } @else if (failed()) {
+    <div class="icon icon--warn">⚠️</div>
+    <h1 class="hn-head">El enlace no sirve</h1>
+    <p class="text">
+      Venció, ya fue usado o no es válido.<br />
+      Si ya verificaste tu cuenta, iniciá sesión.
+    </p>
+    <button class="hn-btn hn-btn--primary cta" type="button" (click)="goLogin()">
+      Ir a iniciar sesión
+    </button>
+  } @else {
+    <div class="icon">✉️</div>
+    <h1 class="hn-head">Revisá tu correo</h1>
+    <p class="text">
+      Te enviamos un correo de verificación a<br />
+      <b>{{ email() || 'tu correo' }}</b>.<br />
+      Validá tu email para empezar a usar Hornerito.
+    </p>
+    <div class="pill">¡Cuenta creada con éxito!</div>
+    <button class="hn-btn hn-btn--primary cta" type="button" (click)="goLogin()">
+      Ir a iniciar sesión
+    </button>
+  }
+
+  <!-- El reenvío sirve tanto recién registrado como con un enlace vencido. -->
+  @if (!checking() && !verified()) {
+    <div class="resend">
+      <div class="resend-title">
+        {{ failed() ? '¿Necesitás un enlace nuevo?' : '¿No te llegó?' }}
+      </div>
+      <input
+        class="hn-input"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        placeholder="tu@correo.com"
+        [value]="resendEmail()"
+        (input)="resendEmail.set($any($event.target).value)"
+      />
+      <button
+        class="hn-btn hn-btn--outline hn-btn--block"
+        type="button"
+        [disabled]="resending() || !resendEmail().trim()"
+        (click)="resend()"
+      >
+        {{ resending() ? 'Enviando…' : 'Reenviar correo' }}
+      </button>
+      @if (resendMsg()) {
+        <p class="resend-msg">{{ resendMsg() }}</p>
+      }
+    </div>
+  }
 </div>

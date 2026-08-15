@@ -99,6 +99,46 @@ describe('AuthService', () => {
     });
   });
 
+  describe('verifyEmail', () => {
+    it('returns true when the verification token is valid', () => {
+      let ok: boolean | undefined;
+      service.verifyEmail('valid-token').subscribe((r) => (ok = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/verify?token=valid-token`);
+      expect(req.request.method).toBe('GET');
+      req.flush(null);
+
+      expect(ok).toBe(true);
+    });
+
+    it('returns false when the token expired or was already used', () => {
+      let ok: boolean | undefined;
+      service.verifyEmail('used-token').subscribe((r) => (ok = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/verify?token=used-token`);
+      req.flush(
+        { message: 'El enlace de verificación no es válido.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+      expect(ok).toBe(false);
+    });
+  });
+
+  describe('resendVerification', () => {
+    it('posts the email and returns the generic message', () => {
+      let result: { message: string } | undefined;
+      service.resendVerification('user@example.com').subscribe((r) => (result = r));
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/resend-verification`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ email: 'user@example.com' });
+      req.flush({ message: 'Si el correo está registrado y sin verificar...' });
+
+      expect(result?.message).toContain('Si el correo está registrado');
+    });
+  });
+
   describe('verifyResetToken', () => {
     it('returns true when token is valid', () => {
       let valid: boolean | undefined;
