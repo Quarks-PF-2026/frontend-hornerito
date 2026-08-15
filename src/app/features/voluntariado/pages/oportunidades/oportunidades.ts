@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { VolunteerTypesService } from '../../../../core/services/volunteer-types.service';
 import { VolunteeringService } from '../../../../core/services/volunteering.service';
 import { Badge } from '../../../../shared/ui/badge/badge';
 
@@ -21,6 +22,7 @@ export class OportunidadesPage {
   private readonly auth = inject(AuthService);
   readonly canWrite = this.auth.canWriteContent;
   private readonly volunteering = inject(VolunteeringService);
+  private readonly volunteerTypes = inject(VolunteerTypesService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
@@ -28,6 +30,8 @@ export class OportunidadesPage {
 
   constructor() {
     this.volunteering.load().subscribe();
+    // El nombre del tipo lo resuelve la vista contra este catálogo.
+    this.volunteerTypes.load().subscribe();
   }
 
   newOpportunity(): void {

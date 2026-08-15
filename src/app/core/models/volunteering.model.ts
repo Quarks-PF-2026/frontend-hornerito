@@ -8,6 +8,8 @@ export interface Opportunity {
   /** ISO con fecha y hora de inicio de la actividad. */
   startsAt: string;
   location: string;
+  /** Tipo del catálogo de la organización; null si la actividad no se clasificó. */
+  volunteerTypeId: string | null;
   capacity: number;
   acceptedCount: number;
   status: OpportunityStatus;
@@ -24,6 +26,7 @@ export interface OpportunityPatch {
   description: string;
   startsAt: string;
   location: string;
+  volunteerTypeId: string | null;
   capacity: number;
 }
 
@@ -45,6 +48,8 @@ export interface OpportunityView {
   description: string;
   location: string;
   when: string;
+  /** Nombre del tipo de voluntario; '' si la actividad no tiene uno. */
+  volunteerTypeName: string;
   cupos: string;
   isOpen: boolean;
   status: OpportunityStatus;

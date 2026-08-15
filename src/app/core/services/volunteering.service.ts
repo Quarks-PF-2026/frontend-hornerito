@@ -13,6 +13,7 @@ import {
   whenLabel,
 } from '../models/volunteering.model';
 import { ToastService } from './toast.service';
+import { VolunteerTypesService } from './volunteer-types.service';
 
 /** Lo que devuelve aceptar/rechazar: la postulación sin datos del voluntario. */
 export type DecidedApplication = Omit<Application, 'volunteerName' | 'volunteerEmail'>;
@@ -26,6 +27,8 @@ export interface OpportunityDraft {
   /** Valor de un `<input type="datetime-local">`. */
   startsAt: string;
   location: string;
+  /** Id del tipo de voluntario; '' = sin tipo. */
+  volunteerTypeId: string;
   capacity: string;
 }
 
@@ -33,6 +36,7 @@ export interface OpportunityDraft {
 export class VolunteeringService {
   private readonly http = inject(HttpClient);
   private readonly toast = inject(ToastService);
+  private readonly volunteerTypes = inject(VolunteerTypesService);
   private readonly apiUrl = `${environment.apiUrl}/volunteering`;
 
   private readonly _opportunities = signal<Opportunity[]>([]);
@@ -102,6 +106,7 @@ export class VolunteeringService {
       description: '',
       startsAt: '',
       location: '',
+      volunteerTypeId: '',
       capacity: '',
     });
   }
@@ -117,6 +122,7 @@ export class VolunteeringService {
       description: opportunity.description,
       startsAt: toDatetimeLocal(opportunity.startsAt),
       location: opportunity.location,
+      volunteerTypeId: opportunity.volunteerTypeId ?? '',
       capacity: String(opportunity.capacity),
     });
   }
@@ -146,6 +152,7 @@ export class VolunteeringService {
       description: draft.description.trim(),
       startsAt: new Date(draft.startsAt).toISOString(),
       location: draft.location.trim(),
+      volunteerTypeId: draft.volunteerTypeId || null,
       capacity: Number(draft.capacity),
     };
 
@@ -238,6 +245,9 @@ export class VolunteeringService {
       description: o.description,
       location: o.location,
       when: whenLabel(o.startsAt),
+      volunteerTypeName: o.volunteerTypeId
+        ? (this.volunteerTypes.find(o.volunteerTypeId)?.name ?? '')
+        : '',
       cupos: `${o.acceptedCount} de ${o.capacity} cupos cubiertos`,
       isOpen: o.isOpen,
       status: o.status,

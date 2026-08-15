@@ -13,6 +13,9 @@
 
       <div class="meta">
         <span>📍 {{ v.location }}</span>
+        @if (v.volunteerTypeName) {
+          <span>🏷️ {{ v.volunteerTypeName }}</span>
+        }
         <span>🙋 {{ v.cupos }}</span>
       </div>
 
