@@ -89,6 +89,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'donaciones',
+        loadComponent: () =>
+          import('./features/donaciones/pages/donaciones/donaciones').then(
+            (m) => m.DonacionesPage,
+          ),
+      },
+      {
+        path: 'donaciones/nueva',
+        loadComponent: () =>
+          import('./features/donaciones/pages/donacion-form/donacion-form').then(
+            (m) => m.DonacionFormPage,
+          ),
+      },
+      {
         path: 'puntos',
         loadComponent: () =>
           import('./features/puntos/pages/puntos/puntos').then((m) => m.PuntosPage),

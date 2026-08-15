@@ -50,6 +50,23 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span>Necesidades</span>
       </a>
+      <a routerLink="/app/donaciones" routerLinkActive="active">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 8.5h18V12H3z" />
+          <path d="M5 12v8h14v-8" />
+          <path d="M12 8.5V20" />
+          <path d="M12 8.5S10.5 3 7.8 4.2C5.6 5.2 6.6 8.5 12 8.5z" />
+          <path d="M12 8.5s1.5-5.5 4.2-4.3c2.2 1 1.2 4.3-4.2 4.3z" />
+        </svg>
+        <span>Donaciones</span>
+      </a>
       <a routerLink="/app/puntos" routerLinkActive="active">
         <svg
           viewBox="0 0 24 24"
@@ -119,7 +136,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         display: flex;
         background: #fff;
         border-top: 1px solid var(--hn-border-soft);
-        padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+        padding: 8px 3px calc(8px + env(safe-area-inset-bottom));
         box-shadow: 0 -4px 20px -10px rgba(90, 50, 10, 0.18);
       }
       a {
@@ -130,7 +147,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         flex-direction: column;
         align-items: center;
         gap: 3px;
-        padding: 6px 2px;
+        padding: 6px 1px;
         color: var(--hn-muted-2);
       }
       a.active {
@@ -141,9 +158,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         height: 22px;
         flex-shrink: 0;
       }
-      /* Hasta 6 tabs + logout: el texto se achica y trunca para no desbordar en 360px. */
+      /* Hasta 7 tabs + logout: el texto se achica y trunca para no desbordar en 360px. */
       span {
-        font-size: 10px;
+        font-size: 9.5px;
         font-weight: 700;
         letter-spacing: -0.2px;
         max-width: 100%;
