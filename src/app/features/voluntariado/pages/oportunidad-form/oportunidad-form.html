@@ -1,0 +1,95 @@
+@if (draft(); as d) {
+  <div class="form">
+    <button class="back" type="button" (click)="back()">← Volver a voluntariado</button>
+    <div class="title hn-head">
+      {{ d.mode === 'new' ? 'Nueva actividad de voluntariado' : 'Editar actividad' }}
+    </div>
+    <div class="subtitle">Tus voluntarios ven estos datos para decidir si se anotan.</div>
+
+    <div class="field">
+      <label class="hn-label">Título</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Ej: Merienda del sábado"
+        [value]="d.title"
+        (input)="onField('title', $event)"
+      />
+      @if (errors()['title']) {
+        <div class="hn-field-error">{{ errors()['title'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Descripción</label>
+      <textarea
+        class="hn-textarea"
+        rows="4"
+        placeholder="Qué se va a hacer, qué hace falta llevar, a qué hora terminar"
+        [value]="d.description"
+        (input)="onField('description', $event)"
+      ></textarea>
+      @if (errors()['description']) {
+        <div class="hn-field-error">{{ errors()['description'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Fecha y hora</label>
+      <input
+        class="hn-input"
+        type="datetime-local"
+        [value]="d.startsAt"
+        (input)="onField('startsAt', $event)"
+      />
+      @if (errors()['startsAt']) {
+        <div class="hn-field-error">{{ errors()['startsAt'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Lugar</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Ej: Bv. Sarmiento 1450, Villa María"
+        [value]="d.location"
+        (input)="onField('location', $event)"
+      />
+      @if (errors()['location']) {
+        <div class="hn-field-error">{{ errors()['location'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Cupos</label>
+      <input
+        class="hn-input"
+        type="number"
+        min="1"
+        max="1000"
+        placeholder="Ej: 8"
+        [value]="d.capacity"
+        (input)="onField('capacity', $event)"
+      />
+      <div class="hint">
+        El cupo se descuenta cuando aceptás una postulación, no cuando alguien se anota.
+      </div>
+      @if (errors()['capacity']) {
+        <div class="hn-field-error">{{ errors()['capacity'] }}</div>
+      }
+    </div>
+
+    <div class="row">
+      <button class="hn-btn hn-btn--white btn" type="button" (click)="back()">Cancelar</button>
+      <button
+        class="hn-btn hn-btn--primary btn save"
+        type="button"
+        [disabled]="saving()"
+        (click)="save()"
+      >
+        {{ d.mode === 'new' ? 'Publicar actividad' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+}

@@ -1,0 +1,51 @@
+<div class="page">
+  <button class="back" type="button" (click)="back()">← Volver a voluntariado</button>
+
+  @if (opportunity(); as o) {
+    <div class="title hn-head">{{ o.title }}</div>
+    <div class="subtitle">🗓️ {{ o.when }} · 🙋 {{ o.cupos }}</div>
+  } @else {
+    <div class="title hn-head">Postulaciones</div>
+  }
+
+  <div class="list">
+    @for (r of rows(); track r.id) {
+      <div class="application hn-card">
+        <div class="head">
+          <div class="head-titles">
+            <div class="name">{{ r.volunteerName }}</div>
+            <div class="email">{{ r.volunteerEmail }}</div>
+          </div>
+          <hn-badge [label]="r.label" [bg]="r.bg" [ink]="r.ink" />
+        </div>
+
+        @if (r.pending) {
+          <div class="actions">
+            <button
+              class="hn-btn hn-btn--primary"
+              type="button"
+              [disabled]="deciding() !== null"
+              (click)="accept(r.id)"
+            >
+              Aceptar
+            </button>
+            <button
+              class="hn-btn hn-btn--danger-soft"
+              type="button"
+              [disabled]="deciding() !== null"
+              (click)="reject(r.id)"
+            >
+              Rechazar
+            </button>
+          </div>
+        }
+      </div>
+    } @empty {
+      <div class="empty hn-card">
+        <div class="empty-ico">📭</div>
+        <div class="empty-title hn-head">Todavía no hay postulaciones</div>
+        <div class="empty-text">Cuando alguien se anote a esta actividad lo vas a ver acá.</div>
+      </div>
+    }
+  </div>
+</div>

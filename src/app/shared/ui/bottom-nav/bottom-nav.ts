@@ -81,6 +81,21 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span>Puntos</span>
       </a>
+      <a routerLink="/app/voluntariado" routerLinkActive="active">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M17 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20" />
+          <circle cx="9.5" cy="7" r="3.2" />
+          <path d="M18 5.5v5M20.5 8h-5" />
+        </svg>
+        <span>Voluntariado</span>
+      </a>
       <a routerLink="/app/insumos" routerLinkActive="active">
         <svg
           viewBox="0 0 24 24"

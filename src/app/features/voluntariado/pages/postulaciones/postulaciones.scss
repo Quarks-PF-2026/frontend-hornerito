@@ -1,0 +1,86 @@
+.page {
+  max-width: 620px;
+  margin: 0 auto;
+}
+.back {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hn-primary-strong);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+}
+.title {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.subtitle {
+  color: var(--hn-text-2);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.application {
+  padding: 16px;
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.head-titles {
+  min-width: 0;
+}
+.name {
+  font-weight: 700;
+  font-size: 15.5px;
+  color: var(--hn-ink);
+  line-height: 1.2;
+}
+.email {
+  font-size: 13px;
+  color: var(--hn-muted);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.actions .hn-btn {
+  flex: 1;
+  height: 42px;
+  font-size: 13.5px;
+  border-radius: 11px;
+  box-shadow: none;
+}
+
+/* ---- Empty state ---- */
+.empty {
+  padding: 30px 22px;
+  text-align: center;
+}
+.empty-ico {
+  font-size: 34px;
+}
+.empty-title {
+  font-size: 17px;
+  margin: 10px 0 6px;
+}
+.empty-text {
+  font-size: 13.5px;
+  color: var(--hn-text-2);
+  line-height: 1.45;
+}
