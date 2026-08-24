@@ -72,6 +72,27 @@
     </div>
   </div>
 
+  @if (canEditOrg()) {
+    <div class="seeks hn-card">
+      <div class="seeks-text">
+        <div class="seeks-title">Estamos buscando voluntarios</div>
+        <div class="seeks-sub">
+          Muestra un formulario en tu página pública para que cualquiera pueda ofrecerse. Vos
+          aprobás quién entra.
+        </div>
+      </div>
+      <label class="switch">
+        <input
+          type="checkbox"
+          [checked]="o.seeksVolunteers"
+          [disabled]="savingSeeks()"
+          (change)="toggleSeeksVolunteers($any($event.target).checked)"
+        />
+        <span class="track"><span class="knob"></span></span>
+      </label>
+    </div>
+  }
+
   <div class="foot">Así te ven donantes y voluntarios cuando<br />tu comedor está validado.</div>
 } @else {
   <div class="empty hn-card">

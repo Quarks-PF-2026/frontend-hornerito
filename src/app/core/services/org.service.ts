@@ -4,7 +4,9 @@ import { Observable, catchError, map, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Org } from '../models/org.model';
 
-export type OrgPatch = Pick<Org, 'name' | 'description' | 'address' | 'contact'>;
+export type OrgPatch = Pick<Org, 'name' | 'description' | 'address' | 'contact'> & {
+  seeksVolunteers?: boolean;
+};
 
 @Injectable({ providedIn: 'root' })
 export class OrgService {
@@ -32,5 +34,24 @@ export class OrgService {
     return this.http
       .put<Org>(`${this.apiUrl}/organization/me`, patch)
       .pipe(tap((org) => this._org.set(org)));
+  }
+
+  /**
+   * El interruptor de "buscamos voluntarios" (QK-16). Reusa el mismo PUT que
+   * el resto del perfil, que espera la entidad completa: el backend valida
+   * todos los campos, así que se reenvían los actuales sin tocarlos.
+   */
+  setSeeksVolunteers(value: boolean): Observable<Org> {
+    const org = this._org();
+    if (!org) {
+      throw new Error('No hay organización cargada.');
+    }
+    return this.save({
+      name: org.name,
+      description: org.description,
+      address: org.address,
+      contact: org.contact,
+      seeksVolunteers: value,
+    });
   }
 }

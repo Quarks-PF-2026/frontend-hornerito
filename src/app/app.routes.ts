@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { memberManagerGuard } from './core/guards/role.guard';
+import { contentWriterGuard, memberManagerGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -133,6 +133,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/voluntariado/pages/oportunidad-form/oportunidad-form').then(
             (m) => m.OportunidadFormPage,
+          ),
+      },
+      {
+        // Antes de las rutas con `:id` para que se lea junto al resto del
+        // voluntariado; no hay colisión real con `voluntariado/:id`.
+        path: 'voluntariado/solicitudes',
+        canActivate: [contentWriterGuard],
+        loadComponent: () =>
+          import('./features/voluntariado/pages/solicitudes/solicitudes').then(
+            (m) => m.SolicitudesPage,
           ),
       },
       {

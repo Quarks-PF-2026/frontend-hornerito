@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { VolunteerRequestsService } from '../../../../core/services/volunteer-requests.service';
 import { VolunteerTypesService } from '../../../../core/services/volunteer-types.service';
 import { VolunteeringService } from '../../../../core/services/volunteering.service';
 import { Badge } from '../../../../shared/ui/badge/badge';
@@ -23,15 +24,22 @@ export class OportunidadesPage {
   readonly canWrite = this.auth.canWriteContent;
   private readonly volunteering = inject(VolunteeringService);
   private readonly volunteerTypes = inject(VolunteerTypesService);
+  private readonly requests = inject(VolunteerRequestsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
   readonly views = this.volunteering.views;
+  /** Contador de la entrada a solicitudes de la comunidad (QK-16). */
+  readonly pendingRequests = this.requests.pendingCount;
 
   constructor() {
     this.volunteering.load().subscribe();
     // El nombre del tipo lo resuelve la vista contra este catálogo.
     this.volunteerTypes.load().subscribe();
+    if (this.canWrite()) {
+      // Solo por el contador: la lista se carga de nuevo al entrar a la página.
+      this.requests.load().subscribe({ error: () => undefined });
+    }
   }
 
   newOpportunity(): void {
@@ -40,6 +48,10 @@ export class OportunidadesPage {
 
   edit(id: string): void {
     void this.router.navigate(['/app/voluntariado', id, 'editar']);
+  }
+
+  requestsInbox(): void {
+    void this.router.navigate(['/app/voluntariado/solicitudes']);
   }
 
   applications(id: string): void {

@@ -1,3 +1,16 @@
+@if (canWrite()) {
+  <button class="requests-entry hn-card" type="button" (click)="requestsInbox()">
+    <span class="requests-ico" aria-hidden="true">🙋</span>
+    <span class="requests-text">
+      <span class="requests-title">Solicitudes de la comunidad</span>
+      <span class="requests-sub">Gente que se ofreció desde tu página pública</span>
+    </span>
+    @if (pendingRequests()) {
+      <span class="pending">{{ pendingRequests() }}</span>
+    }
+  </button>
+}
+
 <div class="list">
   @for (v of views(); track v.id) {
     <div class="opportunity hn-card" [style.opacity]="v.cardOpacity">

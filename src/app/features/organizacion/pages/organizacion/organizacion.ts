@@ -5,6 +5,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { MediaService } from '../../../../core/services/media.service';
 import { OrgService } from '../../../../core/services/org.service';
 import { ModalService } from '../../../../core/services/modal.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { ImageUpload } from '../../../../shared/ui/image-upload/image-upload';
 
 interface StatusStyle {
@@ -55,6 +56,7 @@ export class OrganizacionPage {
   private readonly modal = inject(ModalService);
   private readonly auth = inject(AuthService);
   private readonly mediaSvc = inject(MediaService);
+  private readonly toast = inject(ToastService);
 
   readonly org = this.orgSvc.org;
   readonly canEditOrg = this.auth.isOwner;
@@ -83,6 +85,28 @@ export class OrganizacionPage {
   private loadImages(orgId: string): void {
     this.mediaSvc.list('organization', orgId).subscribe((items) => {
       this.images.set(Object.fromEntries(items.map((m) => [m.purpose, m.url])));
+    });
+  }
+
+  /** Solo el dueño edita el perfil, así que solo él prende el interruptor. */
+  readonly savingSeeks = signal(false);
+
+  toggleSeeksVolunteers(value: boolean): void {
+    if (this.savingSeeks()) return;
+    this.savingSeeks.set(true);
+    this.orgSvc.setSeeksVolunteers(value).subscribe({
+      next: () => {
+        this.savingSeeks.set(false);
+        this.toast.show(
+          value
+            ? 'Listo · tu página pública ya recibe voluntarios'
+            : 'Dejaste de recibir solicitudes de voluntarios',
+        );
+      },
+      error: () => {
+        this.savingSeeks.set(false);
+        this.toast.show('No se pudo guardar el cambio');
+      },
     });
   }
 

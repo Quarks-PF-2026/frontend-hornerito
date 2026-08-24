@@ -218,3 +218,105 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+
+/* ---- Voluntariado (QK-16) ---- */
+.sent {
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  background: var(--hn-success-bg);
+}
+.sent-title {
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+
+.opportunities {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.opportunity,
+.general,
+.sheet-body {
+  padding: 16px;
+}
+.op-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.op-title,
+.general-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--hn-ink);
+  margin: 0;
+  line-height: 1.2;
+}
+.op-when,
+.op-where {
+  font-size: 13px;
+  color: var(--hn-text-2);
+  margin: 4px 0 0;
+}
+.op-type {
+  flex: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hn-primary-strong);
+  background: var(--hn-input-bg);
+  border-radius: var(--hn-radius-pill);
+  padding: 4px 10px;
+}
+.op-desc,
+.general-text,
+.sheet-text {
+  font-size: 13.5px;
+  color: var(--hn-text-2);
+  line-height: 1.45;
+  margin: 12px 0 0;
+}
+.op-progress {
+  margin: 14px 0;
+}
+.op-progress .row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--hn-text-2);
+  margin-bottom: 6px;
+}
+
+.general {
+  text-align: center;
+}
+.general-text {
+  margin: 4px 0 14px;
+}
+
+/* ---- Sheet del formulario ---- */
+.sheet-body {
+  padding: 6px 18px 22px;
+}
+.sheet-title {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.sheet-text {
+  margin: 0 0 16px;
+}
+.opt {
+  font-weight: 400;
+  color: var(--hn-muted);
+}
+.sheet-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+.sheet-actions .hn-btn {
+  flex: 1;
+  height: 44px;
+}

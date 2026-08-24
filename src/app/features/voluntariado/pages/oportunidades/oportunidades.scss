@@ -108,3 +108,37 @@
   margin-bottom: 18px;
   line-height: 1.45;
 }
+
+/* ---- Entrada a solicitudes de la comunidad (QK-16) ---- */
+.requests-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.requests-ico {
+  font-size: 22px;
+  flex: none;
+}
+.requests-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.requests-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--hn-ink);
+}
+.requests-sub {
+  font-size: 12.5px;
+  color: var(--hn-text-2);
+  margin-top: 2px;
+}

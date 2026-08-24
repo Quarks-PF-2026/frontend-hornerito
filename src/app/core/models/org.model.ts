@@ -8,4 +8,6 @@ export interface Org {
   contact: string;
   status: OrgStatus;
   rejectReason: string | null;
+  /** Prende la sección "Sumate como voluntario" en la ficha pública (QK-16). */
+  seeksVolunteers: boolean;
 }
