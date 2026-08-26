@@ -1,15 +1,26 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { inDateRange, inPersonTotals } from '../../../../core/models/donation-filters';
+import { DonationView } from '../../../../core/models/donation.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CollectionPointsService } from '../../../../core/services/collection-points.service';
 import { DonationsService } from '../../../../core/services/donations.service';
 import { MonetaryDonationsService } from '../../../../core/services/monetary-donations.service';
 import { NeedsService } from '../../../../core/services/needs.service';
 import { SuppliesService } from '../../../../core/services/supplies.service';
+import { DonacionesEconomicasPage } from '../donaciones-economicas/donaciones-economicas';
 
+type Tab = 'presenciales' | 'economicas';
+
+/**
+ * Historial de donaciones (QK-23). Dos pestañas y no una lista sola: la
+ * presencial se cuenta en insumos y la económica en pesos, así que mezclarlas
+ * obligaría a una fila que no dice nada de ninguna de las dos.
+ */
 @Component({
   selector: 'app-donaciones',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DonacionesEconomicasPage],
   templateUrl: './donaciones.html',
   styleUrl: './donaciones.scss',
 })
@@ -24,9 +35,24 @@ export class DonacionesPage {
 
   private readonly monetarySvc = inject(MonetaryDonationsService);
 
-  readonly views = this.donationsSvc.views;
+  readonly tab = signal<Tab>('presenciales');
+  readonly from = signal('');
+  readonly to = signal('');
+
   /** Cuántas donaciones económicas esperan que alguien confirme el dinero. */
   readonly pendingMonetary = this.monetarySvc.pendingCount;
+
+  /** Filtro de cliente, igual que en la pestaña económica. */
+  readonly rows = computed<DonationView[]>(() => {
+    const from = this.from();
+    const to = this.to();
+    return this.donationsSvc.views().filter((row) => inDateRange(row.createdAt, from, to));
+  });
+
+  readonly totals = computed(() => inPersonTotals(this.rows()));
+
+  /** Distingue "todavía no registraste nada" de "el filtro no encontró nada". */
+  readonly filtered = computed(() => !!this.from() || !!this.to());
 
   constructor() {
     // Las tres listas alimentan la vista: insumo, necesidad y punto se
@@ -35,8 +61,7 @@ export class DonacionesPage {
     this.needsSvc.load().subscribe();
     this.pointsSvc.load().subscribe();
     this.donationsSvc.load().subscribe();
-    // Solo para el contador de la entrada a económicas; el detalle lo carga
-    // esa pantalla.
+    // Solo para el contador de la pestaña; el detalle lo carga esa pestaña.
     this.monetarySvc.load().subscribe();
   }
 
@@ -44,7 +69,8 @@ export class DonacionesPage {
     void this.router.navigate(['/app/donaciones/nueva']);
   }
 
-  monetaryDonations(): void {
-    void this.router.navigate(['/app/donaciones/economicas']);
+  clearFilters(): void {
+    this.from.set('');
+    this.to.set('');
   }
 }

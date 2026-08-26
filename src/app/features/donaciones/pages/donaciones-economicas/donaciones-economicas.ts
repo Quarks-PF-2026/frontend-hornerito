@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { inDateRange, monetaryTotals } from '../../../../core/models/donation-filters';
 import {
   MonetaryDonationStatus,
   MonetaryDonationView,
+  fmtMoney,
 } from '../../../../core/models/monetary-donation.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { MonetaryDonationsService } from '../../../../core/services/monetary-donations.service';
@@ -12,6 +13,10 @@ import { BottomSheet } from '../../../../shared/ui/bottom-sheet/bottom-sheet';
 
 type StatusFilter = MonetaryDonationStatus | '';
 
+/**
+ * Pestaña de donaciones económicas del historial (QK-23). Nació como pantalla
+ * propia en QK-20; ahora se embebe en `/app/donaciones` y por eso no navega.
+ */
 @Component({
   selector: 'app-donaciones-economicas',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,7 +27,6 @@ type StatusFilter = MonetaryDonationStatus | '';
 export class DonacionesEconomicasPage {
   private readonly donations = inject(MonetaryDonationsService);
   private readonly toast = inject(ToastService);
-  private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
 
   /**
@@ -33,14 +37,27 @@ export class DonacionesEconomicasPage {
   readonly canDecide = this.auth.canManageMembers;
 
   readonly filter = signal<StatusFilter>('');
+  readonly from = signal('');
+  readonly to = signal('');
   readonly deciding = this.donations.deciding;
 
-  /** El filtro es de cliente: el historial de una organización es chico. */
+  /** Los filtros son de cliente: el historial de una organización es chico. */
   readonly rows = computed<MonetaryDonationView[]>(() => {
     const status = this.filter();
-    const views = this.donations.views();
-    return status ? views.filter((row) => row.status === status) : views;
+    const from = this.from();
+    const to = this.to();
+    return this.donations
+      .views()
+      .filter((row) => (status ? row.status === status : true))
+      .filter((row) => inDateRange(row.createdAt, from, to));
   });
+
+  /** Totales de lo filtrado: cambian con el rango y con el estado elegido. */
+  readonly totals = computed(() => monetaryTotals(this.rows()));
+  readonly confirmedLabel = computed(() => fmtMoney(this.totals().confirmedAmount));
+
+  /** Distingue "no hay nada" de "el filtro no encontró nada". */
+  readonly filtered = computed(() => !!this.filter() || !!this.from() || !!this.to());
 
   /** Donación que se está rechazando; el motivo es obligatorio. */
   readonly rejecting = signal<MonetaryDonationView | null>(null);
@@ -53,12 +70,14 @@ export class DonacionesEconomicasPage {
     });
   }
 
-  back(): void {
-    void this.router.navigate(['/app/donaciones']);
-  }
-
   setFilter(value: string): void {
     this.filter.set(value as StatusFilter);
+  }
+
+  clearFilters(): void {
+    this.filter.set('');
+    this.from.set('');
+    this.to.set('');
   }
 
   confirm(row: MonetaryDonationView): void {
