@@ -93,6 +93,15 @@ export const routes: Routes = [
           import('./features/donaciones/pages/donaciones/donaciones').then((m) => m.DonacionesPage),
       },
       {
+        // Antes de `donaciones/nueva` no hace falta: no hay rutas con `:id`
+        // bajo donaciones, así que no hay colisión posible.
+        path: 'donaciones/economicas',
+        loadComponent: () =>
+          import('./features/donaciones/pages/donaciones-economicas/donaciones-economicas').then(
+            (m) => m.DonacionesEconomicasPage,
+          ),
+      },
+      {
         path: 'donaciones/nueva',
         loadComponent: () =>
           import('./features/donaciones/pages/donacion-form/donacion-form').then(
