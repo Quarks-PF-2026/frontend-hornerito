@@ -236,6 +236,7 @@ export class DonationsService {
 
     return {
       id: donation.id,
+      createdAt: donation.createdAt,
       // `createdAt` viene con hora; `fmtDate` espera 'YYYY-MM-DD'.
       date: fmtDate(donation.createdAt.slice(0, 10)),
       donor: donation.donorName?.trim() || 'Donante anónimo',

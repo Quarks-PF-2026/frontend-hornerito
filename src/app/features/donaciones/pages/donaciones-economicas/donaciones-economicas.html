@@ -1,11 +1,40 @@
 <div class="bar">
-  <button class="hn-btn hn-btn--outline" type="button" (click)="back()">← Donaciones</button>
   <select class="hn-select" [value]="filter()" (change)="setFilter($any($event.target).value)">
     <option value="">Todas</option>
     <option value="declarada">Pendientes</option>
     <option value="confirmada">Confirmadas</option>
     <option value="rechazada">Rechazadas</option>
   </select>
+</div>
+
+<div class="bar dates">
+  <label class="hn-label" for="me-from">Desde</label>
+  <input
+    id="me-from"
+    class="hn-input"
+    type="date"
+    [value]="from()"
+    (change)="from.set($any($event.target).value)"
+  />
+  <label class="hn-label" for="me-to">Hasta</label>
+  <input
+    id="me-to"
+    class="hn-input"
+    type="date"
+    [value]="to()"
+    (change)="to.set($any($event.target).value)"
+  />
+</div>
+
+<div class="totals hn-card">
+  <div class="total">
+    <span class="total-value hn-head">{{ confirmedLabel() }}</span>
+    <span class="total-label">confirmado</span>
+  </div>
+  <div class="total">
+    <span class="total-value hn-head">{{ totals().pendingCount }}</span>
+    <span class="total-label">esperando confirmación</span>
+  </div>
 </div>
 
 <div class="list hn-scroll">
@@ -56,12 +85,21 @@
     </div>
   } @empty {
     <div class="empty hn-card">
-      <div class="empty-ico">💸</div>
-      <div class="empty-title hn-head">No hay donaciones económicas</div>
-      <div class="empty-text">
-        Cuando alguien transfiera desde la ficha pública y lo declare, aparece acá para que
-        confirmes que el dinero llegó.
-      </div>
+      @if (filtered()) {
+        <div class="empty-ico">🔍</div>
+        <div class="empty-title hn-head">Ninguna donación coincide</div>
+        <div class="empty-text">Probá con otro estado o ampliá el rango de fechas.</div>
+        <button class="hn-btn hn-btn--outline" type="button" (click)="clearFilters()">
+          Limpiar filtros
+        </button>
+      } @else {
+        <div class="empty-ico">💸</div>
+        <div class="empty-title hn-head">No hay donaciones económicas</div>
+        <div class="empty-text">
+          Cuando alguien transfiera desde la ficha pública y lo declare, aparece acá para que
+          confirmes que el dinero llegó.
+        </div>
+      }
     </div>
   }
 </div>
