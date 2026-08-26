@@ -8,10 +8,12 @@
             <div class="post-date">{{ fmtDate(post.createdAt) }}</div>
           </div>
           <div class="post-content">{{ post.content }}</div>
-          <div class="post-actions">
-            <button class="hn-btn hn-btn--white act" type="button" (click)="edit(post.id)">Editar</button>
-            <button class="hn-btn hn-btn--danger-soft act" type="button" (click)="remove(post.id)">Eliminar</button>
-          </div>
+          @if (canWrite()) {
+            <div class="post-actions">
+              <button class="hn-btn hn-btn--white act" type="button" (click)="edit(post.id)">Editar</button>
+              <button class="hn-btn hn-btn--danger-soft act" type="button" (click)="remove(post.id)">Eliminar</button>
+            </div>
+          }
         </div>
       </article>
     }

@@ -1,0 +1,98 @@
+<div class="page">
+  <button class="back" type="button" (click)="back()">← Volver a voluntariado</button>
+  <div class="title hn-head">Solicitudes de la comunidad</div>
+  <div class="subtitle">Gente que se ofreció desde la página pública de la organización.</div>
+
+  <div class="list">
+    @for (r of rows(); track r.id) {
+      <div class="request hn-card">
+        <div class="head">
+          <div class="head-titles">
+            <div class="name">{{ r.name }}</div>
+            <div class="email">{{ r.email }}</div>
+          </div>
+          <hn-badge [label]="r.label" [bg]="r.bg" [ink]="r.ink" />
+        </div>
+
+        @if (r.target) {
+          <div class="target">🙋 {{ r.target }}</div>
+        }
+        @if (r.phone) {
+          <a class="phone" [href]="'tel:' + r.phone">📞 {{ r.phone }}</a>
+        }
+        @if (r.message) {
+          <p class="message">“{{ r.message }}”</p>
+        }
+        @if (r.rejectReason) {
+          <p class="reject-reason"><strong>Motivo del rechazo:</strong> {{ r.rejectReason }}</p>
+        }
+
+        @if (r.pending) {
+          <div class="actions">
+            <button
+              class="hn-btn hn-btn--primary"
+              type="button"
+              [disabled]="deciding() !== null"
+              (click)="approve(r)"
+            >
+              Aprobar
+            </button>
+            <button
+              class="hn-btn hn-btn--danger-soft"
+              type="button"
+              [disabled]="deciding() !== null"
+              (click)="openReject(r)"
+            >
+              Rechazar
+            </button>
+          </div>
+        }
+      </div>
+    } @empty {
+      <div class="empty hn-card">
+        <div class="empty-ico">📭</div>
+        <div class="empty-title hn-head">Todavía no hay solicitudes</div>
+        <div class="empty-text">
+          Prendé “Estamos buscando voluntarios” en el perfil de la organización para que aparezca el
+          formulario en tu página pública.
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (rejecting(); as r) {
+  <hn-bottom-sheet (closed)="closeReject()">
+    <div class="sheet-body">
+      <div class="sheet-title hn-head">Rechazar la solicitud de {{ r.name }}</div>
+      <p class="sheet-text">Se lo vamos a contar por correo, así que escribilo con cuidado.</p>
+
+      <label class="hn-label" for="reason">Motivo</label>
+      <textarea
+        id="reason"
+        class="hn-textarea"
+        rows="3"
+        maxlength="300"
+        [value]="reason()"
+        (input)="updateReason($any($event.target).value)"
+      ></textarea>
+      @if (reasonError()) {
+        <p class="hn-field-error">{{ reasonError() }}</p>
+      }
+
+      <div class="sheet-actions">
+        <button class="hn-btn hn-btn--outline" type="button" (click)="closeReject()">
+          Cancelar
+        </button>
+        <button
+          class="hn-btn hn-btn--danger"
+          type="button"
+          [disabled]="deciding() !== null"
+          (click)="confirmReject()"
+        >
+          Rechazar
+        </button>
+      </div>
+    </div>
+  </hn-bottom-sheet>
+}

@@ -1,0 +1,274 @@
+@if (failed()) {
+  <div class="notice hn-card">
+    <p class="notice-title hn-head">No encontramos esta organización</p>
+    <p>Puede que haya cambiado de dirección o que todavía no esté publicada.</p>
+    <div class="notice-actions">
+      <button class="hn-btn hn-btn--outline" type="button" (click)="retry()">Reintentar</button>
+      <a class="hn-btn hn-btn--primary" routerLink="/">Volver al inicio</a>
+    </div>
+  </div>
+} @else if (loading()) {
+  <p class="quiet center">Cargando…</p>
+} @else if (org(); as o) {
+  <header class="head">
+    <div
+      class="cover"
+      [style.background-image]="o.coverUrl ? 'url(' + o.coverUrl + ')' : null"
+    ></div>
+
+    <div class="identity">
+      <div class="avatar">
+        @if (o.logoUrl) {
+          <img [src]="o.logoUrl" alt="" />
+        } @else {
+          <span>{{ initials() }}</span>
+        }
+      </div>
+      <h1 class="hn-head">{{ o.name }}</h1>
+      <p class="address">📍 {{ o.address }}</p>
+      <p class="desc">{{ o.description }}</p>
+
+      @if (contactOpen()) {
+        <p class="contact">
+          Escribile o llamala:
+          @if (contactHref()) {
+            <a [href]="contactHref()">{{ o.contact }}</a>
+          } @else {
+            <span>{{ o.contact }}</span>
+          }
+        </p>
+      } @else {
+        <button class="hn-btn hn-btn--primary" type="button" (click)="showContact()">
+          Cómo ayudar
+        </button>
+      }
+    </div>
+  </header>
+
+  <section class="block">
+    <h2 class="hn-head">Necesita ahora</h2>
+    @if (needs().length) {
+      <div class="needs">
+        @for (need of needs(); track need.id) {
+          <article class="need hn-card">
+            <div class="need-head">
+              <span class="ico" aria-hidden="true">{{ need.icon }}</span>
+              <div>
+                <p class="supply">{{ need.supply }}</p>
+                <p class="deadline">Hasta el {{ need.deadline }}</p>
+              </div>
+            </div>
+            <div class="need-progress">
+              <div class="row">
+                <span>{{ need.covered }} de {{ need.required }} {{ need.unit }}</span>
+                <span class="pct">{{ need.pct }}%</span>
+              </div>
+              <hn-progress-bar [pct]="need.pct" [color]="need.color" [height]="10" />
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="quiet">Ahora mismo no tiene pedidos abiertos. Volvé a mirar en unos días.</p>
+    }
+  </section>
+
+  <section class="block">
+    <h2 class="hn-head">Dónde llevarlo</h2>
+    @if (points().length) {
+      <hn-map-picker class="map" [readonly]="true" [markers]="markers()" />
+      <div class="points">
+        @for (point of points(); track point.id) {
+          <article class="point hn-card">
+            <p class="point-name">{{ point.name }}</p>
+            <p class="point-address">{{ point.addressLine }}</p>
+            <ul class="hours">
+              @for (line of point.scheduleLines; track line) {
+                <li>🕘 {{ line }}</li>
+              }
+            </ul>
+            <a class="phone" [href]="'tel:' + point.phone">📞 {{ point.phone }}</a>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="quiet">Todavía no publicó puntos de recolección. Coordiná por contacto.</p>
+    }
+  </section>
+
+  @if (showVolunteering()) {
+    <section class="block">
+      <h2 class="hn-head">Sumate como voluntario</h2>
+
+      @if (sentTo(); as email) {
+        <div class="sent hn-card">
+          <p class="sent-title hn-head">¡Recibimos tu solicitud!</p>
+          <p>
+            {{ o.name }} la va a revisar y te escribe a <strong>{{ email }}</strong
+            >.
+          </p>
+        </div>
+      }
+
+      @if (opportunities().length) {
+        <div class="opportunities">
+          @for (op of opportunities(); track op.id) {
+            <article class="opportunity hn-card">
+              <div class="op-head">
+                <div>
+                  <p class="op-title">{{ op.title }}</p>
+                  <p class="op-when">🗓️ {{ op.when }}</p>
+                  <p class="op-where">📍 {{ op.location }}</p>
+                </div>
+                @if (op.typeName) {
+                  <span class="op-type">{{ op.typeName }}</span>
+                }
+              </div>
+              <p class="op-desc">{{ op.description }}</p>
+              <div class="op-progress">
+                <div class="row">
+                  <span>{{ op.cupos }}</span>
+                  <span class="pct">{{ op.pct }}%</span>
+                </div>
+                <hn-progress-bar [pct]="op.pct" [color]="op.color" [height]="10" />
+              </div>
+              <button
+                class="hn-btn hn-btn--primary hn-btn--block"
+                type="button"
+                (click)="openRequest({ kind: 'opportunity', id: op.id, title: op.title })"
+              >
+                Postularme a esta actividad
+              </button>
+            </article>
+          }
+        </div>
+      }
+
+      <div class="general hn-card">
+        <p class="general-title">¿Querés ayudar de otra forma?</p>
+        <p class="general-text">
+          Contales en qué te gustaría colaborar y se ponen en contacto con vos.
+        </p>
+        <button
+          class="hn-btn hn-btn--outline hn-btn--block"
+          type="button"
+          (click)="openRequest({ kind: 'org' })"
+        >
+          Quiero ser voluntario
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (o.posts.length) {
+    <section class="block">
+      <h2 class="hn-head">Novedades</h2>
+      <div class="posts">
+        @for (post of o.posts; track post.id) {
+          <article class="post hn-card">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  @if (requestTarget(); as target) {
+    <hn-bottom-sheet (closed)="closeRequest()">
+      <div class="sheet-body">
+        <div class="sheet-title hn-head">
+          @if (target.kind === 'opportunity') {
+            Postularte a {{ target.title }}
+          } @else {
+            Sumarte a {{ o.name }}
+          }
+        </div>
+        <p class="sheet-text">
+          No hace falta tener cuenta. Si te aceptan, te llega un correo para crearla.
+        </p>
+
+        <label class="hn-label" for="vr-name">Nombre y apellido</label>
+        <input
+          id="vr-name"
+          class="hn-input"
+          type="text"
+          autocomplete="name"
+          [value]="form().name"
+          (input)="updateField('name', $any($event.target).value)"
+        />
+        @if (errors()['name']) {
+          <p class="hn-field-error">{{ errors()['name'] }}</p>
+        }
+
+        <label class="hn-label" for="vr-email">Correo</label>
+        <input
+          id="vr-email"
+          class="hn-input"
+          type="email"
+          autocomplete="email"
+          [value]="form().email"
+          (input)="updateField('email', $any($event.target).value)"
+        />
+        @if (errors()['email']) {
+          <p class="hn-field-error">{{ errors()['email'] }}</p>
+        }
+
+        <label class="hn-label" for="vr-phone">Teléfono <span class="opt">(opcional)</span></label>
+        <input
+          id="vr-phone"
+          class="hn-input"
+          type="tel"
+          autocomplete="tel"
+          [value]="form().phone"
+          (input)="updateField('phone', $any($event.target).value)"
+        />
+
+        @if (target.kind === 'org' && volunteering()?.types?.length) {
+          <label class="hn-label" for="vr-type">¿En qué te gustaría ayudar?</label>
+          <select
+            id="vr-type"
+            class="hn-select"
+            [value]="form().volunteerTypeId"
+            (change)="updateField('volunteerTypeId', $any($event.target).value)"
+          >
+            <option value="">Donde haga falta</option>
+            @for (type of volunteering()?.types ?? []; track type.id) {
+              <option [value]="type.id">{{ type.name }}</option>
+            }
+          </select>
+        }
+
+        <label class="hn-label" for="vr-message">
+          Contales algo de vos <span class="opt">(opcional)</span>
+        </label>
+        <textarea
+          id="vr-message"
+          class="hn-textarea"
+          rows="3"
+          maxlength="500"
+          [value]="form().message"
+          (input)="updateField('message', $any($event.target).value)"
+        ></textarea>
+
+        @if (errors()['form']) {
+          <p class="hn-field-error">{{ errors()['form'] }}</p>
+        }
+
+        <div class="sheet-actions">
+          <button class="hn-btn hn-btn--outline" type="button" (click)="closeRequest()">
+            Cancelar
+          </button>
+          <button
+            class="hn-btn hn-btn--primary"
+            type="button"
+            [disabled]="sending()"
+            (click)="submitRequest()"
+          >
+            {{ sending() ? 'Enviando…' : 'Enviar solicitud' }}
+          </button>
+        </div>
+      </div>
+    </hn-bottom-sheet>
+  }
+}

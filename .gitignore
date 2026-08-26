@@ -39,6 +39,11 @@ testem.log
 /typings
 __screenshots__/
 
+# Claude Code — permisos personales de cada integrante.
+# .claude/settings.json SÍ se versiona: son los permisos del proyecto, iguales
+# para los 6. settings.local.json es el override individual, no se comparte.
+.claude/settings.local.json
+
 # System files
 .DS_Store
 Thumbs.db

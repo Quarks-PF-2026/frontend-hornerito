@@ -1,0 +1,63 @@
+<div class="list">
+  @for (v of views(); track v.id) {
+    <div class="point hn-card" [style.opacity]="v.cardOpacity">
+      <div class="head">
+        <div class="head-titles">
+          <div class="name">{{ v.name }}</div>
+          <div class="address">{{ v.addressLine }}</div>
+        </div>
+        <hn-badge [label]="v.badge" [bg]="v.badgeBg" [ink]="v.badgeInk" />
+      </div>
+
+      <div class="schedule">
+        @for (line of v.scheduleLines; track line) {
+          <div class="line">🕒 {{ line }}</div>
+        }
+      </div>
+
+      <div class="contact">
+        <span>📞 {{ v.phone }}</span>
+        @if (v.email) {
+          <span>✉️ {{ v.email }}</span>
+        }
+        @if (v.contactName) {
+          <span>👤 {{ v.contactName }}</span>
+        }
+      </div>
+
+      @if (canWrite()) {
+        <div class="actions">
+          <button class="hn-btn hn-btn--outline main" type="button" (click)="edit(v.id)">Editar</button>
+          @if (v.active) {
+            <button class="hn-btn hn-btn--danger-soft" type="button" (click)="deactivate(v.id)">
+              Desactivar
+            </button>
+          } @else {
+            <button class="hn-btn hn-btn--primary" type="button" (click)="activate(v.id)">
+              Reactivar
+            </button>
+          }
+        </div>
+      }
+
+      @if (!v.active) {
+        <div class="inactive-note">
+          Este punto no se ofrece al coordinar donaciones nuevas. Las donaciones pendientes en él
+          siguen vigentes.
+        </div>
+      }
+    </div>
+  } @empty {
+    <div class="empty hn-card">
+      <div class="empty-ico">📍</div>
+      <div class="empty-title hn-head">Todavía no cargaste puntos de recolección</div>
+      <div class="empty-text">
+        Sin un punto activo los donantes no pueden coordinar una entrega física.
+      </div>
+      <button class="hn-btn hn-btn--primary" type="button" (click)="newPoint()">
+        Crear el primero
+      </button>
+    </div>
+  }
+</div>
+

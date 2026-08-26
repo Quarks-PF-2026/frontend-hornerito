@@ -1,0 +1,97 @@
+<section class="hero">
+  <p class="eyebrow">Villa María y alrededores</p>
+  <h1 class="hn-head">Mirá qué le falta hoy a un comedor cerca tuyo.</h1>
+  <p class="lede">
+    Cada organización publica lo que necesita y dónde recibirlo. Elegí una, mirá su lista y
+    acercá lo que puedas.
+  </p>
+
+  <div class="search">
+    <span class="ico" aria-hidden="true">🔎</span>
+    <input
+      class="hn-input"
+      type="search"
+      placeholder="Buscar por nombre o barrio"
+      autocomplete="off"
+      [value]="query()"
+      (input)="search($any($event.target).value)"
+      aria-label="Buscar organizaciones"
+    />
+  </div>
+
+  <div class="chips" role="group" aria-label="Filtrar por tipo de insumo">
+    @for (cat of cats; track cat) {
+      <button
+        type="button"
+        class="chip"
+        [class.on]="category() === cat"
+        [style.background]="category() === cat ? bg(cat) : null"
+        [attr.aria-pressed]="category() === cat"
+        (click)="filterBy(cat)"
+      >
+        <span aria-hidden="true">{{ icon(cat) }}</span> {{ cat }}
+      </button>
+    }
+  </div>
+</section>
+
+<section class="results">
+  @if (failed()) {
+    <div class="notice hn-card">
+      <p>No pudimos cargar las organizaciones.</p>
+      <button class="hn-btn hn-btn--outline" type="button" (click)="retry()">Reintentar</button>
+    </div>
+  } @else if (empty()) {
+    <div class="notice hn-card">
+      <p class="notice-title hn-head">Sin resultados</p>
+      <p>
+        Probá con otro nombre o quitá el filtro de insumo. Las organizaciones aparecen acá
+        cuando su cuenta queda validada.
+      </p>
+    </div>
+  }
+
+  <div class="grid">
+    @for (org of items(); track org.id) {
+      <article class="org hn-card" (click)="open(org.id)" tabindex="0" (keydown.enter)="open(org.id)">
+        <div class="cover" [style.background-image]="org.coverUrl ? 'url(' + org.coverUrl + ')' : null">
+          @if (org.openNeedsCount > 0) {
+            <span class="count">{{ org.openNeedsCount }} {{ org.openNeedsCount === 1 ? 'necesidad' : 'necesidades' }}</span>
+          }
+        </div>
+
+        <div class="body">
+          <div class="avatar">
+            @if (org.logoUrl) {
+              <img [src]="org.logoUrl" alt="" />
+            } @else {
+              <span>{{ initials(org.name) }}</span>
+            }
+          </div>
+
+          <h2 class="name hn-head">{{ org.name }}</h2>
+          <p class="address">{{ org.address }}</p>
+          <p class="desc">{{ org.description }}</p>
+
+          @if (org.categories.length) {
+            <ul class="needs">
+              @for (cat of org.categories; track cat) {
+                <li [style.background]="bg(cat)"><span aria-hidden="true">{{ icon(cat) }}</span> {{ cat }}</li>
+              }
+            </ul>
+          } @else {
+            <p class="quiet">Todavía no publicó necesidades abiertas.</p>
+          }
+        </div>
+      </article>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="quiet center">Cargando…</p>
+  } @else if (hasMore()) {
+    <button class="hn-btn hn-btn--outline hn-btn--block more" type="button" (click)="more()">
+      Ver más organizaciones
+    </button>
+  }
+</section>

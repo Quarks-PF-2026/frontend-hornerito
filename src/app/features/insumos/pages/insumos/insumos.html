@@ -13,16 +13,18 @@
         </div>
         <div class="meta">{{ s.category }} · {{ s.unit }}</div>
       </div>
-      <button class="hn-btn hn-btn--icon sq" type="button" (click)="edit(s.id)">✎</button>
-      <button
-        class="hn-btn hn-btn--icon sq"
-        type="button"
-        [style.color]="s.toggleInk"
-        [title]="s.toggleTitle"
-        (click)="toggle(s.id)"
-      >
-        {{ s.toggleIcon }}
-      </button>
+      @if (canWrite()) {
+        <button class="hn-btn hn-btn--icon sq" type="button" (click)="edit(s.id)">✎</button>
+        <button
+          class="hn-btn hn-btn--icon sq"
+          type="button"
+          [style.color]="s.toggleInk"
+          [title]="s.toggleTitle"
+          (click)="toggle(s.id)"
+        >
+          {{ s.toggleIcon }}
+        </button>
+      }
     </div>
   }
 </div>

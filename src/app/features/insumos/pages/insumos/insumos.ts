@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { CAT_BG, CAT_ICON, DEFAULT_CAT_BG, DEFAULT_CAT_ICON } from '../../../../core/models/catalog';
+import { AuthService } from '../../../../core/services/auth.service';
 import { SuppliesService } from '../../../../core/services/supplies.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -11,6 +12,8 @@ import { ToastService } from '../../../../core/services/toast.service';
   styleUrl: './insumos.scss',
 })
 export class InsumosPage {
+  private readonly auth = inject(AuthService);
+  readonly canWrite = this.auth.canWriteContent;
   private readonly suppliesSvc = inject(SuppliesService);
   private readonly modal = inject(ModalService);
   private readonly toast = inject(ToastService);

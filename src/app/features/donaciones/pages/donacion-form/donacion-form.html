@@ -1,0 +1,139 @@
+@if (draft(); as d) {
+  <div class="form">
+    <button class="back" type="button" (click)="back()">← Volver a donaciones</button>
+    <div class="title hn-head">Registrar donación recibida</div>
+    <div class="subtitle">
+      Cargá lo que acaban de entregar. Lo que asocies a una necesidad suma a su progreso.
+    </div>
+
+    @if (!supplies().length) {
+      <div class="no-supplies">
+        Todavía no hay insumos en el catálogo. Cargá al menos uno en
+        <strong>Insumos</strong> para poder registrar lo que recibís.
+      </div>
+    }
+
+    <div class="field">
+      <label class="hn-label">Insumos donados</label>
+      <div class="items">
+        @for (item of d.items; track $index) {
+          <div class="item">
+            <div class="item-head">
+              <span class="item-num">Insumo {{ $index + 1 }}</span>
+              @if (d.items.length > 1) {
+                <button
+                  class="hn-btn hn-btn--icon"
+                  type="button"
+                  title="Quitar insumo"
+                  (click)="removeItem($index)"
+                >
+                  ⨯
+                </button>
+              }
+            </div>
+
+            <select
+              class="hn-select"
+              [value]="item.supplyId"
+              (change)="onItemField($index, 'supplyId', $event)"
+            >
+              @for (s of supplies(); track s.id) {
+                <option [value]="s.id">{{ s.name }} ({{ s.unit.toLowerCase() }})</option>
+              }
+            </select>
+            @if (errors()['items.' + $index + '.supplyId']) {
+              <div class="hn-field-error">{{ errors()['items.' + $index + '.supplyId'] }}</div>
+            }
+
+            <select
+              class="hn-select"
+              [value]="item.needId"
+              (change)="onItemField($index, 'needId', $event)"
+            >
+              <option value="">— Sin necesidad asociada —</option>
+              @for (need of needOptions()[$index]; track need.id) {
+                <option [value]="need.id">{{ need.label }}</option>
+              }
+            </select>
+
+            <input
+              class="hn-input"
+              type="text"
+              inputmode="numeric"
+              placeholder="Cantidad, ej: 10"
+              [value]="item.quantity"
+              (input)="onItemField($index, 'quantity', $event)"
+            />
+            @if (errors()['items.' + $index + '.quantity']) {
+              <div class="hn-field-error">{{ errors()['items.' + $index + '.quantity'] }}</div>
+            }
+          </div>
+        }
+      </div>
+      <button class="hn-btn hn-btn--outline hn-btn--block add" type="button" (click)="addItem()">
+        + Agregar insumo
+      </button>
+      @if (errors()['items']) {
+        <div class="hn-field-error">{{ errors()['items'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Punto de recolección (opcional)</label>
+      <select
+        class="hn-select"
+        [value]="d.collectionPointId"
+        (change)="onField('collectionPointId', $event)"
+      >
+        <option value="">— Recibida en la sede —</option>
+        @for (p of points(); track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Nombre del donante (opcional)</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Dejalo vacío si prefiere no identificarse"
+        [value]="d.donorName"
+        (input)="onField('donorName', $event)"
+      />
+      @if (errors()['donorName']) {
+        <div class="hn-field-error">{{ errors()['donorName'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label">Contacto del donante (opcional)</label>
+      <input
+        class="hn-input"
+        type="text"
+        placeholder="Teléfono o correo"
+        [value]="d.donorContact"
+        (input)="onField('donorContact', $event)"
+      />
+      @if (errors()['donorContact']) {
+        <div class="hn-field-error">{{ errors()['donorContact'] }}</div>
+      }
+    </div>
+
+    @if (errors()['form']) {
+      <div class="hn-field-error">{{ errors()['form'] }}</div>
+    }
+
+    <div class="row">
+      <button class="hn-btn hn-btn--white btn" type="button" (click)="back()">Cancelar</button>
+      <button
+        class="hn-btn hn-btn--primary btn save"
+        type="button"
+        [disabled]="saving()"
+        (click)="save()"
+      >
+        Registrar donación
+      </button>
+    </div>
+  </div>
+}

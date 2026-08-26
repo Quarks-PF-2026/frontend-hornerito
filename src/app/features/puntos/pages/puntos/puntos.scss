@@ -1,0 +1,222 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- Card de punto ---- */
+.point {
+  padding: 16px;
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.head-titles {
+  min-width: 0;
+}
+.name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--hn-ink);
+  line-height: 1.2;
+}
+.address {
+  font-size: 13px;
+  color: var(--hn-muted);
+  margin-top: 3px;
+}
+
+.schedule {
+  margin-top: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.schedule .line {
+  font-size: 13.5px;
+  color: var(--hn-text);
+}
+
+.contact {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+  color: var(--hn-text-2);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.actions .hn-btn {
+  flex: 1;
+  height: 42px;
+  font-size: 13.5px;
+  border-radius: 11px;
+  box-shadow: none;
+}
+
+.inactive-note {
+  margin-top: 13px;
+  background: var(--hn-cream-soft);
+  border-radius: 11px;
+  padding: 10px 12px;
+  color: var(--hn-text-2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ---- Empty state ---- */
+.empty {
+  padding: 30px 22px;
+  text-align: center;
+}
+.empty-ico {
+  font-size: 34px;
+}
+.empty-title {
+  font-size: 17px;
+  margin: 10px 0 6px;
+}
+.empty-text {
+  font-size: 13.5px;
+  color: var(--hn-text-2);
+  margin-bottom: 18px;
+  line-height: 1.45;
+}
+
+/* ---- Formulario ---- */
+.form {
+  padding: 8px 22px 28px;
+}
+@media (min-width: 768px) {
+  .form {
+    padding-top: 24px;
+  }
+}
+.title {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.subtitle {
+  color: var(--hn-text-2);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.field {
+  margin-bottom: 16px;
+}
+.hint {
+  font-size: 12.5px;
+  color: var(--hn-muted);
+  margin-top: 6px;
+}
+
+.results {
+  margin-top: 6px;
+  border: 1px solid var(--hn-border);
+  border-radius: var(--hn-radius-md, 14px);
+  overflow: hidden;
+  background: var(--hn-card);
+}
+.result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--hn-text);
+  cursor: pointer;
+  border-bottom: 1px solid var(--hn-border-line);
+}
+.result:last-child {
+  border-bottom: none;
+}
+.result:hover {
+  background: var(--hn-cream-soft);
+}
+
+/* ---- Horarios ---- */
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--hn-input-bg);
+  border: 1px solid var(--hn-border);
+  border-radius: 11px;
+  padding: 6px 10px;
+  min-height: 46px;
+}
+.day--closed {
+  background: var(--hn-cream-soft);
+}
+.day-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--hn-ink);
+  cursor: pointer;
+  width: 74px;
+  flex-shrink: 0;
+  padding: 0;
+}
+.check {
+  font-size: 15px;
+  color: var(--hn-primary-strong);
+}
+.closed {
+  font-size: 13px;
+  color: var(--hn-muted);
+}
+.times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.time {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+  font-size: 13.5px;
+}
+.sep {
+  font-size: 12.5px;
+  color: var(--hn-muted);
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.btn {
+  flex: 1;
+  height: 52px;
+  font-size: 15px;
+  border-radius: var(--hn-radius-md);
+  box-shadow: none;
+}
+.btn.save {
+  flex: 1.6;
+}

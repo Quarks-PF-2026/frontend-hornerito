@@ -20,7 +20,7 @@
         <hn-progress-bar [pct]="v.pct" [color]="v.barColor" [height]="10" />
       </div>
 
-      @if (v.open) {
+      @if (v.open && canWrite()) {
         <div class="actions">
           <button class="hn-btn hn-btn--primary main" type="button" (click)="progress(v.id)">Actualizar progreso</button>
           <button class="hn-btn hn-btn--icon sq" type="button" (click)="edit(v.id)">✎</button>

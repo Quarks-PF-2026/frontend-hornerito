@@ -144,3 +144,61 @@
   margin-top: 14px;
   line-height: 1.4;
 }
+
+/* ---- Interruptor "buscamos voluntarios" (QK-16) ---- */
+.seeks {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  margin-top: 14px;
+}
+.seeks-text {
+  flex: 1;
+  min-width: 0;
+}
+.seeks-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--hn-ink);
+}
+.seeks-sub {
+  font-size: 12.5px;
+  color: var(--hn-text-2);
+  line-height: 1.45;
+  margin-top: 3px;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch .track {
+  display: block;
+  width: 46px;
+  height: 27px;
+  border-radius: var(--hn-radius-pill);
+  background: var(--hn-canela-200);
+  transition: background 0.16s ease;
+  cursor: pointer;
+}
+.switch .knob {
+  display: block;
+  width: 21px;
+  height: 21px;
+  margin: 3px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.16s ease;
+}
+.switch input:checked + .track {
+  background: var(--hn-primary);
+}
+.switch input:checked + .track .knob {
+  transform: translateX(19px);
+}
+.switch input:disabled + .track {
+  opacity: 0.6;
+  cursor: default;
+}

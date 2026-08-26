@@ -51,15 +51,24 @@ h1 {
   border-radius: var(--hn-radius-lg);
   box-shadow: none;
 }
+.icon--warn {
+  background: var(--hn-warning-bg);
+}
 .resend {
-  margin-top: 16px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.resend-title {
   font-size: 14px;
+  font-weight: 700;
   color: var(--hn-muted);
 }
-.resend span {
-  color: var(--hn-primary-strong);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
+.resend-msg {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--hn-muted);
 }

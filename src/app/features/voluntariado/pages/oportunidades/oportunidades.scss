@@ -1,0 +1,144 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- Card de oportunidad ---- */
+.opportunity {
+  padding: 16px;
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.head-titles {
+  min-width: 0;
+}
+.name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--hn-ink);
+  line-height: 1.2;
+}
+.when {
+  font-size: 13px;
+  color: var(--hn-muted);
+  margin-top: 3px;
+}
+
+.description {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--hn-text);
+  line-height: 1.45;
+}
+
+.meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+  color: var(--hn-text-2);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.actions .hn-btn {
+  flex: 1;
+  height: 42px;
+  font-size: 13.5px;
+  border-radius: 11px;
+  box-shadow: none;
+}
+.actions .main {
+  flex: 1.4;
+}
+.pending {
+  display: inline-block;
+  margin-left: 6px;
+  min-width: 19px;
+  padding: 1px 5px;
+  border-radius: var(--hn-radius-pill);
+  background: var(--hn-warning-bg);
+  color: var(--hn-warning-ink);
+  font-size: 11.5px;
+}
+
+.cancel {
+  margin-top: 8px;
+  width: 100%;
+  height: 40px;
+  font-size: 13px;
+  border-radius: 11px;
+  box-shadow: none;
+}
+
+.note {
+  margin-top: 13px;
+  background: var(--hn-cream-soft);
+  border-radius: 11px;
+  padding: 10px 12px;
+  color: var(--hn-text-2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ---- Empty state ---- */
+.empty {
+  padding: 30px 22px;
+  text-align: center;
+}
+.empty-ico {
+  font-size: 34px;
+}
+.empty-title {
+  font-size: 17px;
+  margin: 10px 0 6px;
+}
+.empty-text {
+  font-size: 13.5px;
+  color: var(--hn-text-2);
+  margin-bottom: 18px;
+  line-height: 1.45;
+}
+
+/* ---- Entrada a solicitudes de la comunidad (QK-16) ---- */
+.requests-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.requests-ico {
+  font-size: 22px;
+  flex: none;
+}
+.requests-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.requests-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--hn-ink);
+}
+.requests-sub {
+  font-size: 12.5px;
+  color: var(--hn-text-2);
+  margin-top: 2px;
+}

@@ -19,7 +19,11 @@ const TABS: Record<string, TabMeta> = {
   organizacion: { kicker: 'Tu organización', title: 'Mi comedor', fab: 'Editar' },
   publicaciones: { kicker: 'Difusión', title: 'Publicaciones', fab: 'Publicar' },
   necesidades: { kicker: 'Lo que hace falta', title: 'Necesidades', fab: 'Necesidad' },
+  donaciones: { kicker: 'Lo que entra', title: 'Donaciones', fab: 'Donación' },
+  puntos: { kicker: 'Dónde entregar', title: 'Puntos de recolección', fab: 'Punto' },
+  voluntariado: { kicker: 'Quién ayuda', title: 'Voluntariado', fab: 'Actividad' },
   insumos: { kicker: 'Catálogo', title: 'Insumos', fab: 'Insumo' },
+  usuarios: { kicker: 'Tu equipo', title: 'Usuarios', fab: '' },
 };
 
 @Component({
@@ -36,7 +40,24 @@ export class AppLayout {
   private readonly modal = inject(ModalService);
 
   private readonly tab = signal(this.currentTab());
+  private readonly subView = signal(this.isSubView());
   readonly meta = computed(() => TABS[this.tab()] ?? TABS['organizacion']);
+  /**
+   * El FAB se muestra en las listas (no dentro de un formulario ruteado) y solo
+   * si el rol puede escribir en ese módulo.
+   */
+  readonly showFab = computed(() => {
+    if (this.subView()) return false;
+    switch (this.tab()) {
+      // Usuarios trae su propio botón "Invitar usuario".
+      case 'usuarios':
+        return false;
+      case 'organizacion':
+        return this.auth.isOwner();
+      default:
+        return this.auth.canWriteContent();
+    }
+  });
 
   constructor() {
     this.router.events
@@ -44,13 +65,27 @@ export class AppLayout {
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => this.tab.set(this.currentTab()));
+      .subscribe(() => {
+        this.tab.set(this.currentTab());
+        this.subView.set(this.isSubView());
+      });
   }
 
   private currentTab(): string {
+    // Se toma el primer segmento que coincida con un tab conocido, así rutas
+    // hijas como `puntos/nuevo` siguen resolviendo al tab `puntos`.
     const segs = this.router.url.split('?')[0].split('/').filter(Boolean);
-    return segs[segs.length - 1] || 'organizacion';
+    return segs.find((seg) => TABS[seg]) ?? 'organizacion';
   }
+
+  /** True en las vistas-hoja de un tab (formularios ruteados), no en su lista. */
+  private isSubView(): boolean {
+    const segs = this.router.url.split('?')[0].split('/').filter(Boolean);
+    const tabIndex = segs.findIndex((seg) => TABS[seg]);
+    return tabIndex >= 0 && tabIndex < segs.length - 1;
+  }
+
+  readonly canManageMembers = this.auth.canManageMembers;
 
   logout(): void {
     this.auth.logout();
@@ -66,6 +101,15 @@ export class AppLayout {
         break;
       case 'insumos':
         this.modal.newSupply();
+        break;
+      case 'puntos':
+        void this.router.navigate(['/app/puntos/nuevo']);
+        break;
+      case 'donaciones':
+        void this.router.navigate(['/app/donaciones/nueva']);
+        break;
+      case 'voluntariado':
+        void this.router.navigate(['/app/voluntariado/nueva']);
         break;
       default:
         this.modal.editOrg();

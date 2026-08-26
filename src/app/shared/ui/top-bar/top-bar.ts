@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   template: `
     <div class="bar">
       <div class="logo">
-        <img src="assets/hornerito-bird.svg" alt="" />
+        <img src="assets/hornerito-bird.png" alt="" />
       </div>
       <div class="titles">
         <div class="kicker">{{ kicker() }}</div>
@@ -29,7 +29,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         width: 40px;
         height: 40px;
         border-radius: 12px;
-        background: linear-gradient(150deg, var(--hn-primary), var(--hn-primary-strong));
+        background: var(--hn-card);
+        border: 1px solid var(--hn-border-soft);
         display: flex;
         align-items: center;
         justify-content: center;

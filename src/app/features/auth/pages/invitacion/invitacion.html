@@ -1,0 +1,55 @@
+<div class="wrap">
+  @if (loadError()) {
+    <div class="icon error">⚠️</div>
+    <h1 class="hn-head">Invitación no válida</h1>
+    <p class="text">{{ loadError() }}</p>
+    <button class="hn-btn hn-btn--primary cta" type="button" (click)="goLogin()">
+      Ir a iniciar sesión
+    </button>
+  } @else if (preview(); as p) {
+    <div class="icon">👋</div>
+    <h1 class="hn-head">Te invitaron a {{ p.organizationName }}</h1>
+    <p class="text">
+      Vas a unirte como <b>{{ roleLabel() }}</b> con el correo<br />
+      <b>{{ p.email }}</b
+      >.
+    </p>
+
+    @if (!p.userExists) {
+      <div class="form">
+        <div class="field">
+          <label class="hn-label">Nombre y apellido</label>
+          <input
+            class="hn-input"
+            type="text"
+            placeholder="Ej: Juan Pérez"
+            [value]="name()"
+            (input)="onName($event)"
+          />
+        </div>
+        <div class="field">
+          <label class="hn-label">Contraseña</label>
+          <input
+            class="hn-input"
+            type="password"
+            placeholder="Mínimo 8 caracteres"
+            [value]="password()"
+            (input)="onPassword($event)"
+          />
+        </div>
+      </div>
+    } @else {
+      <div class="pill">Ya tenés cuenta en Hornerito: solo confirmá para unirte.</div>
+    }
+
+    @if (formError()) {
+      <div class="hn-field-error">{{ formError() }}</div>
+    }
+
+    <button class="hn-btn hn-btn--primary cta" type="button" (click)="accept()">
+      Aceptar invitación
+    </button>
+  } @else {
+    <p class="text">Cargando invitación...</p>
+  }
+</div>

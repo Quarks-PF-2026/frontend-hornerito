@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+
+# Un push encima de un PR abierto cancela la corrida anterior: no tiene sentido
+# gastar minutos en un commit que ya quedó viejo.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build de producción
+        run: npm run build
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # `ng test` usa el builder @angular/build:unit-test (Vitest 4). Su opción
+      # `watch` ya viene en false fuera de una TTY, pero la pasamos explícita
+      # para que el job no dependa de cómo el runner arma la terminal.
+      - name: Suite de tests
+        run: npm run test -- --watch=false

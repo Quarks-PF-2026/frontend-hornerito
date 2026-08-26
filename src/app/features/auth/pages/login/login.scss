@@ -97,8 +97,23 @@ h1 {
 .mb {
   margin-bottom: 16px;
 }
+.mb-sm {
+  margin-bottom: 8px;
+}
 .mb-lg {
   margin-bottom: 22px;
+}
+.forgot-link {
+  text-align: right;
+  font-size: 14px;
+}
+.forgot-link span {
+  color: var(--hn-primary-strong);
+  font-weight: 600;
+  cursor: pointer;
+}
+.forgot-link span:hover {
+  text-decoration: underline;
 }
 .cta {
   height: 56px;

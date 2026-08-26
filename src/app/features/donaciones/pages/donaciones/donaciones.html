@@ -1,0 +1,48 @@
+<div class="list">
+  @for (v of views(); track v.id) {
+    <div class="donation hn-card">
+      <div class="head">
+        <div class="head-titles">
+          <div class="donor">{{ v.donor }}</div>
+          @if (v.contact) {
+            <div class="contact">📞 {{ v.contact }}</div>
+          }
+        </div>
+        <div class="date">{{ v.date }}</div>
+      </div>
+
+      <div class="items">
+        @for (item of v.items; track $index) {
+          <div class="item">
+            <span class="item-main">{{ item.icon }} {{ item.supply }} · {{ item.quantity }} {{ item.unit }}</span>
+            @if (item.needNote) {
+              <span class="item-need">↳ {{ item.needNote }}</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="where">
+        @if (v.point) {
+          📍 Recibida en {{ v.point }}
+        } @else {
+          📍 Recibida en la sede
+        }
+      </div>
+    </div>
+  } @empty {
+    <div class="empty hn-card">
+      <div class="empty-ico">🎁</div>
+      <div class="empty-title hn-head">Todavía no registraste donaciones</div>
+      <div class="empty-text">
+        Cuando alguien acerque insumos al comedor o a un punto de recolección, registralo acá
+        para que el progreso de las necesidades quede actualizado.
+      </div>
+      @if (canWrite()) {
+        <button class="hn-btn hn-btn--primary" type="button" (click)="newDonation()">
+          Registrar la primera
+        </button>
+      }
+    </div>
+  }
+</div>
