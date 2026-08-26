@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  MonetaryDonationPayload,
   PublicNeed,
   PublicOrgDetail,
   PublicOrgSummary,
@@ -47,6 +48,34 @@ export class PublicService {
     return this.http.post<{ id: string; status: string }>(
       `${this.apiUrl}/public/organizations/${organizationId}/volunteer-requests`,
       payload,
+    );
+  }
+
+  /**
+   * Alguien sin cuenta declara una donación económica que ya transfirió
+   * (QK-20). Va por `FormData` y no JSON porque el comprobante viaja en el
+   * mismo request: para el donante, declarar y adjuntar son un solo acto.
+   *
+   * No se setea `Content-Type` a mano — el navegador tiene que agregar el
+   * `boundary` del multipart, y fijarlo a mano lo rompe.
+   */
+  declareDonation(
+    organizationId: string,
+    payload: MonetaryDonationPayload,
+    receipt?: File | null,
+  ): Observable<{ id: string; status: string }> {
+    const form = new FormData();
+    for (const [key, value] of Object.entries(payload)) {
+      if (value !== undefined && value !== null && value !== '') {
+        form.append(key, String(value));
+      }
+    }
+    if (receipt) {
+      form.append('receipt', receipt);
+    }
+    return this.http.post<{ id: string; status: string }>(
+      `${this.apiUrl}/public/organizations/${organizationId}/donations`,
+      form,
     );
   }
 

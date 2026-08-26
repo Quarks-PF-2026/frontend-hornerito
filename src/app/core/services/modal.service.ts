@@ -85,6 +85,10 @@ export class ModalService {
         description: o?.description ?? '',
         address: o?.address ?? '',
         contact: o?.contact ?? '',
+        paymentAlias: o?.paymentAlias ?? '',
+        paymentHolder: o?.paymentHolder ?? '',
+        paymentCuit: o?.paymentCuit ?? '',
+        paymentBank: o?.paymentBank ?? '',
       },
     );
   }
@@ -135,7 +139,10 @@ export class ModalService {
   editSupply(id: string): void {
     const s = this.suppliesSvc.find(id);
     if (!s) return;
-    this.open({ kind: 'supply', mode: 'edit', id }, { name: s.name, category: s.category, unit: s.unit });
+    this.open(
+      { kind: 'supply', mode: 'edit', id },
+      { name: s.name, category: s.category, unit: s.unit },
+    );
   }
 
   // ---------------- edición de campos ----------------
@@ -228,6 +235,12 @@ export class ModalService {
           this.area('description', 'Descripción', '¿A quiénes ayudan y cómo?', e),
           this.text('address', 'Dirección', 'Calle, número, ciudad', e),
           this.text('contact', 'Contacto', 'Teléfono y/o correo', e),
+          // Datos bancarios (QK-20): con el alias cargado, la ficha pública
+          // ofrece donar dinero. Los cuatro son opcionales.
+          this.text('paymentAlias', 'Alias o CBU para donaciones', 'Ej: comedor.manos.barrio', e),
+          this.text('paymentHolder', 'Titular de la cuenta', 'Ej: Asociación Manos del Barrio', e),
+          this.text('paymentCuit', 'CUIT', 'Ej: 30-71234567-8', e),
+          this.text('paymentBank', 'Banco', 'Ej: Banco Nación', e),
         ];
       case 'post':
         return [
@@ -249,8 +262,18 @@ export class ModalService {
       case 'supply':
         return [
           this.text('name', 'Nombre del insumo', 'Ej: Arroz', e),
-          this.select('category', 'Categoría', CATS.map((c) => ({ value: c, label: c })), e),
-          this.select('unit', 'Unidad de medida', UNITS.map((u) => ({ value: u, label: u })), e),
+          this.select(
+            'category',
+            'Categoría',
+            CATS.map((c) => ({ value: c, label: c })),
+            e,
+          ),
+          this.select(
+            'unit',
+            'Unidad de medida',
+            UNITS.map((u) => ({ value: u, label: u })),
+            e,
+          ),
         ];
       default:
         return [];
@@ -268,13 +291,24 @@ export class ModalService {
       error: e[key] ?? '',
     };
   }
-  private text(key: string, label: string, ph: string, e: Record<string, string>, inputmode = 'text'): FormField {
+  private text(
+    key: string,
+    label: string,
+    ph: string,
+    e: Record<string, string>,
+    inputmode = 'text',
+  ): FormField {
     return { ...this.base(key, label, e), type: 'text', placeholder: ph, inputmode };
   }
   private area(key: string, label: string, ph: string, e: Record<string, string>): FormField {
     return { ...this.base(key, label, e), type: 'textarea', placeholder: ph };
   }
-  private select(key: string, label: string, options: SelectOption[], e: Record<string, string>): FormField {
+  private select(
+    key: string,
+    label: string,
+    options: SelectOption[],
+    e: Record<string, string>,
+  ): FormField {
     return { ...this.base(key, label, e), type: 'select', options };
   }
   private date(key: string, label: string, e: Record<string, string>): FormField {
@@ -294,19 +328,31 @@ export class ModalService {
       const contact = this.str('contact');
       if (!name.trim()) errs['name'] = 'El nombre es obligatorio.';
       if (!description.trim()) errs['description'] = 'La descripción es obligatoria.';
-      if (!address.trim()) errs['address'] = 'La dirección es obligatoria. No se puede guardar sin dirección.';
+      if (!address.trim())
+        errs['address'] = 'La dirección es obligatoria. No se puede guardar sin dirección.';
       if (!contact.trim()) errs['contact'] = 'El contacto es obligatorio.';
       if (this.fail(errs)) return;
       const resent = this.orgSvc.org()?.status === 'rejected';
-      this.orgSvc.save({ name, description, address, contact }).subscribe({
-        next: () => {
-          this.close();
-          this.toast.show(resent ? 'Guardado · reenviado a validación' : 'Cambios guardados');
-        },
-        error: () => {
-          this._errors.set({ name: 'No se pudo guardar. Intentá de nuevo.' });
-        },
-      });
+      this.orgSvc
+        .save({
+          name,
+          description,
+          address,
+          contact,
+          paymentAlias: this.str('paymentAlias'),
+          paymentHolder: this.str('paymentHolder'),
+          paymentCuit: this.str('paymentCuit'),
+          paymentBank: this.str('paymentBank'),
+        })
+        .subscribe({
+          next: () => {
+            this.close();
+            this.toast.show(resent ? 'Guardado · reenviado a validación' : 'Cambios guardados');
+          },
+          error: () => {
+            this._errors.set({ name: 'No se pudo guardar. Intentá de nuevo.' });
+          },
+        });
       return;
     }
 
@@ -334,14 +380,13 @@ export class ModalService {
     if (m.kind === 'need') {
       const req = parseInt(this.str('required'), 10);
       const deadline = this.str('deadline');
-      if (!this.str('required') || isNaN(req) || req <= 0) errs['required'] = 'Ingresá una cantidad mayor a cero.';
+      if (!this.str('required') || isNaN(req) || req <= 0)
+        errs['required'] = 'Ingresá una cantidad mayor a cero.';
       if (!deadline) errs['deadline'] = 'Elegí una fecha límite.';
       if (this.fail(errs)) return;
       const data = { supplyId: this.str('supplyId'), requiredQuantity: req, deadline };
       const request$ =
-        m.mode === 'new'
-          ? this.needsSvc.create(data)
-          : this.needsSvc.update(m.id as string, data);
+        m.mode === 'new' ? this.needsSvc.create(data) : this.needsSvc.update(m.id as string, data);
       request$.subscribe({
         next: () => {
           this.close();

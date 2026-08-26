@@ -6,6 +6,11 @@ import { Org } from '../models/org.model';
 
 export type OrgPatch = Pick<Org, 'name' | 'description' | 'address' | 'contact'> & {
   seeksVolunteers?: boolean;
+  /** Datos bancarios (QK-20). String vacío borra el dato; ausente no lo toca. */
+  paymentAlias?: string;
+  paymentHolder?: string;
+  paymentCuit?: string;
+  paymentBank?: string;
 };
 
 @Injectable({ providedIn: 'root' })

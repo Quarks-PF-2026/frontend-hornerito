@@ -82,6 +82,27 @@ export interface VolunteerRequestPayload {
   volunteerTypeId?: string;
 }
 
+/** Datos bancarios de la organización, tal como los ve un visitante (QK-20).
+ * Son públicos a propósito: son el destino de la transferencia. */
+export interface PublicDonations {
+  /** Interruptor: sin alias cargado la sección no se muestra. */
+  acceptsMonetary: boolean;
+  alias: string | null;
+  holder: string | null;
+  cuit: string | null;
+  bank: string | null;
+}
+
+/** Lo que declara el donante después de transferir. El comprobante va aparte,
+ * en el `FormData`, porque es un archivo. */
+export interface MonetaryDonationPayload {
+  amount: number;
+  method: 'transferencia' | 'mercadopago';
+  operationNumber?: string;
+  donorName?: string;
+  donorContact?: string;
+}
+
 export interface PublicOrgDetail {
   id: string;
   name: string;
@@ -94,4 +115,5 @@ export interface PublicOrgDetail {
   collectionPoints: PublicCollectionPoint[];
   posts: PublicPost[];
   volunteering: PublicVolunteering;
+  donations: PublicDonations;
 }

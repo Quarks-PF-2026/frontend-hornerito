@@ -1,3 +1,18 @@
+<button class="money hn-card" type="button" (click)="monetaryDonations()">
+  <span class="money-ico">💸</span>
+  <span class="money-text">
+    <span class="money-title">Donaciones económicas</span>
+    <span class="money-sub">
+      @if (pendingMonetary()) {
+        {{ pendingMonetary() }} esperando confirmación
+      } @else {
+        Transferencias declaradas desde la ficha pública
+      }
+    </span>
+  </span>
+  <span class="money-go">›</span>
+</button>
+
 <div class="list">
   @for (v of views(); track v.id) {
     <div class="donation hn-card">
@@ -14,7 +29,9 @@
       <div class="items">
         @for (item of v.items; track $index) {
           <div class="item">
-            <span class="item-main">{{ item.icon }} {{ item.supply }} · {{ item.quantity }} {{ item.unit }}</span>
+            <span class="item-main"
+              >{{ item.icon }} {{ item.supply }} · {{ item.quantity }} {{ item.unit }}</span
+            >
             @if (item.needNote) {
               <span class="item-need">↳ {{ item.needNote }}</span>
             }
@@ -35,8 +52,8 @@
       <div class="empty-ico">🎁</div>
       <div class="empty-title hn-head">Todavía no registraste donaciones</div>
       <div class="empty-text">
-        Cuando alguien acerque insumos al comedor o a un punto de recolección, registralo acá
-        para que el progreso de las necesidades quede actualizado.
+        Cuando alguien acerque insumos al comedor o a un punto de recolección, registralo acá para
+        que el progreso de las necesidades quede actualizado.
       </div>
       @if (canWrite()) {
         <button class="hn-btn hn-btn--primary" type="button" (click)="newDonation()">

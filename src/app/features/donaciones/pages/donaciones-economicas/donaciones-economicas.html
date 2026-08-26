@@ -1,0 +1,100 @@
+<div class="bar">
+  <button class="hn-btn hn-btn--outline" type="button" (click)="back()">← Donaciones</button>
+  <select class="hn-select" [value]="filter()" (change)="setFilter($any($event.target).value)">
+    <option value="">Todas</option>
+    <option value="declarada">Pendientes</option>
+    <option value="confirmada">Confirmadas</option>
+    <option value="rechazada">Rechazadas</option>
+  </select>
+</div>
+
+<div class="list hn-scroll">
+  @for (row of rows(); track row.id) {
+    <div class="donation hn-card">
+      <div class="head">
+        <div class="head-titles">
+          <div class="amount hn-head">{{ row.amountLabel }}</div>
+          <div class="donor">{{ row.donor }}</div>
+        </div>
+        <hn-badge [label]="row.statusLabel" [bg]="row.statusBg" [ink]="row.statusInk" />
+      </div>
+
+      <div class="meta">
+        <span>🗓️ {{ row.date }}</span>
+        @if (row.operationNumber) {
+          <span>#️⃣ {{ row.operationNumber }}</span>
+        }
+        @if (row.receiptUrl) {
+          <a [href]="row.receiptUrl" target="_blank" rel="noopener">📎 Ver comprobante</a>
+        }
+      </div>
+
+      @if (row.rejectReason) {
+        <div class="reason">Motivo: {{ row.rejectReason }}</div>
+      }
+
+      @if (row.decidable && canDecide()) {
+        <div class="actions">
+          <button
+            class="hn-btn hn-btn--danger-soft"
+            type="button"
+            [disabled]="deciding() === row.id"
+            (click)="openReject(row)"
+          >
+            Rechazar
+          </button>
+          <button
+            class="hn-btn hn-btn--primary"
+            type="button"
+            [disabled]="deciding() === row.id"
+            (click)="confirm(row)"
+          >
+            {{ deciding() === row.id ? 'Guardando…' : 'Confirmar recepción' }}
+          </button>
+        </div>
+      }
+    </div>
+  } @empty {
+    <div class="empty hn-card">
+      <div class="empty-ico">💸</div>
+      <div class="empty-title hn-head">No hay donaciones económicas</div>
+      <div class="empty-text">
+        Cuando alguien transfiera desde la ficha pública y lo declare, aparece acá para que
+        confirmes que el dinero llegó.
+      </div>
+    </div>
+  }
+</div>
+
+@if (rejecting(); as row) {
+  <hn-bottom-sheet (closed)="closeReject()">
+    <div class="sheet-body">
+      <div class="sheet-title hn-head">Rechazar {{ row.amountLabel }}</div>
+      <p class="quiet">
+        Si {{ row.donor }} dejó su correo, le avisamos con el motivo que escribas acá.
+      </p>
+
+      <label class="hn-label" for="rj-reason">Motivo</label>
+      <textarea
+        id="rj-reason"
+        class="hn-textarea"
+        rows="3"
+        maxlength="255"
+        [value]="reason()"
+        (input)="updateReason($any($event.target).value)"
+      ></textarea>
+      @if (reasonError()) {
+        <p class="hn-field-error">{{ reasonError() }}</p>
+      }
+
+      <div class="sheet-actions">
+        <button class="hn-btn hn-btn--outline" type="button" (click)="closeReject()">
+          Cancelar
+        </button>
+        <button class="hn-btn hn-btn--danger" type="button" (click)="submitReject()">
+          Rechazar donación
+        </button>
+      </div>
+    </div>
+  </hn-bottom-sheet>
+}

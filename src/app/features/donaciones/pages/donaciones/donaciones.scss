@@ -82,3 +82,40 @@
   margin-bottom: 18px;
   line-height: 1.45;
 }
+
+/* ---- Entrada a donaciones económicas (QK-20) ---- */
+.money {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.money-ico {
+  font-size: 22px;
+}
+.money-text {
+  flex: 1;
+  min-width: 0;
+}
+.money-title {
+  display: block;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--hn-ink);
+}
+.money-sub {
+  display: block;
+  font-size: 13px;
+  color: var(--hn-text-2);
+  margin-top: 2px;
+}
+.money-go {
+  font-size: 20px;
+  color: var(--hn-muted);
+}
