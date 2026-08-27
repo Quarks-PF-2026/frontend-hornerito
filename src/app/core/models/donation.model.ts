@@ -35,8 +35,6 @@ export interface DonationItemView {
 /** Vista derivada de una donación, con textos ya calculados. */
 export interface DonationView {
   id: string;
-  /** ISO crudo, para filtrar por rango sin reparsear `date`. */
-  createdAt: string;
   date: string;
   donor: string;
   contact: string | null;

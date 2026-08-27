@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { MonetaryDonationQuery, toHttpParams } from '../models/donation-filters';
 import {
   MonetaryDonation,
   MonetaryDonationStatus,
@@ -33,15 +34,28 @@ export class MonetaryDonationsService {
     this._donations().map((donation) => toMonetaryView(donation, fmtDate)),
   );
 
-  readonly pendingCount = computed(
-    () => this._donations().filter((d) => d.status === 'declarada').length,
-  );
+  /**
+   * Pendientes de toda la organización, no de lo que se está viendo: alimenta
+   * el contador de la pestaña, que no depende del filtro. Por eso solo se
+   * actualiza con las respuestas sin filtrar.
+   */
+  private readonly _pendingCount = signal(0);
+  readonly pendingCount = this._pendingCount.asReadonly();
 
-  load(status?: MonetaryDonationStatus): Observable<MonetaryDonation[]> {
-    const params = status ? new HttpParams().set('status', status) : undefined;
+  load(query: MonetaryDonationQuery = {}): Observable<MonetaryDonation[]> {
+    const params = toHttpParams(query, new HttpParams());
     return this.http
       .get<MonetaryDonation[]>(`${this.apiUrl}/donations/monetary`, { params })
-      .pipe(tap((donations) => this._donations.set(donations)));
+      .pipe(
+        tap((donations) => {
+          this._donations.set(donations);
+          if (params.keys().length === 0) {
+            this._pendingCount.set(
+              donations.filter((d) => d.status === 'declarada').length,
+            );
+          }
+        }),
+      );
   }
 
   confirm(id: string): void {
@@ -67,6 +81,8 @@ export class MonetaryDonationsService {
         this._donations.update((list) =>
           list.map((donation) => (donation.id === id ? updated : donation)),
         );
+        // Decidir siempre saca una del pendiente, se esté viendo o no.
+        this._pendingCount.update((count) => Math.max(0, count - 1));
         this.toast.show(okMessage);
       },
       error: (err: HttpErrorResponse) => {

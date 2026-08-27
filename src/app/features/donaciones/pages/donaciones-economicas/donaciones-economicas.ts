@@ -1,5 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { inDateRange, monetaryTotals } from '../../../../core/models/donation-filters';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { monetaryTotals } from '../../../../core/models/donation-filters';
 import {
   MonetaryDonationStatus,
   MonetaryDonationView,
@@ -41,16 +49,8 @@ export class DonacionesEconomicasPage {
   readonly to = signal('');
   readonly deciding = this.donations.deciding;
 
-  /** Los filtros son de cliente: el historial de una organización es chico. */
-  readonly rows = computed<MonetaryDonationView[]>(() => {
-    const status = this.filter();
-    const from = this.from();
-    const to = this.to();
-    return this.donations
-      .views()
-      .filter((row) => (status ? row.status === status : true))
-      .filter((row) => inDateRange(row.createdAt, from, to));
-  });
+  /** Filtra el backend: acá solo se muestra lo que volvió. */
+  readonly rows: Signal<MonetaryDonationView[]> = this.donations.views;
 
   /** Totales de lo filtrado: cambian con el rango y con el estado elegido. */
   readonly totals = computed(() => monetaryTotals(this.rows()));
@@ -65,19 +65,45 @@ export class DonacionesEconomicasPage {
   readonly reasonError = signal('');
 
   constructor() {
-    this.donations.load().subscribe({
-      error: () => this.toast.show('No se pudieron cargar las donaciones'),
-    });
+    this.reload();
   }
 
   setFilter(value: string): void {
     this.filter.set(value as StatusFilter);
+    this.reload();
+  }
+
+  setFrom(value: string): void {
+    this.from.set(value);
+    this.reload();
+  }
+
+  setTo(value: string): void {
+    this.to.set(value);
+    this.reload();
   }
 
   clearFilters(): void {
     this.filter.set('');
     this.from.set('');
     this.to.set('');
+    this.reload();
+  }
+
+  private reload(): void {
+    this.donations
+      .load({ status: this.filter(), from: this.from(), to: this.to() })
+      .subscribe({
+        error: (err: HttpErrorResponse) => {
+          // El 400 del backend trae el motivo (por ejemplo, rango dado vuelta).
+          const message = (err.error as { message?: string | string[] })?.message;
+          this.toast.show(
+            Array.isArray(message)
+              ? message[0]
+              : (message ?? 'No se pudieron cargar las donaciones'),
+          );
+        },
+      });
   }
 
   confirm(row: MonetaryDonationView): void {

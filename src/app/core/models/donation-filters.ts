@@ -1,27 +1,39 @@
+import { HttpParams } from '@angular/common/http';
 import { DonationView } from './donation.model';
-import { MonetaryDonationView } from './monetary-donation.model';
+import { MonetaryDonationStatus, MonetaryDonationView } from './monetary-donation.model';
 
 /**
  * Filtros y totales del historial de donaciones (QK-23).
  *
- * Viven acá y no en el componente porque son lo único con lógica de la
- * pantalla: separados se pueden probar sin montar Angular.
+ * El filtrado lo hace el backend: acá solo se arma el query string y se
+ * resumen las filas que volvieron. Vive fuera del componente para poder
+ * probarlo sin montar Angular.
  */
 
+/** Rango de días 'AAAA-MM-DD', tal como los deja un `<input type="date">`. */
+export interface DateRange {
+  from?: string;
+  to?: string;
+}
+
+export interface MonetaryDonationQuery extends DateRange {
+  status?: MonetaryDonationStatus | '';
+}
+
 /**
- * ¿La donación cae en el rango? Los extremos son inclusivos y opcionales:
- * vacío significa "sin límite por ese lado".
- *
- * `iso` viene del backend con hora (`2026-08-26T14:03:00.000Z`) y los
- * extremos vienen de un `<input type="date">` (`2026-08-26`), así que se
- * comparan los primeros 10 caracteres: comparar strings 'YYYY-MM-DD' equivale
- * a comparar fechas y evita construir `Date` con la zona horaria del navegador.
+ * Pasa el filtro a query params, salteando lo vacío. Un parámetro vacío no es
+ * lo mismo que ausente: el DTO del backend rechaza `from=` porque no tiene
+ * formato de fecha.
  */
-export function inDateRange(iso: string, from: string, to: string): boolean {
-  const day = iso.slice(0, 10);
-  if (from && day < from) return false;
-  if (to && day > to) return false;
-  return true;
+export function toHttpParams(
+  query: MonetaryDonationQuery,
+  params: HttpParams,
+): HttpParams {
+  let result = params;
+  for (const [key, value] of Object.entries(query)) {
+    if (value) result = result.set(key, value);
+  }
+  return result;
 }
 
 export interface MonetaryTotals {
