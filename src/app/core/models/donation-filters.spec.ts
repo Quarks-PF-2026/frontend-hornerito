@@ -1,6 +1,7 @@
+import { HttpParams } from '@angular/common/http';
 import { DonationView } from './donation.model';
 import { MonetaryDonationStatus, MonetaryDonationView } from './monetary-donation.model';
-import { inDateRange, inPersonTotals, monetaryTotals } from './donation-filters';
+import { inPersonTotals, monetaryTotals, toHttpParams } from './donation-filters';
 
 function monetary(
   status: MonetaryDonationStatus,
@@ -31,7 +32,6 @@ function monetary(
 function inPerson(quantities: number[]): DonationView {
   return {
     id: `p-${quantities.join('-')}`,
-    createdAt: '2026-08-20T12:00:00.000Z',
     date: '20 ago',
     donor: 'Donante anónimo',
     contact: null,
@@ -46,25 +46,28 @@ function inPerson(quantities: number[]): DonationView {
   };
 }
 
-describe('inDateRange', () => {
-  const iso = '2026-08-20T12:00:00.000Z';
+describe('toHttpParams', () => {
+  const empty = new HttpParams();
 
-  it('acepta todo cuando los dos extremos están vacíos', () => {
-    expect(inDateRange(iso, '', '')).toBe(true);
+  it('no manda nada cuando no hay filtros', () => {
+    expect(toHttpParams({}, empty).keys()).toEqual([]);
   });
 
-  it('incluye los extremos', () => {
-    expect(inDateRange(iso, '2026-08-20', '2026-08-20')).toBe(true);
+  it('saltea los valores vacíos', () => {
+    // `from=` no es lo mismo que sin `from`: el backend lo rechaza por formato.
+    const params = toHttpParams({ status: '', from: '', to: '2026-08-31' }, empty);
+    expect(params.keys()).toEqual(['to']);
+    expect(params.get('to')).toBe('2026-08-31');
   });
 
-  it('deja afuera lo anterior al desde y lo posterior al hasta', () => {
-    expect(inDateRange(iso, '2026-08-21', '')).toBe(false);
-    expect(inDateRange(iso, '', '2026-08-19')).toBe(false);
-  });
-
-  it('no se corre de día por la hora ni por la zona horaria', () => {
-    // 23:30 UTC del 20 sigue siendo el 20 para el filtro.
-    expect(inDateRange('2026-08-20T23:30:00.000Z', '2026-08-20', '2026-08-20')).toBe(true);
+  it('manda estado y rango juntos', () => {
+    const params = toHttpParams(
+      { status: 'declarada', from: '2026-08-01', to: '2026-08-31' },
+      empty,
+    );
+    expect(params.get('status')).toBe('declarada');
+    expect(params.get('from')).toBe('2026-08-01');
+    expect(params.get('to')).toBe('2026-08-31');
   });
 });
 

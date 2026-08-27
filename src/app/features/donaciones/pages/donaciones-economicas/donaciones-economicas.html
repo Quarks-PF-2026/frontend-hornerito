@@ -14,7 +14,7 @@
     class="hn-input"
     type="date"
     [value]="from()"
-    (change)="from.set($any($event.target).value)"
+    (change)="setFrom($any($event.target).value)"
   />
   <label class="hn-label" for="me-to">Hasta</label>
   <input
@@ -22,7 +22,7 @@
     class="hn-input"
     type="date"
     [value]="to()"
-    (change)="to.set($any($event.target).value)"
+    (change)="setTo($any($event.target).value)"
   />
 </div>
 
