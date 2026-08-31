@@ -59,6 +59,9 @@ export class DonacionesEconomicasPage {
   /** Distingue "no hay nada" de "el filtro no encontró nada". */
   readonly filtered = computed(() => !!this.filter() || !!this.from() || !!this.to());
 
+  /** Comprobante abierto en el modal; se mira sin salir del panel. */
+  readonly viewingReceipt = signal<MonetaryDonationView | null>(null);
+
   /** Donación que se está rechazando; el motivo es obligatorio. */
   readonly rejecting = signal<MonetaryDonationView | null>(null);
   readonly reason = signal('');
@@ -108,6 +111,14 @@ export class DonacionesEconomicasPage {
 
   confirm(row: MonetaryDonationView): void {
     this.donations.confirm(row.id);
+  }
+
+  openReceipt(row: MonetaryDonationView): void {
+    this.viewingReceipt.set(row);
+  }
+
+  closeReceipt(): void {
+    this.viewingReceipt.set(null);
   }
 
   openReject(row: MonetaryDonationView): void {

@@ -83,10 +83,18 @@
   color: var(--hn-text-2);
   margin-top: 12px;
 }
-.meta a {
+.meta a,
+.meta .link {
   color: var(--hn-primary-strong);
   font-weight: 600;
   text-decoration: none;
+}
+.meta .link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .reason {
@@ -152,4 +160,20 @@
 .sheet-actions .hn-btn {
   flex: 1;
   height: 44px;
+}
+
+.receipt {
+  display: block;
+  width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  margin-top: 12px;
+  border-radius: var(--hn-radius-md);
+  background: var(--hn-surface);
+}
+.sheet-actions a.hn-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
