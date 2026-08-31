@@ -96,6 +96,71 @@
     }
   </section>
 
+  @if (showDonations()) {
+    <section class="block">
+      <h2 class="hn-head">Donar dinero</h2>
+
+      @if (donatedAmount(); as amount) {
+        <div class="sent hn-card">
+          <p class="sent-title hn-head">¡Gracias por tu donación!</p>
+          <p>
+            Anotamos tu aporte de <strong>{{ amount }}</strong
+            >. {{ o.name }} confirma la recepción cuando lo vea en su cuenta.
+          </p>
+        </div>
+      }
+
+      @if (donations(); as d) {
+        <article class="bank hn-card">
+          <p class="quiet">
+            Transferí desde tu banco a estos datos y después contanos que lo hiciste.
+          </p>
+
+          <div>
+            <span class="hn-label">Alias o CBU</span>
+            <div class="op-head">
+              <strong>{{ d.alias }}</strong>
+              <button
+                class="hn-btn hn-btn--outline"
+                type="button"
+                (click)="copyAlias(d.alias ?? '')"
+              >
+                {{ copied() === d.alias ? '✓ Copiado' : 'Copiar' }}
+              </button>
+            </div>
+          </div>
+          @if (d.holder) {
+            <div>
+              <span class="hn-label">Titular</span>
+              <span>{{ d.holder }}</span>
+            </div>
+          }
+          @if (d.cuit) {
+            <div>
+              <span class="hn-label">CUIT</span>
+              <span>{{ d.cuit }}</span>
+            </div>
+          }
+          @if (d.bank) {
+            <div>
+              <span class="hn-label">Banco</span>
+              <span>{{ d.bank }}</span>
+            </div>
+          }
+
+          <button
+            class="hn-btn hn-btn--primary hn-btn--block"
+            type="button"
+            (click)="openDonation()"
+          >
+            Ya transferí
+          </button>
+          <p class="quiet center">Pago con Mercado Pago: próximamente.</p>
+        </article>
+      }
+    </section>
+  }
+
   @if (showVolunteering()) {
     <section class="block">
       <h2 class="hn-head">Sumate como voluntario</h2>
@@ -266,6 +331,97 @@
             (click)="submitRequest()"
           >
             {{ sending() ? 'Enviando…' : 'Enviar solicitud' }}
+          </button>
+        </div>
+      </div>
+    </hn-bottom-sheet>
+  }
+
+  @if (donationOpen()) {
+    <hn-bottom-sheet (closed)="closeDonation()">
+      <div class="sheet-body">
+        <div class="sheet-title hn-head">Contanos de tu transferencia</div>
+        <p class="quiet">
+          Lo que declarás queda pendiente hasta que {{ o.name }} confirme que recibió el dinero.
+        </p>
+
+        <label class="hn-label" for="dn-amount">Monto</label>
+        <input
+          id="dn-amount"
+          class="hn-input"
+          type="number"
+          inputmode="decimal"
+          min="0"
+          step="0.01"
+          [value]="donationForm().amount"
+          (input)="updateDonationField('amount', $any($event.target).value)"
+        />
+        @if (donationErrors()['amount']) {
+          <p class="hn-field-error">{{ donationErrors()['amount'] }}</p>
+        }
+
+        <label class="hn-label" for="dn-operation">
+          Número de operación <span class="opt">(opcional)</span>
+        </label>
+        <input
+          id="dn-operation"
+          class="hn-input"
+          type="text"
+          maxlength="60"
+          [value]="donationForm().operationNumber"
+          (input)="updateDonationField('operationNumber', $any($event.target).value)"
+        />
+
+        <span class="hn-label">Comprobante <span class="opt">(opcional)</span></span>
+        <hn-file-picker
+          accept="image/jpeg,image/png,image/webp"
+          label="Adjuntar comprobante"
+          changeLabel="Cambiar comprobante"
+          hint="Foto o captura de la transferencia · JPG, PNG o WebP"
+          [file]="receipt()"
+          (picked)="receipt.set($event)"
+        />
+
+        <label class="hn-label" for="dn-name">Tu nombre <span class="opt">(opcional)</span></label>
+        <input
+          id="dn-name"
+          class="hn-input"
+          type="text"
+          maxlength="80"
+          autocomplete="name"
+          [value]="donationForm().donorName"
+          (input)="updateDonationField('donorName', $any($event.target).value)"
+        />
+
+        <label class="hn-label" for="dn-email">Tu correo <span class="opt">(opcional)</span></label>
+        <input
+          id="dn-email"
+          class="hn-input"
+          type="email"
+          autocomplete="email"
+          [value]="donationForm().donorContact"
+          (input)="updateDonationField('donorContact', $any($event.target).value)"
+        />
+        <p class="quiet">Si lo dejás, te mandamos el recibo y te avisamos cuando la confirmen.</p>
+        @if (donationErrors()['donorContact']) {
+          <p class="hn-field-error">{{ donationErrors()['donorContact'] }}</p>
+        }
+
+        @if (donationErrors()['form']) {
+          <p class="hn-field-error">{{ donationErrors()['form'] }}</p>
+        }
+
+        <div class="sheet-actions">
+          <button class="hn-btn hn-btn--outline" type="button" (click)="closeDonation()">
+            Cancelar
+          </button>
+          <button
+            class="hn-btn hn-btn--primary"
+            type="button"
+            [disabled]="donating()"
+            (click)="submitDonation()"
+          >
+            {{ donating() ? 'Enviando…' : 'Declarar donación' }}
           </button>
         </div>
       </div>

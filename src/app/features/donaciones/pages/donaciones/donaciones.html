@@ -1,48 +1,115 @@
-<div class="list">
-  @for (v of views(); track v.id) {
-    <div class="donation hn-card">
-      <div class="head">
-        <div class="head-titles">
-          <div class="donor">{{ v.donor }}</div>
-          @if (v.contact) {
-            <div class="contact">📞 {{ v.contact }}</div>
-          }
-        </div>
-        <div class="date">{{ v.date }}</div>
-      </div>
+<div class="tabs">
+  <button
+    class="tab"
+    type="button"
+    [class.tab--on]="tab() === 'presenciales'"
+    (click)="tab.set('presenciales')"
+  >
+    Presenciales
+  </button>
+  <button
+    class="tab"
+    type="button"
+    [class.tab--on]="tab() === 'economicas'"
+    (click)="tab.set('economicas')"
+  >
+    Económicas
+    @if (pendingMonetary()) {
+      <span class="tab-badge">{{ pendingMonetary() }}</span>
+    }
+  </button>
+</div>
 
-      <div class="items">
-        @for (item of v.items; track $index) {
-          <div class="item">
-            <span class="item-main">{{ item.icon }} {{ item.supply }} · {{ item.quantity }} {{ item.unit }}</span>
-            @if (item.needNote) {
-              <span class="item-need">↳ {{ item.needNote }}</span>
+@if (tab() === 'economicas') {
+  <app-donaciones-economicas />
+} @else {
+  <div class="bar dates">
+    <label class="hn-label" for="dp-from">Desde</label>
+    <input
+      id="dp-from"
+      class="hn-input"
+      type="date"
+      [value]="from()"
+      (change)="setFrom($any($event.target).value)"
+    />
+    <label class="hn-label" for="dp-to">Hasta</label>
+    <input
+      id="dp-to"
+      class="hn-input"
+      type="date"
+      [value]="to()"
+      (change)="setTo($any($event.target).value)"
+    />
+  </div>
+
+  <div class="totals hn-card">
+    <div class="total">
+      <span class="total-value hn-head">{{ totals().donations }}</span>
+      <span class="total-label">donaciones</span>
+    </div>
+    <div class="total">
+      <span class="total-value hn-head">{{ totals().items }}</span>
+      <span class="total-label">unidades recibidas</span>
+    </div>
+  </div>
+
+  <div class="list">
+    @for (v of rows(); track v.id) {
+      <div class="donation hn-card">
+        <div class="head">
+          <div class="head-titles">
+            <div class="donor">{{ v.donor }}</div>
+            @if (v.contact) {
+              <div class="contact">📞 {{ v.contact }}</div>
             }
           </div>
-        }
-      </div>
+          <div class="date">{{ v.date }}</div>
+        </div>
 
-      <div class="where">
-        @if (v.point) {
-          📍 Recibida en {{ v.point }}
+        <div class="items">
+          @for (item of v.items; track $index) {
+            <div class="item">
+              <span class="item-main"
+                >{{ item.icon }} {{ item.supply }} · {{ item.quantity }} {{ item.unit }}</span
+              >
+              @if (item.needNote) {
+                <span class="item-need">↳ {{ item.needNote }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="where">
+          @if (v.point) {
+            📍 Recibida en {{ v.point }}
+          } @else {
+            📍 Recibida en la sede
+          }
+        </div>
+      </div>
+    } @empty {
+      <div class="empty hn-card">
+        @if (filtered()) {
+          <div class="empty-ico">🔍</div>
+          <div class="empty-title hn-head">Ninguna donación en ese rango</div>
+          <div class="empty-text">Probá ampliando las fechas.</div>
+          <button class="hn-btn hn-btn--outline" type="button" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
         } @else {
-          📍 Recibida en la sede
+          <div class="empty-ico">🎁</div>
+          <div class="empty-title hn-head">Todavía no registraste donaciones</div>
+          <div class="empty-text">
+            Cuando alguien acerque insumos al comedor o a un punto de recolección, registralo acá
+            para que el progreso de las necesidades quede actualizado.
+          </div>
+          @if (canWrite()) {
+            <button class="hn-btn hn-btn--primary" type="button" (click)="newDonation()">
+              Registrar la primera
+            </button>
+          }
         }
       </div>
-    </div>
-  } @empty {
-    <div class="empty hn-card">
-      <div class="empty-ico">🎁</div>
-      <div class="empty-title hn-head">Todavía no registraste donaciones</div>
-      <div class="empty-text">
-        Cuando alguien acerque insumos al comedor o a un punto de recolección, registralo acá
-        para que el progreso de las necesidades quede actualizado.
-      </div>
-      @if (canWrite()) {
-        <button class="hn-btn hn-btn--primary" type="button" (click)="newDonation()">
-          Registrar la primera
-        </button>
-      }
-    </div>
-  }
-</div>
+    }
+  </div>
+}

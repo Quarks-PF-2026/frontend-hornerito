@@ -1,10 +1,19 @@
-// Botones — Hornerito. Clases utilitarias; la altura/flex se ajusta por contexto en cada uso.
+// Botones — Hornerito. Clases utilitarias.
+//
+// El tamaño base (44px de alto, el mínimo táctil) vive acá y no en cada
+// contexto: antes `.hn-btn` no traía alto ni padding, así que todo botón que no
+// tuviera una clase local de layout salía pegado al texto. Los contextos que
+// necesitan otra medida —barras de filtros, botoneras de formulario— siguen
+// pisando `height`/`padding` con su propia regla, que gana por especificidad.
 
 .hn-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
   border: none;
   cursor: pointer;
   font-family: var(--hn-font-body);
@@ -70,10 +79,12 @@
   color: var(--hn-danger-ink);
 }
 
-// Ícono cuadrado neutro
+// Ícono cuadrado neutro. Sin padding: el lado lo fija el contexto (`.sq`), y el
+// padding horizontal del base lo haría más ancho que alto.
 .hn-btn--icon {
   background: var(--hn-surface);
   color: var(--hn-canela-700);
   border: 1.5px solid var(--hn-border);
   gap: 0;
+  padding: 0;
 }

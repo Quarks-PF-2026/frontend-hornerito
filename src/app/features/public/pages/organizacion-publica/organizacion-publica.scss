@@ -5,7 +5,7 @@
   padding-bottom: 40px;
 }
 
-// `.hn-btn` no trae alto ni padding: los define cada contexto.
+// Medidas propias de esta vista; el tamaño base de `.hn-btn` es 44px.
 .hn-btn {
   height: 46px;
   padding: 0 22px;
@@ -83,7 +83,8 @@
 
 .needs,
 .points,
-.posts {
+.posts,
+.bank {
   display: grid;
   gap: 12px;
 }
@@ -238,6 +239,7 @@
 }
 .opportunity,
 .general,
+.bank,
 .sheet-body {
   padding: 16px;
 }
@@ -319,4 +321,7 @@
 .sheet-actions .hn-btn {
   flex: 1;
   height: 44px;
+}
+.bank strong {
+  word-break: break-all;
 }

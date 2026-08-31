@@ -1,8 +1,9 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CAT_ICON, DEFAULT_CAT_ICON } from '../models/catalog';
+import { DateRange, toHttpParams } from '../models/donation-filters';
 import {
   Donation,
   DonationItemView,
@@ -56,9 +57,12 @@ export class DonationsService {
   readonly saving = this._saving.asReadonly();
 
   // ---------------- datos ----------------
-  load(): Observable<Donation[]> {
+  /** El rango lo filtra el backend: acá solo se arma el query string. */
+  load(range: DateRange = {}): Observable<Donation[]> {
     return this.http
-      .get<Donation[]>(`${this.apiUrl}/donations`)
+      .get<Donation[]>(`${this.apiUrl}/donations`, {
+        params: toHttpParams(range, new HttpParams()),
+      })
       .pipe(tap((donations) => this._donations.set(donations)));
   }
 

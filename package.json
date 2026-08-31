@@ -1,6 +1,9 @@
 {
   "name": "hornerito",
   "version": "0.0.0",
+  "engines": {
+    "node": ">=26"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
