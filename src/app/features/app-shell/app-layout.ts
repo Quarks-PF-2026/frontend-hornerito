@@ -39,7 +39,7 @@ export class AppLayout {
   private readonly auth = inject(AuthService);
   private readonly modal = inject(ModalService);
 
-  private readonly tab = signal(this.currentTab());
+  readonly tab = signal(this.currentTab());
   private readonly subView = signal(this.isSubView());
   readonly meta = computed(() => TABS[this.tab()] ?? TABS['organizacion']);
   /**

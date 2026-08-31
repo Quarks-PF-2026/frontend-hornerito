@@ -10,6 +10,10 @@
   </button>
 }
 
-<hn-bottom-nav [canManageMembers]="canManageMembers()" (logout)="logout()" />
+<hn-bottom-nav
+  [currentTab]="tab()"
+  [canManageMembers]="canManageMembers()"
+  (logout)="logout()"
+/>
 <app-modal-host />
 <hn-toast />
