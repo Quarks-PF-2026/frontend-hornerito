@@ -1,8 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { EMPTY, Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Org } from '../models/org.model';
+import { AuthService, LoginResponse } from './auth.service';
 
 export type OrgPatch = Pick<Org, 'name' | 'description' | 'address' | 'contact'> & {
   seeksVolunteers?: boolean;
@@ -16,6 +17,7 @@ export type OrgPatch = Pick<Org, 'name' | 'description' | 'address' | 'contact'>
 @Injectable({ providedIn: 'root' })
 export class OrgService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
   private readonly apiUrl = environment.apiUrl;
 
   private readonly _org = signal<Org | null>(null);
@@ -36,9 +38,37 @@ export class OrgService {
   }
 
   save(patch: OrgPatch): Observable<Org> {
+    // Sin organización cargada, este PUT no edita: crea la organización y la
+    // membresía de dueño. El JWT en curso se firmó en el login, cuando esa
+    // membresía todavía no existía, así que no lleva `orgId` y todo endpoint
+    // protegido por TenantGuard responde 403 hasta el próximo login. Por eso
+    // se renueva la sesión en el acto, igual que al aceptar una invitación.
+    const creating = this._org() === null;
+    return this.http.put<Org>(`${this.apiUrl}/organization/me`, patch).pipe(
+      tap((org) => this._org.set(org)),
+      switchMap((org) => (creating ? this.refreshSession(org) : of(org))),
+    );
+  }
+
+  /**
+   * Cambia la sesión a la organización recién creada. Reusa `switch-org`, que
+   * corre solo con JwtAuthGuard: funciona con el token viejo, todavía sin
+   * `orgId`.
+   */
+  private refreshSession(org: Org): Observable<Org> {
     return this.http
-      .put<Org>(`${this.apiUrl}/organization/me`, patch)
-      .pipe(tap((org) => this._org.set(org)));
+      .post<LoginResponse>(`${this.apiUrl}/auth/switch-org`, { organizationId: org.id })
+      .pipe(
+        tap((res) => this.auth.startSession(res.accessToken, res.role, res.user.email)),
+        map(() => org),
+        catchError(() => {
+          // La organización quedó creada; lo que falló es renovar el token.
+          // Seguir con el token viejo deja la app dando 403 en silencio, así
+          // que se corta la sesión: volver a entrar la deja consistente.
+          this.auth.logout();
+          return EMPTY;
+        }),
+      );
   }
 
   /**

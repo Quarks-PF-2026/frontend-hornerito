@@ -12,7 +12,7 @@ export interface LoginResult {
   error: string;
 }
 
-interface LoginResponse {
+export interface LoginResponse {
   accessToken: string;
   user: { id: string; name: string; email: string };
   role: MemberRole | null;
