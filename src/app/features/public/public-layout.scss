@@ -16,7 +16,7 @@
   border-bottom: 1px solid var(--hn-border-soft);
 }
 
-// `.hn-btn` no trae alto ni padding: los define cada contexto.
+// Medidas propias de esta vista; el tamaño base de `.hn-btn` es 44px.
 .bar .hn-btn {
   height: 40px;
   padding: 0 16px;
