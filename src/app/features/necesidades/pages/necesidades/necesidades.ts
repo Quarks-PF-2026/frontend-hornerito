@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NeedsService } from '../../../../core/services/needs.service';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -21,13 +22,22 @@ export class NecesidadesPage {
   private readonly suppliesSvc = inject(SuppliesService);
   private readonly modal = inject(ModalService);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
   readonly views = this.needsSvc.views;
+  /** Sin insumos activos el formulario de necesidad queda con el select vacío. */
+  readonly hasSupplies = computed(() => this.suppliesSvc.active().length > 0);
 
   constructor() {
     this.suppliesSvc.load().subscribe();
     this.needsSvc.load().subscribe();
   }
 
+  newNeed(): void {
+    this.modal.newNeed();
+  }
+  goSupplies(): void {
+    void this.router.navigate(['/app/insumos']);
+  }
   progress(id: string): void {
     this.modal.progress(id);
   }

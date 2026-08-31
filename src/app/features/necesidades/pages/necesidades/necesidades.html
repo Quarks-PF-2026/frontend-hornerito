@@ -31,5 +31,30 @@
         <div class="closed">{{ v.closedNote }}</div>
       }
     </div>
+  } @empty {
+    <div class="empty hn-card">
+      <div class="empty-ico">📦</div>
+      @if (hasSupplies()) {
+        <div class="empty-title hn-head">Todavía no cargaste necesidades</div>
+        <div class="empty-text">
+          Sin necesidades abiertas los donantes no saben qué hace falta ni cuánto.
+        </div>
+        @if (canWrite()) {
+          <button class="hn-btn hn-btn--primary" type="button" (click)="newNeed()">
+            Crear la primera
+          </button>
+        }
+      } @else {
+        <div class="empty-title hn-head">Primero cargá insumos</div>
+        <div class="empty-text">
+          Una necesidad se define sobre un insumo del catálogo. Todavía no hay ninguno.
+        </div>
+        @if (canWrite()) {
+          <button class="hn-btn hn-btn--primary" type="button" (click)="goSupplies()">
+            Ir a insumos
+          </button>
+        }
+      }
+    </div>
   }
 </div>
