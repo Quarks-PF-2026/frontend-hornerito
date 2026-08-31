@@ -54,7 +54,7 @@
           <span>#️⃣ {{ row.operationNumber }}</span>
         }
         @if (row.receiptUrl) {
-          <a [href]="row.receiptUrl" target="_blank" rel="noopener">📎 Ver comprobante</a>
+          <button class="link" type="button" (click)="openReceipt(row)">📎 Ver comprobante</button>
         }
       </div>
 
@@ -132,6 +132,24 @@
         <button class="hn-btn hn-btn--danger" type="button" (click)="submitReject()">
           Rechazar donación
         </button>
+      </div>
+    </div>
+  </hn-bottom-sheet>
+}
+
+@if (viewingReceipt(); as row) {
+  <hn-bottom-sheet (closed)="closeReceipt()">
+    <div class="sheet-body">
+      <div class="sheet-title hn-head">Comprobante de {{ row.amountLabel }}</div>
+      <p class="quiet">{{ row.donor }} · {{ row.date }}</p>
+
+      <img class="receipt" [src]="row.receiptUrl" alt="Comprobante de la donación" />
+
+      <div class="sheet-actions">
+        <a class="hn-btn hn-btn--outline" [href]="row.receiptUrl" target="_blank" rel="noopener">
+          Abrir original
+        </a>
+        <button class="hn-btn hn-btn--primary" type="button" (click)="closeReceipt()">Cerrar</button>
       </div>
     </div>
   </hn-bottom-sheet>
