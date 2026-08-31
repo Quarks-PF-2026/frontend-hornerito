@@ -2,7 +2,7 @@
   "name": "hornerito",
   "version": "0.0.0",
   "engines": {
-    "node": ">=26"
+    "node": "24.x"
   },
   "scripts": {
     "ng": "ng",
