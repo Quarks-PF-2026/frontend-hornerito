@@ -13,6 +13,8 @@
 <hn-bottom-nav
   [currentTab]="tab()"
   [canManageMembers]="canManageMembers()"
+  [isPlatformAdmin]="isPlatformAdmin()"
+  [canOperate]="canOperate()"
   (logout)="logout()"
 />
 <app-modal-host />

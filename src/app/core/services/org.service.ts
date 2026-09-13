@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { EMPTY, Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Org } from '../models/org.model';
@@ -22,6 +22,12 @@ export class OrgService {
 
   private readonly _org = signal<Org | null>(null);
   readonly org = this._org.asReadonly();
+
+  /**
+   * Solo una organización validada opera (DOMAIN.md §4). Sin organización
+   * cargada también es false: arma el menú y el guard, el backend revalida.
+   */
+  readonly canOperate = computed(() => this._org()?.status === 'validated');
 
   load(): Observable<Org | null> {
     return this.http.get<Org[]>(`${this.apiUrl}/organization/me`).pipe(
@@ -59,7 +65,14 @@ export class OrgService {
     return this.http
       .post<LoginResponse>(`${this.apiUrl}/auth/switch-org`, { organizationId: org.id })
       .pipe(
-        tap((res) => this.auth.startSession(res.accessToken, res.role, res.user.email)),
+        tap((res) =>
+          this.auth.startSession(
+            res.accessToken,
+            res.role,
+            res.user.email,
+            res.user.isPlatformAdmin,
+          ),
+        ),
         map(() => org),
         catchError(() => {
           // La organización quedó creada; lo que falló es renovar el token.

@@ -1,0 +1,92 @@
+<div class="page">
+  <div class="subtitle">
+    Organizaciones que se registraron y esperan que las revises para aparecer en la plataforma.
+  </div>
+
+  <div class="list">
+    @for (o of rows(); track o.id) {
+      <div class="org hn-card">
+        <div class="head">
+          <div class="name hn-head">{{ o.name }}</div>
+          <div class="date">🗓️ {{ o.requestedAt }}</div>
+        </div>
+
+        <p class="description">{{ o.description }}</p>
+
+        <div class="details">
+          <div class="detail">📍 {{ o.address }}</div>
+          <div class="detail">📞 {{ o.contact }}</div>
+        </div>
+
+        <div class="owner">
+          <div class="hn-label">Representante</div>
+          <div class="owner-name">{{ o.owner.name }}</div>
+          <a class="owner-email" [href]="'mailto:' + o.owner.email">{{ o.owner.email }}</a>
+        </div>
+
+        <div class="actions">
+          <button
+            class="hn-btn hn-btn--primary"
+            type="button"
+            [disabled]="deciding() !== null"
+            (click)="approve(o)"
+          >
+            {{ deciding() === o.id && !rejecting() ? 'Guardando…' : 'Aprobar' }}
+          </button>
+          <button
+            class="hn-btn hn-btn--danger-soft"
+            type="button"
+            [disabled]="deciding() !== null"
+            (click)="openReject(o)"
+          >
+            Rechazar
+          </button>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty hn-card">
+        <div class="empty-ico">✅</div>
+        <div class="empty-title hn-head">No hay organizaciones pendientes de validación.</div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (rejecting(); as o) {
+  <hn-bottom-sheet (closed)="closeReject()">
+    <div class="sheet-body">
+      <div class="sheet-title hn-head">Rechazar {{ o.name }}</div>
+      <p class="sheet-text">
+        La organización va a ver este motivo en su perfil, así que escribilo claro para que sepa qué
+        corregir.
+      </p>
+
+      <label class="hn-label" for="reject-reason">Motivo</label>
+      <textarea
+        id="reject-reason"
+        class="hn-textarea"
+        rows="4"
+        [attr.maxlength]="reasonMax"
+        [value]="reason()"
+        (input)="updateReason($any($event.target).value)"
+      ></textarea>
+      @if (reasonError()) {
+        <p class="hn-field-error">{{ reasonError() }}</p>
+      }
+
+      <div class="sheet-actions">
+        <button class="hn-btn hn-btn--outline" type="button" (click)="closeReject()">
+          Cancelar
+        </button>
+        <button
+          class="hn-btn hn-btn--danger"
+          type="button"
+          [disabled]="deciding() !== null"
+          (click)="confirmReject()"
+        >
+          {{ deciding() === o.id ? 'Guardando…' : 'Rechazar' }}
+        </button>
+      </div>
+    </div>
+  </hn-bottom-sheet>
+}

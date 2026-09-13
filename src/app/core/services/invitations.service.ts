@@ -14,7 +14,8 @@ export interface InvitationPreview {
 
 interface AcceptResponse {
   accessToken: string;
-  user: { id: string; name: string; email: string };
+  /** El contrato de QK-19 no garantiza el flag acá: si falta, cuenta como false. */
+  user: { id: string; name: string; email: string; isPlatformAdmin?: boolean };
   role: MemberRole | null;
   organizationId: string;
 }
@@ -33,6 +34,15 @@ export class InvitationsService {
   accept(token: string, name?: string, password?: string): Observable<AcceptResponse> {
     return this.http
       .post<AcceptResponse>(`${this.apiUrl}/${token}/accept`, { name, password })
-      .pipe(tap((res) => this.auth.startSession(res.accessToken, res.role, res.user.email)));
+      .pipe(
+        tap((res) =>
+          this.auth.startSession(
+            res.accessToken,
+            res.role,
+            res.user.email,
+            res.user.isPlatformAdmin === true,
+          ),
+        ),
+      );
   }
 }
