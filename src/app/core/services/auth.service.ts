@@ -14,7 +14,7 @@ export interface LoginResult {
 
 export interface LoginResponse {
   accessToken: string;
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; isPlatformAdmin: boolean };
   role: MemberRole | null;
 }
 
@@ -40,6 +40,14 @@ export class AuthService {
   readonly canWriteContent = computed(() => canWriteContent(this._role()));
   readonly canManageMembers = computed(() => canManageMembers(this._role()));
   readonly isOwner = computed(() => this._role() === 'owner');
+
+  /**
+   * Administrador de plataforma (QK-19): es un atributo del usuario, no de la
+   * membresía, así que no depende de la organización activa. Igual que el rol,
+   * solo arma el menú: el backend revalida en cada request a `/admin/*`.
+   */
+  private readonly _isPlatformAdmin = signal(localStorage.getItem('isPlatformAdmin') === 'true');
+  readonly isPlatformAdmin = this._isPlatformAdmin.asReadonly();
 
   /** Correo de la sesión activa, para no ofrecerse acciones sobre uno mismo. */
   private readonly _currentEmail = signal(localStorage.getItem('userEmail') ?? '');
@@ -82,7 +90,9 @@ export class AuthService {
 
   login(email: string, pass: string): Observable<LoginResult> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password: pass }).pipe(
-      tap((res) => this.startSession(res.accessToken, res.role, res.user.email)),
+      tap((res) =>
+        this.startSession(res.accessToken, res.role, res.user.email, res.user.isPlatformAdmin),
+      ),
       map((): LoginResult => ({ ok: true, unverified: false, error: '' })),
       catchError((err: HttpErrorResponse) => {
         const unverified = Boolean(err.error?.unverified);
@@ -95,7 +105,12 @@ export class AuthService {
   }
 
   /** Guarda la sesión; la usan el login y la aceptación de una invitación. */
-  startSession(accessToken: string, role: MemberRole | null, email: string): void {
+  startSession(
+    accessToken: string,
+    role: MemberRole | null,
+    email: string,
+    isPlatformAdmin: boolean,
+  ): void {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('userEmail', email);
     if (role) {
@@ -103,7 +118,15 @@ export class AuthService {
     } else {
       localStorage.removeItem('role');
     }
+    // Estricto contra `true`: una respuesta sin el campo no promueve a nadie.
+    const platformAdmin = isPlatformAdmin === true;
+    if (platformAdmin) {
+      localStorage.setItem('isPlatformAdmin', 'true');
+    } else {
+      localStorage.removeItem('isPlatformAdmin');
+    }
     this._role.set(role);
+    this._isPlatformAdmin.set(platformAdmin);
     this._currentEmail.set(email);
     this._authenticated.set(true);
   }
@@ -112,7 +135,9 @@ export class AuthService {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('role');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('isPlatformAdmin');
     this._role.set(null);
+    this._isPlatformAdmin.set(false);
     this._currentEmail.set('');
     this._authenticated.set(false);
     this.router.navigateByUrl('/login');

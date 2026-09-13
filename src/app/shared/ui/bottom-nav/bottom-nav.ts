@@ -13,6 +13,10 @@ interface NavItem {
   bar?: true;
   /** Solo visible para dueño y administradores. */
   admin?: true;
+  /** Solo visible para el administrador de plataforma (QK-19). */
+  platformAdmin?: true;
+  /** Visible aunque la organización no esté validada: no opera sus datos. */
+  open?: true;
 }
 
 /**
@@ -26,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
     key: 'organizacion',
     label: 'Mi comedor',
     bar: true,
+    open: true,
     d: ['M3 10.5 12 3l9 7.5', 'M5 9.5V21h14V9.5', 'M9 21v-6h6v6'],
   },
   {
@@ -74,6 +79,14 @@ const NAV_ITEMS: NavItem[] = [
     admin: true,
     d: ['M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20', 'M17 11.2a3 3 0 0 0 0-5.9M22 20v-1.5a4 4 0 0 0-3-3.8'],
     c: [9, 7, 3.2],
+  },
+  {
+    key: 'validacion',
+    label: 'Validación',
+    platformAdmin: true,
+    // Abierto: el administrador tiene que poder validar su propia org pendiente.
+    open: true,
+    d: ['M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3z', 'M8.5 12l2.5 2.5 4.5-5'],
   },
 ];
 
@@ -394,6 +407,10 @@ const LOGOUT_ICON = ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'M16 17l5-5-5-5'
 export class BottomNav {
   /** El tab Usuarios solo existe para dueño y administradores. */
   readonly canManageMembers = input(false);
+  /** El tab Validación solo existe para el administrador de plataforma. */
+  readonly isPlatformAdmin = input(false);
+  /** Organización validada; sin ella solo quedan los items `open`. */
+  readonly canOperate = input(false);
   /**
    * Segmento activo, ya resuelto por AppLayout (colapsa sub-vistas como
    * `puntos/nuevo` → `puntos`). Se usa para iluminar el botón Menú cuando la
@@ -408,7 +425,12 @@ export class BottomNav {
   readonly logoutIcon = LOGOUT_ICON;
 
   readonly items = computed(() =>
-    NAV_ITEMS.filter((i) => !i.admin || this.canManageMembers()),
+    NAV_ITEMS.filter(
+      (i) =>
+        (i.open || this.canOperate()) &&
+        (!i.admin || this.canManageMembers()) &&
+        (!i.platformAdmin || this.isPlatformAdmin()),
+    ),
   );
   readonly menuActive = computed(() =>
     NAV_ITEMS.some((i) => !i.bar && i.key === this.currentTab()),

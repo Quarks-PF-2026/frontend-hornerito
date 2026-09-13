@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { contentWriterGuard, memberManagerGuard } from './core/guards/role.guard';
+import { validatedOrgGuard } from './core/guards/org.guard';
+import {
+  contentWriterGuard,
+  memberManagerGuard,
+  platformAdminGuard,
+} from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -68,94 +73,112 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'usuarios',
-        canActivate: [memberManagerGuard],
-        loadComponent: () =>
-          import('./features/organizacion/pages/usuarios/usuarios').then((m) => m.UsuariosPage),
+        // Todo lo que opera datos de la organización exige que esté validada.
+        // Padre sin path: no cambia ninguna URL y una sección nueva queda
+        // bloqueada por defecto. Mi comedor y Validación quedan afuera a
+        // propósito: son las dos pantallas que tienen sentido con la org pendiente.
+        path: '',
+        canActivateChild: [validatedOrgGuard],
+        children: [
+          {
+            path: 'usuarios',
+            canActivate: [memberManagerGuard],
+            loadComponent: () =>
+              import('./features/organizacion/pages/usuarios/usuarios').then((m) => m.UsuariosPage),
+          },
+          {
+            path: 'publicaciones',
+            loadComponent: () =>
+              import('./features/publicaciones/pages/publicaciones/publicaciones').then(
+                (m) => m.PublicacionesPage,
+              ),
+          },
+          {
+            path: 'necesidades',
+            loadComponent: () =>
+              import('./features/necesidades/pages/necesidades/necesidades').then(
+                (m) => m.NecesidadesPage,
+              ),
+          },
+          {
+            path: 'donaciones',
+            loadComponent: () =>
+              import('./features/donaciones/pages/donaciones/donaciones').then((m) => m.DonacionesPage),
+          },
+          {
+            path: 'donaciones/nueva',
+            loadComponent: () =>
+              import('./features/donaciones/pages/donacion-form/donacion-form').then(
+                (m) => m.DonacionFormPage,
+              ),
+          },
+          {
+            path: 'puntos',
+            loadComponent: () =>
+              import('./features/puntos/pages/puntos/puntos').then((m) => m.PuntosPage),
+          },
+          {
+            path: 'puntos/nuevo',
+            loadComponent: () =>
+              import('./features/puntos/pages/punto-form/punto-form').then((m) => m.PuntoFormPage),
+          },
+          {
+            path: 'puntos/:id/editar',
+            loadComponent: () =>
+              import('./features/puntos/pages/punto-form/punto-form').then((m) => m.PuntoFormPage),
+          },
+          {
+            path: 'voluntariado',
+            loadComponent: () =>
+              import('./features/voluntariado/pages/oportunidades/oportunidades').then(
+                (m) => m.OportunidadesPage,
+              ),
+          },
+          {
+            path: 'voluntariado/nueva',
+            loadComponent: () =>
+              import('./features/voluntariado/pages/oportunidad-form/oportunidad-form').then(
+                (m) => m.OportunidadFormPage,
+              ),
+          },
+          {
+            path: 'voluntariado/:id/editar',
+            loadComponent: () =>
+              import('./features/voluntariado/pages/oportunidad-form/oportunidad-form').then(
+                (m) => m.OportunidadFormPage,
+              ),
+          },
+          {
+            // Antes de las rutas con `:id` para que se lea junto al resto del
+            // voluntariado; no hay colisión real con `voluntariado/:id`.
+            path: 'voluntariado/solicitudes',
+            canActivate: [contentWriterGuard],
+            loadComponent: () =>
+              import('./features/voluntariado/pages/solicitudes/solicitudes').then(
+                (m) => m.SolicitudesPage,
+              ),
+          },
+          {
+            path: 'voluntariado/:id/postulaciones',
+            loadComponent: () =>
+              import('./features/voluntariado/pages/postulaciones/postulaciones').then(
+                (m) => m.PostulacionesPage,
+              ),
+          },
+          {
+            path: 'insumos',
+            loadComponent: () =>
+              import('./features/insumos/pages/insumos/insumos').then((m) => m.InsumosPage),
+          },
+        ],
       },
       {
-        path: 'publicaciones',
+        path: 'validacion',
+        canActivate: [platformAdminGuard],
         loadComponent: () =>
-          import('./features/publicaciones/pages/publicaciones/publicaciones').then(
-            (m) => m.PublicacionesPage,
+          import('./features/administracion/pages/validacion/validacion').then(
+            (m) => m.ValidacionPage,
           ),
-      },
-      {
-        path: 'necesidades',
-        loadComponent: () =>
-          import('./features/necesidades/pages/necesidades/necesidades').then(
-            (m) => m.NecesidadesPage,
-          ),
-      },
-      {
-        path: 'donaciones',
-        loadComponent: () =>
-          import('./features/donaciones/pages/donaciones/donaciones').then((m) => m.DonacionesPage),
-      },
-      {
-        path: 'donaciones/nueva',
-        loadComponent: () =>
-          import('./features/donaciones/pages/donacion-form/donacion-form').then(
-            (m) => m.DonacionFormPage,
-          ),
-      },
-      {
-        path: 'puntos',
-        loadComponent: () =>
-          import('./features/puntos/pages/puntos/puntos').then((m) => m.PuntosPage),
-      },
-      {
-        path: 'puntos/nuevo',
-        loadComponent: () =>
-          import('./features/puntos/pages/punto-form/punto-form').then((m) => m.PuntoFormPage),
-      },
-      {
-        path: 'puntos/:id/editar',
-        loadComponent: () =>
-          import('./features/puntos/pages/punto-form/punto-form').then((m) => m.PuntoFormPage),
-      },
-      {
-        path: 'voluntariado',
-        loadComponent: () =>
-          import('./features/voluntariado/pages/oportunidades/oportunidades').then(
-            (m) => m.OportunidadesPage,
-          ),
-      },
-      {
-        path: 'voluntariado/nueva',
-        loadComponent: () =>
-          import('./features/voluntariado/pages/oportunidad-form/oportunidad-form').then(
-            (m) => m.OportunidadFormPage,
-          ),
-      },
-      {
-        path: 'voluntariado/:id/editar',
-        loadComponent: () =>
-          import('./features/voluntariado/pages/oportunidad-form/oportunidad-form').then(
-            (m) => m.OportunidadFormPage,
-          ),
-      },
-      {
-        // Antes de las rutas con `:id` para que se lea junto al resto del
-        // voluntariado; no hay colisión real con `voluntariado/:id`.
-        path: 'voluntariado/solicitudes',
-        canActivate: [contentWriterGuard],
-        loadComponent: () =>
-          import('./features/voluntariado/pages/solicitudes/solicitudes').then(
-            (m) => m.SolicitudesPage,
-          ),
-      },
-      {
-        path: 'voluntariado/:id/postulaciones',
-        loadComponent: () =>
-          import('./features/voluntariado/pages/postulaciones/postulaciones').then(
-            (m) => m.PostulacionesPage,
-          ),
-      },
-      {
-        path: 'insumos',
-        loadComponent: () =>
-          import('./features/insumos/pages/insumos/insumos').then((m) => m.InsumosPage),
       },
     ],
   },
