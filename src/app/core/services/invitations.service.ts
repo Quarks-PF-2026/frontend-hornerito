@@ -41,6 +41,7 @@ export class InvitationsService {
             res.role,
             res.user.email,
             res.user.isPlatformAdmin === true,
+            res.user.name,
           ),
         ),
       );

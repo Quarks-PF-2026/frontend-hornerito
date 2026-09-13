@@ -1,0 +1,109 @@
+@if (loading()) {
+  <div class="hint">Cargando tu perfil…</div>
+} @else {
+  <div class="hn-card section">
+    <div class="section-title hn-head">Datos personales</div>
+
+    <div class="field">
+      <label class="hn-label">Correo electrónico</label>
+      <input class="hn-input" type="email" [value]="email()" disabled />
+      <div class="hint">El correo no se puede modificar.</div>
+    </div>
+
+    <div class="field">
+      <label class="hn-label" for="p-name">Nombre</label>
+      <input
+        id="p-name"
+        class="hn-input"
+        type="text"
+        placeholder="Nombre y apellido"
+        [value]="name()"
+        (input)="name.set($any($event.target).value)"
+      />
+      @if (errors()['name']) {
+        <div class="hn-field-error">{{ errors()['name'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label" for="p-phone">Teléfono (opcional)</label>
+      <input
+        id="p-phone"
+        class="hn-input"
+        type="tel"
+        inputmode="tel"
+        placeholder="Ej: +5493511234567"
+        [value]="phone()"
+        (input)="phone.set($any($event.target).value)"
+      />
+      @if (errors()['phone']) {
+        <div class="hn-field-error">{{ errors()['phone'] }}</div>
+      }
+    </div>
+
+    <button
+      class="hn-btn hn-btn--primary hn-btn--block"
+      type="button"
+      [disabled]="saving()"
+      (click)="saveProfile()"
+    >
+      {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+    </button>
+  </div>
+
+  <div class="hn-card section">
+    <div class="section-title hn-head">Cambiar contraseña</div>
+
+    <div class="field">
+      <label class="hn-label" for="p-current">Contraseña actual</label>
+      <input
+        id="p-current"
+        class="hn-input"
+        type="password"
+        [value]="currentPassword()"
+        (input)="currentPassword.set($any($event.target).value)"
+      />
+      @if (passwordErrors()['currentPassword']) {
+        <div class="hn-field-error">{{ passwordErrors()['currentPassword'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label" for="p-new">Nueva contraseña</label>
+      <input
+        id="p-new"
+        class="hn-input"
+        type="password"
+        placeholder="Mínimo 8 caracteres"
+        [value]="newPassword()"
+        (input)="newPassword.set($any($event.target).value)"
+      />
+      @if (passwordErrors()['newPassword']) {
+        <div class="hn-field-error">{{ passwordErrors()['newPassword'] }}</div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="hn-label" for="p-confirm">Repetir nueva contraseña</label>
+      <input
+        id="p-confirm"
+        class="hn-input"
+        type="password"
+        [value]="confirmNewPassword()"
+        (input)="confirmNewPassword.set($any($event.target).value)"
+      />
+      @if (passwordErrors()['confirmNewPassword']) {
+        <div class="hn-field-error">{{ passwordErrors()['confirmNewPassword'] }}</div>
+      }
+    </div>
+
+    <button
+      class="hn-btn hn-btn--outline hn-btn--block"
+      type="button"
+      [disabled]="changingPassword()"
+      (click)="changePassword()"
+    >
+      {{ changingPassword() ? 'Actualizando…' : 'Cambiar contraseña' }}
+    </button>
+  </div>
+}

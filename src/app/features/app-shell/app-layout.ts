@@ -26,6 +26,7 @@ const TABS: Record<string, TabMeta> = {
   insumos: { kicker: 'Catálogo', title: 'Insumos', fab: 'Insumo' },
   usuarios: { kicker: 'Tu equipo', title: 'Usuarios', fab: '' },
   validacion: { kicker: 'Plataforma', title: 'Validar organizaciones', fab: '' },
+  perfil: { kicker: 'Tu cuenta', title: 'Mi Perfil', fab: '' },
 };
 
 @Component({
@@ -56,6 +57,8 @@ export class AppLayout {
       case 'usuarios':
       // Validación no crea nada: solo decide sobre lo que ya llegó.
       case 'validacion':
+      // Perfil no crea nada: es un formulario de edición, no una lista.
+      case 'perfil':
         return false;
       case 'organizacion':
         return this.auth.isOwner();
