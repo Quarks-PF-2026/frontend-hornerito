@@ -71,6 +71,8 @@ export class OrgService {
             res.role,
             res.user.email,
             res.user.isPlatformAdmin,
+            res.user.name,
+            res.user.phone,
           ),
         ),
         map(() => org),

@@ -88,6 +88,14 @@ const NAV_ITEMS: NavItem[] = [
     open: true,
     d: ['M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3z', 'M8.5 12l2.5 2.5 4.5-5'],
   },
+  {
+    key: 'perfil',
+    label: 'Mi Perfil',
+    // Dato de la persona, no de la organización (QK-11): visible sin importar
+    // el estado de validación.
+    open: true,
+    d: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M4.5 20c0-4 3.5-6.5 7.5-6.5s7.5 2.5 7.5 6.5'],
+  },
 ];
 
 const MENU_ICON = ['M4 7h16', 'M4 12h16', 'M4 17h16'];

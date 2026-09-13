@@ -1,0 +1,25 @@
+.hint {
+  color: var(--hn-muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.section {
+  max-width: 620px;
+  margin: 0 auto 16px;
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.hn-input:disabled {
+  color: var(--hn-muted);
+  cursor: not-allowed;
+}

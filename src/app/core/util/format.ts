@@ -12,3 +12,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function emailOk(e: string): boolean {
   return EMAIL_RE.test(e);
 }
+
+/** '+' opcional seguido de 8 a 15 dígitos, sin espacios ni guiones (QK-11). */
+const PHONE_RE = /^\+?\d{8,15}$/;
+export function phoneOk(p: string): boolean {
+  return PHONE_RE.test(p);
+}

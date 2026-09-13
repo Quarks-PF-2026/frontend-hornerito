@@ -73,6 +73,12 @@ export const routes: Routes = [
           ),
       },
       {
+        // Datos de la persona, no de la organización (QK-11): cualquier
+        // usuario logueado entra, sin exigir rol ni organización validada.
+        path: 'perfil',
+        loadComponent: () => import('./features/perfil/pages/perfil/perfil').then((m) => m.PerfilPage),
+      },
+      {
         // Todo lo que opera datos de la organización exige que esté validada.
         // Padre sin path: no cambia ninguna URL y una sección nueva queda
         // bloqueada por defecto. Mi comedor y Validación quedan afuera a
