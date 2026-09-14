@@ -17,3 +17,11 @@ export const contentWriterGuard: CanActivateFn = () => {
   const router = inject(Router);
   return canWriteContent(auth.role()) ? true : router.createUrlTree(['/app/organizacion']);
 };
+
+/** Validación de organizaciones (QK-19): solo el administrador de plataforma.
+ * Como los otros guards, evita una pantalla vacía; el 403 real lo da el backend. */
+export const platformAdminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return auth.isPlatformAdmin() ? true : router.createUrlTree(['/app/organizacion']);
+};

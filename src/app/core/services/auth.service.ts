@@ -14,7 +14,7 @@ export interface LoginResult {
 
 export interface LoginResponse {
   accessToken: string;
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; isPlatformAdmin: boolean; phone: string | null };
   role: MemberRole | null;
 }
 
@@ -41,9 +41,27 @@ export class AuthService {
   readonly canManageMembers = computed(() => canManageMembers(this._role()));
   readonly isOwner = computed(() => this._role() === 'owner');
 
+  /**
+   * Administrador de plataforma (QK-19): es un atributo del usuario, no de la
+   * membresía, así que no depende de la organización activa. Igual que el rol,
+   * solo arma el menú: el backend revalida en cada request a `/admin/*`.
+   */
+  private readonly _isPlatformAdmin = signal(localStorage.getItem('isPlatformAdmin') === 'true');
+  readonly isPlatformAdmin = this._isPlatformAdmin.asReadonly();
+
   /** Correo de la sesión activa, para no ofrecerse acciones sobre uno mismo. */
   private readonly _currentEmail = signal(localStorage.getItem('userEmail') ?? '');
   readonly currentEmail = this._currentEmail.asReadonly();
+
+  /**
+   * Nombre y teléfono de la sesión activa (QK-11). Se guardan acá, y no solo
+   * en el estado local de la página de perfil, para que un menú o saludo que
+   * los use en el futuro no dependa de un nuevo login para verlos al día.
+   */
+  private readonly _currentName = signal(localStorage.getItem('userName') ?? '');
+  readonly currentName = this._currentName.asReadonly();
+  private readonly _currentPhone = signal<string | null>(localStorage.getItem('userPhone'));
+  readonly currentPhone = this._currentPhone.asReadonly();
 
   /** Correo del último registro, para la pantalla de verificación. */
   readonly registeredEmail = signal('');
@@ -82,7 +100,16 @@ export class AuthService {
 
   login(email: string, pass: string): Observable<LoginResult> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password: pass }).pipe(
-      tap((res) => this.startSession(res.accessToken, res.role, res.user.email)),
+      tap((res) =>
+        this.startSession(
+          res.accessToken,
+          res.role,
+          res.user.email,
+          res.user.isPlatformAdmin,
+          res.user.name,
+          res.user.phone,
+        ),
+      ),
       map((): LoginResult => ({ ok: true, unverified: false, error: '' })),
       catchError((err: HttpErrorResponse) => {
         const unverified = Boolean(err.error?.unverified);
@@ -94,8 +121,20 @@ export class AuthService {
     );
   }
 
-  /** Guarda la sesión; la usan el login y la aceptación de una invitación. */
-  startSession(accessToken: string, role: MemberRole | null, email: string): void {
+  /**
+   * Guarda la sesión; la usan el login, la aceptación de una invitación y el
+   * cambio de organización activa. `name`/`phone` son opcionales porque no
+   * todos esos flujos los devuelven todavía (QK-11 solo lo confirmó para
+   * login) — si faltan, se conserva lo que ya había en la sesión.
+   */
+  startSession(
+    accessToken: string,
+    role: MemberRole | null,
+    email: string,
+    isPlatformAdmin: boolean,
+    name?: string,
+    phone?: string | null,
+  ): void {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('userEmail', email);
     if (role) {
@@ -103,17 +142,58 @@ export class AuthService {
     } else {
       localStorage.removeItem('role');
     }
+    // Estricto contra `true`: una respuesta sin el campo no promueve a nadie.
+    const platformAdmin = isPlatformAdmin === true;
+    if (platformAdmin) {
+      localStorage.setItem('isPlatformAdmin', 'true');
+    } else {
+      localStorage.removeItem('isPlatformAdmin');
+    }
     this._role.set(role);
+    this._isPlatformAdmin.set(platformAdmin);
     this._currentEmail.set(email);
     this._authenticated.set(true);
+    if (name !== undefined) this.setSessionName(name);
+    if (phone !== undefined) this.setSessionPhone(phone);
+  }
+
+  /**
+   * Actualiza nombre/teléfono reflejados en la sesión después de un PATCH
+   * exitoso a `/profile` (QK-11), para que un consumidor futuro (menú,
+   * top-bar) no necesite un nuevo login para verlos al día. El componente de
+   * perfil no escribe `localStorage` directamente: pasa siempre por acá.
+   */
+  updateProfileSession(name: string, phone: string | null): void {
+    this.setSessionName(name);
+    this.setSessionPhone(phone);
+  }
+
+  private setSessionName(name: string): void {
+    localStorage.setItem('userName', name);
+    this._currentName.set(name);
+  }
+
+  private setSessionPhone(phone: string | null): void {
+    if (phone) {
+      localStorage.setItem('userPhone', phone);
+    } else {
+      localStorage.removeItem('userPhone');
+    }
+    this._currentPhone.set(phone);
   }
 
   logout(): void {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('role');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('isPlatformAdmin');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userPhone');
     this._role.set(null);
+    this._isPlatformAdmin.set(false);
     this._currentEmail.set('');
+    this._currentName.set('');
+    this._currentPhone.set(null);
     this._authenticated.set(false);
     this.router.navigateByUrl('/login');
   }

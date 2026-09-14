@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ModalService } from '../../core/services/modal.service';
+import { OrgService } from '../../core/services/org.service';
 import { TopBar } from '../../shared/ui/top-bar/top-bar';
 import { BottomNav } from '../../shared/ui/bottom-nav/bottom-nav';
 import { Toast } from '../../shared/ui/toast/toast';
@@ -24,6 +25,8 @@ const TABS: Record<string, TabMeta> = {
   voluntariado: { kicker: 'Quién ayuda', title: 'Voluntariado', fab: 'Actividad' },
   insumos: { kicker: 'Catálogo', title: 'Insumos', fab: 'Insumo' },
   usuarios: { kicker: 'Tu equipo', title: 'Usuarios', fab: '' },
+  validacion: { kicker: 'Plataforma', title: 'Validar organizaciones', fab: '' },
+  perfil: { kicker: 'Tu cuenta', title: 'Mi Perfil', fab: '' },
 };
 
 @Component({
@@ -38,6 +41,7 @@ export class AppLayout {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   private readonly modal = inject(ModalService);
+  private readonly orgSvc = inject(OrgService);
 
   readonly tab = signal(this.currentTab());
   private readonly subView = signal(this.isSubView());
@@ -51,15 +55,25 @@ export class AppLayout {
     switch (this.tab()) {
       // Usuarios trae su propio botón "Invitar usuario".
       case 'usuarios':
+      // Validación no crea nada: solo decide sobre lo que ya llegó.
+      case 'validacion':
+      // Perfil no crea nada: es un formulario de edición, no una lista.
+      case 'perfil':
         return false;
       case 'organizacion':
         return this.auth.isOwner();
+      // Con la organización sin validar, el alta termina en 403: no se ofrece.
       default:
-        return this.auth.canWriteContent();
+        return this.auth.canWriteContent() && this.orgSvc.canOperate();
     }
   });
 
   constructor() {
+    // El menú depende del estado de la organización desde cualquier pantalla,
+    // no solo desde Mi comedor, que era la única que la cargaba. Un fallo acá
+    // deja el menú restringido, que es el lado seguro.
+    this.orgSvc.load().subscribe({ error: () => undefined });
+
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -86,6 +100,8 @@ export class AppLayout {
   }
 
   readonly canManageMembers = this.auth.canManageMembers;
+  readonly isPlatformAdmin = this.auth.isPlatformAdmin;
+  readonly canOperate = this.orgSvc.canOperate;
 
   logout(): void {
     this.auth.logout();
