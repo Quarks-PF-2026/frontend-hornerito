@@ -3,12 +3,14 @@ import { Router } from '@angular/router';
 import { CATS, CAT_BG, CAT_ICON, DEFAULT_CAT_ICON } from '../../../../core/models/catalog';
 import { PublicOrgSummary } from '../../../../core/models/public.model';
 import { PublicService } from '../../../../core/services/public.service';
+import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [LocalityPipe],
   templateUrl: './explorar.html',
   styleUrl: './explorar.scss',
 })

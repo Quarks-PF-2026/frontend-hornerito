@@ -26,6 +26,9 @@
       </div>
       <h1 class="hn-head">{{ o.name }}</h1>
       <p class="address">📍 {{ o.address }}</p>
+      @if (o.locality) {
+        <p class="address">🏙️ {{ o.locality | hnLocality: o.province }}</p>
+      }
       <p class="desc">{{ o.description }}</p>
 
       @if (contactOpen()) {

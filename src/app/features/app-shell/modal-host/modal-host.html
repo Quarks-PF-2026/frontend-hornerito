@@ -27,6 +27,14 @@
                   }
                 </select>
               }
+              @case ('locality') {
+                <hn-locality-picker
+                  [value]="fld.value"
+                  [placeholder]="fld.placeholder"
+                  (picked)="modal.pickLocality($event)"
+                />
+                <div class="hint">Opcional. Elegí una de las sugerencias.</div>
+              }
               @case ('date') {
                 <input
                   class="hn-input"

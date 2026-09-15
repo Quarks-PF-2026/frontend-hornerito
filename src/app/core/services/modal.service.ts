@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CATS, UNITS } from '../models/catalog';
+import { PickedLocality, localityLabel } from '../models/org.model';
 import { OrgService } from './org.service';
 import { PostsService } from './posts.service';
 import { NeedsService } from './needs.service';
@@ -8,7 +9,7 @@ import { SuppliesService } from './supplies.service';
 import { ToastService } from './toast.service';
 
 export type ModalKind = 'org' | 'post' | 'need' | 'progress' | 'supply' | 'confirm' | 'preview';
-export type FieldType = 'text' | 'textarea' | 'select' | 'date';
+export type FieldType = 'text' | 'textarea' | 'select' | 'date' | 'locality';
 
 export interface SelectOption {
   value: string;
@@ -89,6 +90,9 @@ export class ModalService {
         paymentHolder: o?.paymentHolder ?? '',
         paymentCuit: o?.paymentCuit ?? '',
         paymentBank: o?.paymentBank ?? '',
+        locality: o?.locality ?? '',
+        province: o?.province ?? '',
+        country: o?.country ?? '',
       },
     );
   }
@@ -149,6 +153,19 @@ export class ModalService {
   setField(key: string, value: string | boolean): void {
     this._form.update((f) => ({ ...f, [key]: value }));
     this._errors.update((e) => ({ ...e, [key]: '' }));
+  }
+
+  /**
+   * Elegir una sugerencia setea el trío de una: cargarlo campo por campo
+   * dejaría una localidad con la provincia de la anterior (Caso 4 de QK-112).
+   */
+  pickLocality(picked: PickedLocality): void {
+    this._form.update((f) => ({
+      ...f,
+      locality: picked.locality,
+      province: picked.province ?? '',
+      country: picked.country ?? '',
+    }));
   }
 
   str(key: string): string {
@@ -234,6 +251,9 @@ export class ModalService {
           this.text('name', 'Nombre del comedor', 'Ej: Comedor Manos del Barrio', e),
           this.area('description', 'Descripción', '¿A quiénes ayudan y cómo?', e),
           this.text('address', 'Dirección', 'Calle, número, ciudad', e),
+          // Localidad (QK-112): se elige de las sugerencias, no se escribe a
+          // mano, y es opcional — el perfil se guarda igual sin ella.
+          this.locality('locality', 'Localidad', e),
           this.text('contact', 'Contacto', 'Teléfono y/o correo', e),
           // Datos bancarios (QK-20): con el alias cargado, la ficha pública
           // ofrece donar dinero. Los cuatro son opcionales.
@@ -311,6 +331,16 @@ export class ModalService {
   ): FormField {
     return { ...this.base(key, label, e), type: 'select', options };
   }
+  /** Campo con sugerencias del geocoder. Muestra lo ya elegido, no lo tipeado. */
+  private locality(key: string, label: string, e: Record<string, string>): FormField {
+    return {
+      ...this.base(key, label, e),
+      type: 'locality',
+      value: localityLabel(this.str('locality') || null, this.str('province') || null),
+      placeholder: 'Ej: Villa María',
+    };
+  }
+
   private date(key: string, label: string, e: Record<string, string>): FormField {
     return { ...this.base(key, label, e), type: 'date', placeholder: 'AAAA-MM-DD' };
   }
@@ -343,6 +373,11 @@ export class ModalService {
           paymentHolder: this.str('paymentHolder'),
           paymentCuit: this.str('paymentCuit'),
           paymentBank: this.str('paymentBank'),
+          // Las tres juntas: el backend las escribe como una unidad, y con
+          // `locality` vacío deja la ubicación guardada sin tocar.
+          locality: this.str('locality'),
+          province: this.str('province'),
+          country: this.str('country'),
         })
         .subscribe({
           next: () => {

@@ -13,6 +13,9 @@ export interface PublicOrgSummary {
   name: string;
   description: string;
   address: string;
+  /** Ubicación normalizada (QK-112). Null si todavía no la cargaron. */
+  locality: string | null;
+  province: string | null;
   logoUrl: string | null;
   coverUrl: string | null;
   openNeedsCount: number;
@@ -108,6 +111,9 @@ export interface PublicOrgDetail {
   name: string;
   description: string;
   address: string;
+  /** Ubicación normalizada (QK-112). Null si todavía no la cargaron. */
+  locality: string | null;
+  province: string | null;
   contact: string;
   logoUrl: string | null;
   coverUrl: string | null;

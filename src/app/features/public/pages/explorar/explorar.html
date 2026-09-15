@@ -71,6 +71,9 @@
 
           <h2 class="name hn-head">{{ org.name }}</h2>
           <p class="address">{{ org.address }}</p>
+          @if (org.locality) {
+            <p class="address">{{ org.locality | hnLocality: org.province }}</p>
+          }
           <p class="desc">{{ org.description }}</p>
 
           @if (org.categories.length) {
