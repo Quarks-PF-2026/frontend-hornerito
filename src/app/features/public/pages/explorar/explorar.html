@@ -19,6 +19,22 @@
     />
   </div>
 
+  @if (localities().length) {
+    <div class="search">
+      <select
+        class="hn-select"
+        aria-label="Filtrar por localidad"
+        [value]="locality() ?? ''"
+        (change)="filterByLocality($any($event.target).value)"
+      >
+        <option value="">Todas las localidades</option>
+        @for (l of localities(); track l.locality + (l.province ?? '')) {
+          <option [value]="l.locality">{{ l.locality | hnLocality: l.province }}</option>
+        }
+      </select>
+    </div>
+  }
+
   <div class="chips" role="group" aria-label="Filtrar por tipo de insumo">
     @for (cat of cats; track cat) {
       <button
@@ -73,7 +89,7 @@
     <div class="notice hn-card">
       <p class="notice-title hn-head">Sin resultados</p>
       <p>
-        Probá con otro nombre o quitá el filtro de insumo. Las organizaciones aparecen acá
+        Probá con otro nombre o quitá el filtro de insumo o de localidad. Las organizaciones aparecen acá
         cuando su cuenta queda validada.
       </p>
     </div>

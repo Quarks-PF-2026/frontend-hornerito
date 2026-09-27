@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CATS, CAT_BG, CAT_ICON, DEFAULT_CAT_ICON } from '../../../../core/models/catalog';
-import { PublicFeedNeed, PublicOrgSummary } from '../../../../core/models/public.model';
+import { PublicFeedNeed, PublicLocality, PublicOrgSummary } from '../../../../core/models/public.model';
 import { PublicService } from '../../../../core/services/public.service';
 import { dueLabel } from '../../../../core/util/format';
 import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
@@ -61,6 +61,8 @@ export class ExplorarPage implements OnDestroy {
   readonly failed = signal(false);
   readonly query = signal('');
   readonly category = signal<string | null>(null);
+  readonly localities = signal<PublicLocality[]>([]);
+  readonly locality = signal<string | null>(null);
   readonly expiring = signal<ExpiringRow[]>([]);
 
   readonly hasMore = computed(() => this.items().length < this.total());
@@ -74,6 +76,7 @@ export class ExplorarPage implements OnDestroy {
   constructor() {
     this.fetch();
     this.fetchExpiring();
+    this.fetchLocalities();
   }
 
   ngOnDestroy(): void {
@@ -109,6 +112,11 @@ export class ExplorarPage implements OnDestroy {
     this.reload();
   }
 
+  filterByLocality(value: string): void {
+    this.locality.set(value || null);
+    this.reload();
+  }
+
   open(id: string): void {
     void this.router.navigate(['/organizacion', id]);
   }
@@ -136,6 +144,14 @@ export class ExplorarPage implements OnDestroy {
     });
   }
 
+  /** Si falla, el selector no se muestra: se puede buscar igual sin él. */
+  private fetchLocalities(): void {
+    this.api.localities().subscribe({
+      next: (localities) => this.localities.set(localities),
+      error: () => this.localities.set([]),
+    });
+  }
+
   private fetch(append = false): void {
     this.loading.set(true);
     this.failed.set(false);
@@ -143,6 +159,7 @@ export class ExplorarPage implements OnDestroy {
       .organizations({
         q: this.query(),
         category: this.category() ?? undefined,
+        locality: this.locality() ?? undefined,
         page: this.page,
       })
       .subscribe({

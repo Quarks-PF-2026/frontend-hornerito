@@ -22,6 +22,12 @@ export interface PublicOrgSummary {
   categories: string[];
 }
 
+/** Una localidad con organizaciones validadas, para el filtro del inicio (QK-109). */
+export interface PublicLocality {
+  locality: string;
+  province: string | null;
+}
+
 export interface PublicNeed {
   id: string;
   supplyName: string;
