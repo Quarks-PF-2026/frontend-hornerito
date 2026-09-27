@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   MonetaryDonationPayload,
-  PublicNeed,
+  PublicFeedNeed,
   PublicOrgDetail,
   PublicOrgSummary,
   PublicPage,
@@ -16,6 +16,8 @@ export interface PublicQuery {
   category?: string;
   page?: number;
   pageSize?: number;
+  /** Solo `/public/needs`: las que vencen entre hoy y hoy + N días. */
+  withinDays?: number;
 }
 
 /** Directorio público: se consume sin sesión, el backend no pide token. */
@@ -79,8 +81,8 @@ export class PublicService {
     );
   }
 
-  needs(query: PublicQuery = {}): Observable<PublicPage<PublicNeed>> {
-    return this.http.get<PublicPage<PublicNeed>>(`${this.apiUrl}/public/needs`, {
+  needs(query: PublicQuery = {}): Observable<PublicPage<PublicFeedNeed>> {
+    return this.http.get<PublicPage<PublicFeedNeed>>(`${this.apiUrl}/public/needs`, {
       params: toParams(query),
     });
   }

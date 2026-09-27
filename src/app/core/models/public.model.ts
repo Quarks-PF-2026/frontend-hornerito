@@ -32,6 +32,13 @@ export interface PublicNeed {
   deadline: string;
 }
 
+/** Necesidad del feed global (`/public/needs`): trae de qué organización es. */
+export interface PublicFeedNeed extends PublicNeed {
+  organizationId: string;
+  organizationName: string;
+  organizationLogoUrl: string | null;
+}
+
 export interface PublicCollectionPoint {
   id: string;
   name: string;

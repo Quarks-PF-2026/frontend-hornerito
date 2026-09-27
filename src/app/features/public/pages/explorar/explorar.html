@@ -35,6 +35,34 @@
   </div>
 </section>
 
+@if (expiring().length) {
+  <section class="expiring" aria-labelledby="expiring-title">
+    <h2 id="expiring-title" class="hn-head">Por vencer</h2>
+    <p class="quiet">Necesidades que cierran en los próximos días.</p>
+    <div class="rail">
+      @for (need of expiring(); track need.id) {
+        <button type="button" class="need hn-card" (click)="open(need.organizationId)">
+          <div class="need-head">
+            <span class="ico" aria-hidden="true">{{ need.icon }}</span>
+            <div>
+              <p class="supply">{{ need.supply }}</p>
+              <p class="org-name">{{ need.organization }}</p>
+            </div>
+          </div>
+          <p class="due">{{ need.due }}</p>
+          <div class="need-progress">
+            <div class="row">
+              <span>{{ need.covered }} de {{ need.required }} {{ need.unit }}</span>
+              <span class="pct">{{ need.pct }}%</span>
+            </div>
+            <hn-progress-bar [pct]="need.pct" [color]="need.color" [height]="8" />
+          </div>
+        </button>
+      }
+    </div>
+  </section>
+}
+
 <section class="results">
   @if (failed()) {
     <div class="notice hn-card">
