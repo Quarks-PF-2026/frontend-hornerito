@@ -1,14 +1,52 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CATS, CAT_BG, CAT_ICON, DEFAULT_CAT_ICON } from '../../../../core/models/catalog';
-import { PublicOrgSummary } from '../../../../core/models/public.model';
+import { PublicFeedNeed, PublicLocality, PublicOrgSummary } from '../../../../core/models/public.model';
 import { PublicService } from '../../../../core/services/public.service';
+import { dueLabel } from '../../../../core/util/format';
+import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
+import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 
 const SEARCH_DEBOUNCE_MS = 300;
+/** "Por vencer" (QK-108): ventana y tope del carrusel. */
+const EXPIRING_DAYS = 7;
+const EXPIRING_MAX = 8;
+
+interface ExpiringRow {
+  id: string;
+  organizationId: string;
+  organization: string;
+  supply: string;
+  icon: string;
+  unit: string;
+  covered: number;
+  required: number;
+  pct: number;
+  color: string;
+  due: string;
+}
+
+function toExpiringRow(need: PublicFeedNeed): ExpiringRow {
+  const pct = Math.min(100, Math.round((need.coveredQuantity / need.requiredQuantity) * 100));
+  return {
+    id: need.id,
+    organizationId: need.organizationId,
+    organization: need.organizationName,
+    supply: need.supplyName,
+    icon: CAT_ICON[need.supplyCategory] ?? DEFAULT_CAT_ICON,
+    unit: need.supplyUnit.toLowerCase(),
+    covered: need.coveredQuantity,
+    required: need.requiredQuantity,
+    pct,
+    color: pct >= 50 ? 'var(--hn-primary)' : 'var(--hn-canela-200)',
+    due: dueLabel(need.deadline),
+  };
+}
 
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [LocalityPipe, ProgressBar],
   templateUrl: './explorar.html',
   styleUrl: './explorar.scss',
 })
@@ -23,6 +61,9 @@ export class ExplorarPage implements OnDestroy {
   readonly failed = signal(false);
   readonly query = signal('');
   readonly category = signal<string | null>(null);
+  readonly localities = signal<PublicLocality[]>([]);
+  readonly locality = signal<string | null>(null);
+  readonly expiring = signal<ExpiringRow[]>([]);
 
   readonly hasMore = computed(() => this.items().length < this.total());
   readonly empty = computed(
@@ -34,6 +75,8 @@ export class ExplorarPage implements OnDestroy {
 
   constructor() {
     this.fetch();
+    this.fetchExpiring();
+    this.fetchLocalities();
   }
 
   ngOnDestroy(): void {
@@ -69,6 +112,11 @@ export class ExplorarPage implements OnDestroy {
     this.reload();
   }
 
+  filterByLocality(value: string): void {
+    this.locality.set(value || null);
+    this.reload();
+  }
+
   open(id: string): void {
     void this.router.navigate(['/organizacion', id]);
   }
@@ -87,6 +135,23 @@ export class ExplorarPage implements OnDestroy {
     this.fetch();
   }
 
+  /** Fija: no depende de la búsqueda ni de los chips. */
+  private fetchExpiring(): void {
+    this.api.needs({ withinDays: EXPIRING_DAYS, pageSize: EXPIRING_MAX }).subscribe({
+      next: (result) => this.expiring.set(result.items.map(toExpiringRow)),
+      // Si falla, la sección no se muestra: la grilla de organizaciones sigue sola.
+      error: () => this.expiring.set([]),
+    });
+  }
+
+  /** Si falla, el selector no se muestra: se puede buscar igual sin él. */
+  private fetchLocalities(): void {
+    this.api.localities().subscribe({
+      next: (localities) => this.localities.set(localities),
+      error: () => this.localities.set([]),
+    });
+  }
+
   private fetch(append = false): void {
     this.loading.set(true);
     this.failed.set(false);
@@ -94,6 +159,7 @@ export class ExplorarPage implements OnDestroy {
       .organizations({
         q: this.query(),
         category: this.category() ?? undefined,
+        locality: this.locality() ?? undefined,
         page: this.page,
       })
       .subscribe({

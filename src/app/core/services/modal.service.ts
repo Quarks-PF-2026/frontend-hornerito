@@ -1,14 +1,18 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CATS, UNITS } from '../models/catalog';
+import { EventKind } from '../models/event.model';
+import { PickedLocality, localityLabel } from '../models/org.model';
+import { EventsService } from './events.service';
 import { OrgService } from './org.service';
 import { PostsService } from './posts.service';
 import { NeedsService } from './needs.service';
 import { SuppliesService } from './supplies.service';
 import { ToastService } from './toast.service';
 
-export type ModalKind = 'org' | 'post' | 'need' | 'progress' | 'supply' | 'confirm' | 'preview';
-export type FieldType = 'text' | 'textarea' | 'select' | 'date';
+export type ModalKind =
+  'org' | 'post' | 'need' | 'progress' | 'supply' | 'event' | 'confirm' | 'preview';
+export type FieldType = 'text' | 'textarea' | 'select' | 'date' | 'locality';
 
 export interface SelectOption {
   value: string;
@@ -30,10 +34,10 @@ interface ModalState {
   kind: ModalKind;
   mode?: 'new' | 'edit';
   id?: number | string | null;
-  sub?: 'post';
+  sub?: 'post' | 'event';
 }
 
-const FORM_KINDS: ModalKind[] = ['org', 'post', 'need', 'progress', 'supply'];
+const FORM_KINDS: ModalKind[] = ['org', 'post', 'need', 'progress', 'supply', 'event'];
 
 @Injectable({ providedIn: 'root' })
 export class ModalService {
@@ -41,6 +45,7 @@ export class ModalService {
   private readonly postsSvc = inject(PostsService);
   private readonly needsSvc = inject(NeedsService);
   private readonly suppliesSvc = inject(SuppliesService);
+  private readonly eventsSvc = inject(EventsService);
   private readonly toast = inject(ToastService);
 
   private readonly _modal = signal<ModalState | null>(null);
@@ -59,9 +64,17 @@ export class ModalService {
   readonly isConfirm = computed(() => this._modal()?.kind === 'confirm');
   readonly isPreview = computed(() => this._modal()?.kind === 'preview');
 
-  readonly confirmTitle = '¿Eliminar publicación?';
-  readonly confirmText =
-    'Esta acción no se puede deshacer. La publicación dejará de mostrarse en tu feed.';
+  readonly confirmTitle = computed(() =>
+    this._modal()?.sub === 'event' ? '¿Dar de baja el evento?' : '¿Eliminar publicación?',
+  );
+  readonly confirmText = computed(() =>
+    this._modal()?.sub === 'event'
+      ? 'Deja de ofrecerse para cargar nuevas ocurrencias. Las asistencias ya cargadas se conservan.'
+      : 'Esta acción no se puede deshacer. La publicación dejará de mostrarse en tu feed.',
+  );
+  readonly confirmActionLabel = computed(() =>
+    this._modal()?.sub === 'event' ? 'Dar de baja' : 'Eliminar',
+  );
 
   // ---------------- apertura ----------------
   private open(state: ModalState, form: Record<string, string | boolean> = {}): void {
@@ -89,6 +102,9 @@ export class ModalService {
         paymentHolder: o?.paymentHolder ?? '',
         paymentCuit: o?.paymentCuit ?? '',
         paymentBank: o?.paymentBank ?? '',
+        locality: o?.locality ?? '',
+        province: o?.province ?? '',
+        country: o?.country ?? '',
       },
     );
   }
@@ -145,10 +161,37 @@ export class ModalService {
     );
   }
 
+  newEvent(): void {
+    this.open({ kind: 'event', mode: 'new' }, { name: '', kind: 'periodic', startDate: '' });
+  }
+  editEvent(id: string): void {
+    const ev = this.eventsSvc.find(id);
+    if (!ev) return;
+    // Edición acotada al nombre (contrato §PUT /events/:id): cambiar tipo o
+    // fecha con asistencias ya cargadas da 409 en el backend.
+    this.open({ kind: 'event', mode: 'edit', id }, { name: ev.name });
+  }
+  confirmDeactivateEvent(id: string): void {
+    this.open({ kind: 'confirm', sub: 'event', id });
+  }
+
   // ---------------- edición de campos ----------------
   setField(key: string, value: string | boolean): void {
     this._form.update((f) => ({ ...f, [key]: value }));
     this._errors.update((e) => ({ ...e, [key]: '' }));
+  }
+
+  /**
+   * Elegir una sugerencia setea el trío de una: cargarlo campo por campo
+   * dejaría una localidad con la provincia de la anterior (Caso 4 de QK-112).
+   */
+  pickLocality(picked: PickedLocality): void {
+    this._form.update((f) => ({
+      ...f,
+      locality: picked.locality,
+      province: picked.province ?? '',
+      country: picked.country ?? '',
+    }));
   }
 
   str(key: string): string {
@@ -175,6 +218,8 @@ export class ModalService {
         return 'Actualizar progreso';
       case 'supply':
         return isNew ? 'Nuevo insumo' : 'Editar insumo';
+      case 'event':
+        return isNew ? 'Nuevo evento' : 'Editar evento';
       default:
         return '';
     }
@@ -199,6 +244,10 @@ export class ModalService {
       }
       case 'supply':
         return 'Definí el tipo de insumo del catálogo.';
+      case 'event':
+        return m.mode === 'new'
+          ? 'Un evento periódico se repite; uno extraordinario tiene una única fecha.'
+          : 'Solo se puede corregir el nombre.';
       default:
         return '';
     }
@@ -219,6 +268,8 @@ export class ModalService {
         return 'Actualizar';
       case 'supply':
         return isNew ? 'Agregar insumo' : 'Guardar';
+      case 'event':
+        return isNew ? 'Crear evento' : 'Guardar';
       default:
         return 'Guardar';
     }
@@ -234,6 +285,9 @@ export class ModalService {
           this.text('name', 'Nombre del comedor', 'Ej: Comedor Manos del Barrio', e),
           this.area('description', 'Descripción', '¿A quiénes ayudan y cómo?', e),
           this.text('address', 'Dirección', 'Calle, número, ciudad', e),
+          // Localidad (QK-112): se elige de las sugerencias, no se escribe a
+          // mano, y es opcional — el perfil se guarda igual sin ella.
+          this.locality('locality', 'Localidad', e),
           this.text('contact', 'Contacto', 'Teléfono y/o correo', e),
           // Datos bancarios (QK-20): con el alias cargado, la ficha pública
           // ofrece donar dinero. Los cuatro son opcionales.
@@ -275,6 +329,25 @@ export class ModalService {
             e,
           ),
         ];
+      case 'event': {
+        if (m.mode !== 'new') {
+          return [this.text('name', 'Nombre del evento', 'Ej: Merienda', e)];
+        }
+        const isOneOff = this.str('kind') === 'one_off';
+        return [
+          this.text('name', 'Nombre del evento', 'Ej: Merienda', e),
+          this.select(
+            'kind',
+            'Tipo',
+            [
+              { value: 'periodic', label: 'Periódico (se repite)' },
+              { value: 'one_off', label: 'Extraordinario (una fecha)' },
+            ],
+            e,
+          ),
+          this.date('startDate', isOneOff ? 'Fecha' : 'Desde', e),
+        ];
+      }
       default:
         return [];
     }
@@ -311,6 +384,16 @@ export class ModalService {
   ): FormField {
     return { ...this.base(key, label, e), type: 'select', options };
   }
+  /** Campo con sugerencias del geocoder. Muestra lo ya elegido, no lo tipeado. */
+  private locality(key: string, label: string, e: Record<string, string>): FormField {
+    return {
+      ...this.base(key, label, e),
+      type: 'locality',
+      value: localityLabel(this.str('locality') || null, this.str('province') || null),
+      placeholder: 'Ej: Villa María',
+    };
+  }
+
   private date(key: string, label: string, e: Record<string, string>): FormField {
     return { ...this.base(key, label, e), type: 'date', placeholder: 'AAAA-MM-DD' };
   }
@@ -343,6 +426,11 @@ export class ModalService {
           paymentHolder: this.str('paymentHolder'),
           paymentCuit: this.str('paymentCuit'),
           paymentBank: this.str('paymentBank'),
+          // Las tres juntas: el backend las escribe como una unidad, y con
+          // `locality` vacío deja la ubicación guardada sin tocar.
+          locality: this.str('locality'),
+          province: this.str('province'),
+          country: this.str('country'),
         })
         .subscribe({
           next: () => {
@@ -441,12 +529,48 @@ export class ModalService {
           });
         },
       });
+      return;
+    }
+
+    if (m.kind === 'event') {
+      const name = this.str('name');
+      if (!name.trim()) errs['name'] = 'El nombre es obligatorio.';
+      if (m.mode === 'new') {
+        const startDate = this.str('startDate');
+        if (!startDate) errs['startDate'] = 'Elegí una fecha.';
+        if (this.fail(errs)) return;
+        this.eventsSvc
+          .create({ name: name.trim(), kind: this.str('kind') as EventKind, startDate })
+          .subscribe({
+            next: () => {
+              this.close();
+              this.toast.show('Evento creado');
+            },
+            error: (err: HttpErrorResponse) => {
+              this._errors.set({ name: err.error?.message ?? 'No se pudo crear el evento.' });
+            },
+          });
+        return;
+      }
+      if (this.fail(errs)) return;
+      this.eventsSvc.update(m.id as string, { name: name.trim() }).subscribe({
+        next: () => {
+          this.close();
+          this.toast.show('Evento actualizado');
+        },
+        error: (err: HttpErrorResponse) => {
+          this._errors.set({
+            name: err.error?.message ?? 'No se pudo guardar. Intentá de nuevo.',
+          });
+        },
+      });
     }
   }
 
   confirmAction(): void {
     const m = this._modal();
-    if (m?.kind === 'confirm' && m.sub === 'post') {
+    if (m?.kind !== 'confirm') return;
+    if (m.sub === 'post') {
       this.postsSvc.remove(m.id as string).subscribe({
         next: () => {
           this.close();
@@ -455,6 +579,17 @@ export class ModalService {
         error: () => {
           this.close();
           this.toast.show('No se pudo eliminar la publicación');
+        },
+      });
+    } else if (m.sub === 'event') {
+      this.eventsSvc.deactivate(m.id as string).subscribe({
+        next: () => {
+          this.close();
+          this.toast.show('Evento dado de baja');
+        },
+        error: () => {
+          this.close();
+          this.toast.show('No se pudo dar de baja el evento');
         },
       });
     }

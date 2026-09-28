@@ -1,0 +1,67 @@
+.back {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hn-primary-strong);
+  padding: 0 0 12px;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 22px;
+}
+.subtitle {
+  color: var(--hn-text-2);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  padding: 14px 16px;
+}
+.date {
+  font-weight: 700;
+  color: var(--hn-ink);
+  margin-bottom: 10px;
+}
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+.count {
+  flex: 1;
+  min-width: 0;
+}
+.save {
+  height: 44px;
+  padding: 0 16px;
+  font-size: 13.5px;
+  border-radius: 11px;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+.empty {
+  padding: 30px 22px;
+  text-align: center;
+}
+.empty-ico {
+  font-size: 34px;
+}
+.empty-title {
+  font-size: 17px;
+  margin: 10px 0 6px;
+}
+.empty-text {
+  font-size: 13.5px;
+  color: var(--hn-text-2);
+  line-height: 1.45;
+}

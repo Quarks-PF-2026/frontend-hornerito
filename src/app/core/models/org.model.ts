@@ -15,4 +15,24 @@ export interface Org {
   paymentHolder: string | null;
   paymentCuit: string | null;
   paymentBank: string | null;
+  /**
+   * Ubicación elegida del buscador de direcciones (QK-112). Las tres viajan
+   * juntas: salen de una sola sugerencia, nunca se escriben a mano.
+   */
+  locality: string | null;
+  province: string | null;
+  country: string | null;
+}
+
+/** Localidad elegida del buscador, con lo que la acompaña (QK-112). */
+export interface PickedLocality {
+  locality: string;
+  province: string | null;
+  country: string | null;
+}
+
+/** "Villa María, Córdoba" — la provincia solo si vino. Vacío si no hay localidad. */
+export function localityLabel(locality: string | null, province: string | null): string {
+  if (!locality) return '';
+  return province ? `${locality}, ${province}` : locality;
 }

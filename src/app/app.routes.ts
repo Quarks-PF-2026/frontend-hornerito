@@ -76,7 +76,8 @@ export const routes: Routes = [
         // Datos de la persona, no de la organización (QK-11): cualquier
         // usuario logueado entra, sin exigir rol ni organización validada.
         path: 'perfil',
-        loadComponent: () => import('./features/perfil/pages/perfil/perfil').then((m) => m.PerfilPage),
+        loadComponent: () =>
+          import('./features/perfil/pages/perfil/perfil').then((m) => m.PerfilPage),
       },
       {
         // Todo lo que opera datos de la organización exige que esté validada.
@@ -109,7 +110,9 @@ export const routes: Routes = [
           {
             path: 'donaciones',
             loadComponent: () =>
-              import('./features/donaciones/pages/donaciones/donaciones').then((m) => m.DonacionesPage),
+              import('./features/donaciones/pages/donaciones/donaciones').then(
+                (m) => m.DonacionesPage,
+              ),
           },
           {
             path: 'donaciones/nueva',
@@ -175,6 +178,18 @@ export const routes: Routes = [
             path: 'insumos',
             loadComponent: () =>
               import('./features/insumos/pages/insumos/insumos').then((m) => m.InsumosPage),
+          },
+          {
+            path: 'eventos',
+            loadComponent: () =>
+              import('./features/eventos/pages/eventos/eventos').then((m) => m.EventosPage),
+          },
+          {
+            path: 'eventos/:id',
+            loadComponent: () =>
+              import('./features/eventos/pages/evento-detalle/evento-detalle').then(
+                (m) => m.EventoDetallePage,
+              ),
           },
         ],
       },

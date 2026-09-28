@@ -8,6 +8,10 @@ export interface GeocodeResult {
   label: string;
   lat: number;
   lon: number;
+  /** Localidad normalizada de la sugerencia (QK-112). */
+  locality: string | null;
+  province: string | null;
+  country: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   MonetaryDonationPayload,
-  PublicNeed,
+  PublicFeedNeed,
+  PublicLocality,
   PublicOrgDetail,
   PublicOrgSummary,
   PublicPage,
@@ -14,8 +15,12 @@ import {
 export interface PublicQuery {
   q?: string;
   category?: string;
+  /** Solo `/public/organizations`: localidad exacta (QK-109). */
+  locality?: string;
   page?: number;
   pageSize?: number;
+  /** Solo `/public/needs`: las que vencen entre hoy y hoy + N días. */
+  withinDays?: number;
 }
 
 /** Directorio público: se consume sin sesión, el backend no pide token. */
@@ -28,6 +33,10 @@ export class PublicService {
     return this.http.get<PublicPage<PublicOrgSummary>>(`${this.apiUrl}/public/organizations`, {
       params: toParams(query),
     });
+  }
+
+  localities(): Observable<PublicLocality[]> {
+    return this.http.get<PublicLocality[]>(`${this.apiUrl}/public/localities`);
   }
 
   organization(id: string): Observable<PublicOrgDetail> {
@@ -79,8 +88,8 @@ export class PublicService {
     );
   }
 
-  needs(query: PublicQuery = {}): Observable<PublicPage<PublicNeed>> {
-    return this.http.get<PublicPage<PublicNeed>>(`${this.apiUrl}/public/needs`, {
+  needs(query: PublicQuery = {}): Observable<PublicPage<PublicFeedNeed>> {
+    return this.http.get<PublicPage<PublicFeedNeed>>(`${this.apiUrl}/public/needs`, {
       params: toParams(query),
     });
   }

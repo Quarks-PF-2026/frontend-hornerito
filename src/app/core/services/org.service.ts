@@ -12,6 +12,14 @@ export type OrgPatch = Pick<Org, 'name' | 'description' | 'address' | 'contact'>
   paymentHolder?: string;
   paymentCuit?: string;
   paymentBank?: string;
+  /**
+   * Ubicación (QK-112). El backend escribe las tres juntas y solo si viene
+   * `locality`: no mandarlas deja la ubicación guardada intacta, que es lo que
+   * necesita `setSeeksVolunteers`.
+   */
+  locality?: string;
+  province?: string;
+  country?: string;
 };
 
 @Injectable({ providedIn: 'root' })

@@ -7,6 +7,7 @@ import { OrgService } from '../../../../core/services/org.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ImageUpload } from '../../../../shared/ui/image-upload/image-upload';
+import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 
 interface StatusStyle {
   label: string;
@@ -47,7 +48,7 @@ const STATUS: Record<OrgStatus, StatusStyle> = {
 @Component({
   selector: 'app-organizacion',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ImageUpload],
+  imports: [ImageUpload, LocalityPipe],
   templateUrl: './organizacion.html',
   styleUrl: './organizacion.scss',
 })

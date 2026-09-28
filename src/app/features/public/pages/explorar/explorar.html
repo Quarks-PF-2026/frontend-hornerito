@@ -19,6 +19,22 @@
     />
   </div>
 
+  @if (localities().length) {
+    <div class="search">
+      <select
+        class="hn-select"
+        aria-label="Filtrar por localidad"
+        [value]="locality() ?? ''"
+        (change)="filterByLocality($any($event.target).value)"
+      >
+        <option value="">Todas las localidades</option>
+        @for (l of localities(); track l.locality + (l.province ?? '')) {
+          <option [value]="l.locality">{{ l.locality | hnLocality: l.province }}</option>
+        }
+      </select>
+    </div>
+  }
+
   <div class="chips" role="group" aria-label="Filtrar por tipo de insumo">
     @for (cat of cats; track cat) {
       <button
@@ -35,6 +51,34 @@
   </div>
 </section>
 
+@if (expiring().length) {
+  <section class="expiring" aria-labelledby="expiring-title">
+    <h2 id="expiring-title" class="hn-head">Por vencer</h2>
+    <p class="quiet">Necesidades que cierran en los próximos días.</p>
+    <div class="rail">
+      @for (need of expiring(); track need.id) {
+        <button type="button" class="need hn-card" (click)="open(need.organizationId)">
+          <div class="need-head">
+            <span class="ico" aria-hidden="true">{{ need.icon }}</span>
+            <div>
+              <p class="supply">{{ need.supply }}</p>
+              <p class="org-name">{{ need.organization }}</p>
+            </div>
+          </div>
+          <p class="due">{{ need.due }}</p>
+          <div class="need-progress">
+            <div class="row">
+              <span>{{ need.covered }} de {{ need.required }} {{ need.unit }}</span>
+              <span class="pct">{{ need.pct }}%</span>
+            </div>
+            <hn-progress-bar [pct]="need.pct" [color]="need.color" [height]="8" />
+          </div>
+        </button>
+      }
+    </div>
+  </section>
+}
+
 <section class="results">
   @if (failed()) {
     <div class="notice hn-card">
@@ -45,7 +89,7 @@
     <div class="notice hn-card">
       <p class="notice-title hn-head">Sin resultados</p>
       <p>
-        Probá con otro nombre o quitá el filtro de insumo. Las organizaciones aparecen acá
+        Probá con otro nombre o quitá el filtro de insumo o de localidad. Las organizaciones aparecen acá
         cuando su cuenta queda validada.
       </p>
     </div>
@@ -71,6 +115,9 @@
 
           <h2 class="name hn-head">{{ org.name }}</h2>
           <p class="address">{{ org.address }}</p>
+          @if (org.locality) {
+            <p class="address">{{ org.locality | hnLocality: org.province }}</p>
+          }
           <p class="desc">{{ org.description }}</p>
 
           @if (org.categories.length) {

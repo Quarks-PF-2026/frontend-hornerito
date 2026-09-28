@@ -67,6 +67,11 @@
         <div class="meta-row">
           <span class="emoji">📍</span><span>{{ o.address }}</span>
         </div>
+        @if (o.locality) {
+          <div class="meta-row">
+            <span class="emoji">🏙️</span><span>{{ o.locality | hnLocality: o.province }}</span>
+          </div>
+        }
         <div class="meta-row">
           <span class="emoji">📞</span><span>{{ o.contact }}</span>
         </div>

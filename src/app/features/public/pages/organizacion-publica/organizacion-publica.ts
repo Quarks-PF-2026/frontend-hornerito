@@ -12,6 +12,7 @@ import { MIN_DONATION_AMOUNT, fmtMoney } from '../../../../core/models/monetary-
 import { PublicService } from '../../../../core/services/public.service';
 import { fmtDate } from '../../../../core/util/format';
 import { MapMarker, MapPicker } from '../../../../shared/ui/map-picker/map-picker';
+import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 import { BottomSheet } from '../../../../shared/ui/bottom-sheet/bottom-sheet';
 import { FilePicker } from '../../../../shared/ui/file-picker/file-picker';
@@ -75,7 +76,7 @@ interface PointRow {
 @Component({
   selector: 'app-organizacion-publica',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ProgressBar, MapPicker, RouterLink, BottomSheet, FilePicker],
+  imports: [ProgressBar, MapPicker, RouterLink, BottomSheet, FilePicker, LocalityPipe],
   templateUrl: './organizacion-publica.html',
   styleUrl: './organizacion-publica.scss',
 })

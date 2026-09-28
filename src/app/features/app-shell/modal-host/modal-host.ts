@@ -3,12 +3,13 @@ import { ModalService } from '../../../core/services/modal.service';
 import { OrgService } from '../../../core/services/org.service';
 import { NeedsService } from '../../../core/services/needs.service';
 import { BottomSheet } from '../../../shared/ui/bottom-sheet/bottom-sheet';
+import { LocalityPicker } from '../../../shared/ui/locality-picker/locality-picker';
 import { ProgressBar } from '../../../shared/ui/progress-bar/progress-bar';
 
 @Component({
   selector: 'app-modal-host',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BottomSheet, ProgressBar],
+  imports: [BottomSheet, ProgressBar, LocalityPicker],
   templateUrl: './modal-host.html',
   styleUrl: './modal-host.scss',
 })

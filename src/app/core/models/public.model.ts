@@ -13,10 +13,19 @@ export interface PublicOrgSummary {
   name: string;
   description: string;
   address: string;
+  /** Ubicación normalizada (QK-112). Null si todavía no la cargaron. */
+  locality: string | null;
+  province: string | null;
   logoUrl: string | null;
   coverUrl: string | null;
   openNeedsCount: number;
   categories: string[];
+}
+
+/** Una localidad con organizaciones validadas, para el filtro del inicio (QK-109). */
+export interface PublicLocality {
+  locality: string;
+  province: string | null;
 }
 
 export interface PublicNeed {
@@ -27,6 +36,13 @@ export interface PublicNeed {
   requiredQuantity: number;
   coveredQuantity: number;
   deadline: string;
+}
+
+/** Necesidad del feed global (`/public/needs`): trae de qué organización es. */
+export interface PublicFeedNeed extends PublicNeed {
+  organizationId: string;
+  organizationName: string;
+  organizationLogoUrl: string | null;
 }
 
 export interface PublicCollectionPoint {
@@ -108,6 +124,9 @@ export interface PublicOrgDetail {
   name: string;
   description: string;
   address: string;
+  /** Ubicación normalizada (QK-112). Null si todavía no la cargaron. */
+  locality: string | null;
+  province: string | null;
   contact: string;
   logoUrl: string | null;
   coverUrl: string | null;

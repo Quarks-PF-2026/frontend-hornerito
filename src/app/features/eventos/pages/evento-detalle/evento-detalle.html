@@ -1,0 +1,57 @@
+@if (loading()) {
+  <div class="empty hn-card">
+    <div class="empty-text">Cargando…</div>
+  </div>
+} @else if (notFound()) {
+  <div class="empty hn-card">
+    <div class="empty-ico">📅</div>
+    <div class="empty-title hn-head">Evento no encontrado</div>
+    <button class="hn-btn hn-btn--primary" type="button" (click)="back()">Volver a eventos</button>
+  </div>
+} @else {
+  <button class="back" type="button" (click)="back()">← Volver a eventos</button>
+
+  @if (event(); as ev) {
+    <div class="title hn-head">{{ ev.name }}</div>
+    <div class="subtitle">{{ kindLabel() }} · desde {{ ev.startDate }}</div>
+  }
+
+  <div class="list">
+    @for (r of rows(); track r.date) {
+      <div class="row hn-card">
+        <div class="date">{{ r.dateLabel }}</div>
+        <div class="field-row">
+          <input
+            class="hn-input count"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            placeholder="Cantidad"
+            [value]="r.draft"
+            (input)="onDraft(r.date, $event)"
+          />
+          <button
+            class="hn-btn hn-btn--primary save"
+            type="button"
+            [disabled]="r.saving"
+            (click)="save(r)"
+          >
+            {{ r.count != null ? 'Corregir' : 'Guardar' }}
+          </button>
+        </div>
+        @if (r.error) {
+          <div class="hn-field-error">{{ r.error }}</div>
+        }
+      </div>
+    } @empty {
+      <div class="empty hn-card">
+        <div class="empty-ico">📅</div>
+        <div class="empty-title hn-head">Todavía no hay ocurrencias</div>
+        <div class="empty-text">
+          Las ocurrencias aparecen a partir de la fecha de inicio del evento.
+        </div>
+      </div>
+    }
+  </div>
+}
