@@ -70,15 +70,17 @@
       </div>
     }
 
-    <!-- ===== Confirmar eliminación ===== -->
+    <!-- ===== Confirmar acción destructiva ===== -->
     @if (modal.isConfirm()) {
       <div class="confirm">
         <div class="confirm-ico">🗑️</div>
-        <div class="confirm-title hn-head">{{ modal.confirmTitle }}</div>
-        <div class="confirm-text">{{ modal.confirmText }}</div>
+        <div class="confirm-title hn-head">{{ modal.confirmTitle() }}</div>
+        <div class="confirm-text">{{ modal.confirmText() }}</div>
         <div class="row">
           <button class="hn-btn hn-btn--white btn" type="button" (click)="modal.close()">Cancelar</button>
-          <button class="hn-btn hn-btn--danger btn" type="button" (click)="modal.confirmAction()">Eliminar</button>
+          <button class="hn-btn hn-btn--danger btn" type="button" (click)="modal.confirmAction()">
+            {{ modal.confirmActionLabel() }}
+          </button>
         </div>
       </div>
     }

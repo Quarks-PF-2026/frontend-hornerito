@@ -42,7 +42,9 @@ const NAV_ITEMS: NavItem[] = [
     key: 'necesidades',
     label: 'Necesidades',
     bar: true,
-    d: ['M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.6a5.5 5.5 0 0 0 0-7.8z'],
+    d: [
+      'M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.6a5.5 5.5 0 0 0 0-7.8z',
+    ],
   },
   {
     key: 'donaciones',
@@ -74,10 +76,18 @@ const NAV_ITEMS: NavItem[] = [
     d: ['M21 16V8l-9-5-9 5v8l9 5 9-5z', 'M3.3 7 12 12l8.7-5M12 22V12'],
   },
   {
+    key: 'eventos',
+    label: 'Eventos',
+    d: ['M4 5h16v15H4z', 'M4 9.5h16', 'M8 3v4', 'M16 3v4'],
+  },
+  {
     key: 'usuarios',
     label: 'Usuarios',
     admin: true,
-    d: ['M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20', 'M17 11.2a3 3 0 0 0 0-5.9M22 20v-1.5a4 4 0 0 0-3-3.8'],
+    d: [
+      'M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20',
+      'M17 11.2a3 3 0 0 0 0-5.9M22 20v-1.5a4 4 0 0 0-3-3.8',
+    ],
     c: [9, 7, 3.2],
   },
   {
@@ -123,11 +133,7 @@ const LOGOUT_ICON = ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'M16 17l5-5-5-5'
   template: `
     <nav class="nav">
       @for (it of items(); track it.key) {
-        <a
-          [routerLink]="'/app/' + it.key"
-          routerLinkActive="active"
-          [class.secondary]="!it.bar"
-        >
+        <a [routerLink]="'/app/' + it.key" routerLinkActive="active" [class.secondary]="!it.bar">
           <svg
             viewBox="0 0 24 24"
             fill="none"

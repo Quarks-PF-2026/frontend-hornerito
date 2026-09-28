@@ -1,0 +1,55 @@
+<div class="list">
+  @for (e of activeViews(); track e.id) {
+    <div class="event hn-card" (click)="open(e.id)">
+      <div class="head">
+        <div class="head-titles">
+          <div class="name">{{ e.name }}</div>
+          <div class="meta">{{ e.kindLabel }} · desde {{ e.startLabel }}</div>
+        </div>
+        <span class="ico">📅</span>
+      </div>
+      @if (canWrite()) {
+        <div class="actions">
+          <button class="hn-btn hn-btn--outline main" type="button" (click)="edit(e.id, $event)">
+            Editar
+          </button>
+          <button
+            class="hn-btn hn-btn--danger-soft"
+            type="button"
+            (click)="deactivate(e.id, $event)"
+          >
+            Dar de baja
+          </button>
+        </div>
+      }
+    </div>
+  } @empty {
+    <div class="empty hn-card">
+      <div class="empty-ico">📅</div>
+      <div class="empty-title hn-head">Todavía no cargaste eventos</div>
+      <div class="empty-text">
+        Un evento agrupa las fechas donde se registra cuánta gente asistió.
+      </div>
+      @if (canWrite()) {
+        <button class="hn-btn hn-btn--primary" type="button" (click)="newEvent()">
+          Crear el primero
+        </button>
+      }
+    </div>
+  }
+
+  @if (inactiveViews().length > 0) {
+    <div class="section hn-head">Dados de baja</div>
+    @for (e of inactiveViews(); track e.id) {
+      <div class="event hn-card inactive" (click)="open(e.id)">
+        <div class="head">
+          <div class="head-titles">
+            <div class="name">{{ e.name }}</div>
+            <div class="meta">{{ e.kindLabel }} · baja {{ e.endedLabel }}</div>
+          </div>
+          <span class="ico">📅</span>
+        </div>
+      </div>
+    }
+  }
+</div>

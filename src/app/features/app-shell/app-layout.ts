@@ -24,6 +24,7 @@ const TABS: Record<string, TabMeta> = {
   puntos: { kicker: 'Dónde entregar', title: 'Puntos de recolección', fab: 'Punto' },
   voluntariado: { kicker: 'Quién ayuda', title: 'Voluntariado', fab: 'Actividad' },
   insumos: { kicker: 'Catálogo', title: 'Insumos', fab: 'Insumo' },
+  eventos: { kicker: 'Qué se hace y cuánta gente vino', title: 'Eventos', fab: 'Evento' },
   usuarios: { kicker: 'Tu equipo', title: 'Usuarios', fab: '' },
   validacion: { kicker: 'Plataforma', title: 'Validar organizaciones', fab: '' },
   perfil: { kicker: 'Tu cuenta', title: 'Mi Perfil', fab: '' },
@@ -126,6 +127,9 @@ export class AppLayout {
         break;
       case 'voluntariado':
         void this.router.navigate(['/app/voluntariado/nueva']);
+        break;
+      case 'eventos':
+        this.modal.newEvent();
         break;
       default:
         this.modal.editOrg();
