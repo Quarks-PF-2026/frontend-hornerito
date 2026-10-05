@@ -278,9 +278,12 @@ export class ModalService {
   editEvent(id: string): void {
     const ev = this.eventsSvc.find(id);
     if (!ev) return;
-    // Edición acotada al nombre (contrato §PUT /events/:id): cambiar tipo o
-    // fecha con asistencias ya cargadas da 409 en el backend.
-    this.open({ kind: 'event', mode: 'edit', id }, { name: ev.name });
+    // Nombre y fecha (contrato §PUT /events/:id): cambiar la fecha con
+    // asistencias ya cargadas da 409 en el backend. `kind` va solo para el label.
+    this.open(
+      { kind: 'event', mode: 'edit', id },
+      { name: ev.name, kind: ev.kind, startDate: ev.startDate },
+    );
   }
   confirmDeactivateEvent(id: string): void {
     this.open({ kind: 'confirm', sub: 'event', id });
@@ -441,10 +444,13 @@ export class ModalService {
           ),
         ];
       case 'event': {
-        if (m.mode !== 'new') {
-          return [this.text('name', 'Nombre del evento', 'Ej: Merienda', e)];
-        }
         const isOneOff = this.str('kind') === 'one_off';
+        if (m.mode !== 'new') {
+          return [
+            this.text('name', 'Nombre del evento', 'Ej: Merienda', e),
+            this.date('startDate', isOneOff ? 'Fecha' : 'Desde', e),
+          ];
+        }
         return [
           this.text('name', 'Nombre del evento', 'Ej: Merienda', e),
           this.select(
@@ -662,16 +668,17 @@ export class ModalService {
           });
         return;
       }
+      const startDate = this.str('startDate');
+      if (!startDate) errs['startDate'] = 'Elegí una fecha.';
       if (this.fail(errs)) return;
-      this.eventsSvc.update(m.id as string, { name: name.trim() }).subscribe({
+      this.eventsSvc.update(m.id as string, { name: name.trim(), startDate }).subscribe({
         next: () => {
           this.close();
           this.toast.show('Evento actualizado');
         },
         error: (err: HttpErrorResponse) => {
-          this._errors.set({
-            name: err.error?.message ?? 'No se pudo guardar. Intentá de nuevo.',
-          });
+          const msg = err.error?.message ?? 'No se pudo guardar. Intentá de nuevo.';
+          this._errors.set(err.status === 409 ? { startDate: msg } : { name: msg });
         },
       });
     }
