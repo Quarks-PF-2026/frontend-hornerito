@@ -28,6 +28,10 @@ export class ModalHost {
     input.value = '';
   }
 
+  onToggleDay(value: string): void {
+    this.modal.toggleWeekday(Number(value));
+  }
+
   onInput(key: string, event: Event): void {
     this.modal.setField(
       key,

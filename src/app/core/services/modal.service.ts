@@ -2,7 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { CATS, UNITS } from '../models/catalog';
-import { EventKind } from '../models/event.model';
+import {
+  EventKind,
+  WEEKDAY_DISPLAY_ORDER,
+  WEEKDAY_LONG,
+  WEEKDAY_SHORT,
+} from '../models/event.model';
 import { PickedLocality, localityLabel } from '../models/org.model';
 import {
   MediaResourceType,
@@ -23,11 +28,14 @@ import { ToastService } from './toast.service';
 
 export type ModalKind =
   'org' | 'post' | 'need' | 'progress' | 'supply' | 'event' | 'confirm' | 'preview';
-export type FieldType = 'text' | 'textarea' | 'select' | 'date' | 'locality';
+export type FieldType = 'text' | 'textarea' | 'select' | 'date' | 'locality' | 'time' | 'weekdays';
 
 export interface SelectOption {
   value: string;
   label: string;
+  /** Solo `weekdays`: si el día está elegido. */
+  selected?: boolean;
+  ariaLabel?: string;
 }
 
 export interface FormField {
@@ -273,16 +281,21 @@ export class ModalService {
   }
 
   newEvent(): void {
-    this.open({ kind: 'event', mode: 'new' }, { name: '', kind: 'periodic', startDate: '' });
+    // Días como "0,3,5": el form es un Record de strings; se parsea al guardar.
+    this.open(
+      { kind: 'event', mode: 'new' },
+      { name: '', kind: 'periodic', startTime: '', weekdays: '0,1,2,3,4,5,6', startDate: '' },
+    );
   }
   editEvent(id: string): void {
     const ev = this.eventsSvc.find(id);
     if (!ev) return;
-    // Nombre y fecha (contrato §PUT /events/:id): cambiar la fecha con
-    // asistencias ya cargadas da 409 en el backend. `kind` va solo para el label.
+    // Nombre, hora y fecha (contrato §PUT /events/:id): cambiar la fecha con
+    // asistencias ya cargadas da 409 en el backend. `kind` va solo para el label;
+    // los días, como el tipo, no se editan.
     this.open(
       { kind: 'event', mode: 'edit', id },
-      { name: ev.name, kind: ev.kind, startDate: ev.startDate },
+      { name: ev.name, kind: ev.kind, startTime: ev.startTime, startDate: ev.startDate },
     );
   }
   confirmDeactivateEvent(id: string): void {
@@ -293,6 +306,18 @@ export class ModalService {
   setField(key: string, value: string | boolean): void {
     this._form.update((f) => ({ ...f, [key]: value }));
     this._errors.update((e) => ({ ...e, [key]: '' }));
+  }
+
+  toggleWeekday(d: number): void {
+    const days = this.weekdays();
+    this.setField(
+      'weekdays',
+      (days.includes(d) ? days.filter((x) => x !== d) : [...days, d]).join(','),
+    );
+  }
+  private weekdays(): number[] {
+    const raw = this.str('weekdays');
+    return raw ? raw.split(',').map(Number) : [];
   }
 
   /**
@@ -361,7 +386,7 @@ export class ModalService {
       case 'event':
         return m.mode === 'new'
           ? 'Un evento periódico se repite; uno extraordinario tiene una única fecha.'
-          : 'Solo se puede corregir el nombre.';
+          : 'Con asistencias cargadas solo se pueden cambiar el nombre y la hora.';
       default:
         return '';
     }
@@ -448,6 +473,7 @@ export class ModalService {
         if (m.mode !== 'new') {
           return [
             this.text('name', 'Nombre del evento', 'Ej: Merienda', e),
+            this.time('startTime', 'Hora de comienzo', e),
             this.date('startDate', isOneOff ? 'Fecha' : 'Desde', e),
           ];
         }
@@ -462,6 +488,8 @@ export class ModalService {
             ],
             e,
           ),
+          this.time('startTime', 'Hora de comienzo', e),
+          ...(isOneOff ? [] : [this.weekdaysField('weekdays', 'Días', e)]),
           this.date('startDate', isOneOff ? 'Fecha' : 'Desde', e),
         ];
       }
@@ -513,6 +541,22 @@ export class ModalService {
 
   private date(key: string, label: string, e: Record<string, string>): FormField {
     return { ...this.base(key, label, e), type: 'date', placeholder: 'AAAA-MM-DD' };
+  }
+  private time(key: string, label: string, e: Record<string, string>): FormField {
+    return { ...this.base(key, label, e), type: 'time', placeholder: 'HH:MM' };
+  }
+  private weekdaysField(key: string, label: string, e: Record<string, string>): FormField {
+    const days = this.weekdays();
+    return {
+      ...this.base(key, label, e),
+      type: 'weekdays',
+      options: WEEKDAY_DISPLAY_ORDER.map((d) => ({
+        value: String(d),
+        label: WEEKDAY_SHORT[d],
+        ariaLabel: WEEKDAY_LONG[d],
+        selected: days.includes(d),
+      })),
+    };
   }
 
   // ---------------- guardado ----------------
@@ -653,13 +697,26 @@ export class ModalService {
 
     if (m.kind === 'event') {
       const name = this.str('name');
+      const startTime = this.str('startTime');
       if (!name.trim()) errs['name'] = 'El nombre es obligatorio.';
+      if (!startTime) errs['startTime'] = 'Elegí una hora.';
       if (m.mode === 'new') {
+        const kind = this.str('kind') as EventKind;
         const startDate = this.str('startDate');
+        const weekdays = this.weekdays();
+        if (kind === 'periodic' && weekdays.length === 0)
+          errs['weekdays'] = 'Elegí al menos un día.';
         if (!startDate) errs['startDate'] = 'Elegí una fecha.';
         if (this.fail(errs)) return;
         this.eventsSvc
-          .create({ name: name.trim(), kind: this.str('kind') as EventKind, startDate })
+          .create({
+            name: name.trim(),
+            kind,
+            startDate,
+            startTime,
+            // En `one_off` no viaja: el backend lo guarda en null.
+            ...(kind === 'periodic' ? { weekdays } : {}),
+          })
           .subscribe({
             next: () => {
               this.close();
@@ -674,7 +731,7 @@ export class ModalService {
       const startDate = this.str('startDate');
       if (!startDate) errs['startDate'] = 'Elegí una fecha.';
       if (this.fail(errs)) return;
-      this.eventsSvc.update(m.id as string, { name: name.trim(), startDate }).subscribe({
+      this.eventsSvc.update(m.id as string, { name: name.trim(), startTime, startDate }).subscribe({
         next: () => {
           this.close();
           this.toast.show('Evento actualizado');

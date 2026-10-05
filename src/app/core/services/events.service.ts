@@ -4,10 +4,13 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EventOccurrence, OrgEvent } from '../models/event.model';
 
-export type EventCreate = Pick<OrgEvent, 'name' | 'kind' | 'startDate'>;
-/** El PUT admite los tres campos, pero la UI de edición solo ofrece `name`
- * (backend §contrato: cambiar kind/startDate con asistencias cargadas da 409). */
-export type EventPatch = Partial<Pick<OrgEvent, 'name' | 'kind' | 'startDate'>>;
+/** `weekdays` solo viaja en `periodic`; en `one_off` se omite. */
+export type EventCreate = Pick<OrgEvent, 'name' | 'kind' | 'startDate' | 'startTime'> & {
+  weekdays?: number[];
+};
+/** Con asistencias cargadas el backend solo acepta cambiar `name` y
+ * `startTime`; tocar kind/startDate/weekdays da 409. */
+export type EventPatch = Partial<EventCreate>;
 
 export interface AttendanceResult {
   eventId: string;

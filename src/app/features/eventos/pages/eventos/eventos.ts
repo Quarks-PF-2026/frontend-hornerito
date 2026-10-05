@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EventsService } from '../../../../core/services/events.service';
 import { ModalService } from '../../../../core/services/modal.service';
-import { EVENT_KIND_LABEL } from '../../../../core/models/event.model';
+import { scheduleLabel } from '../../../../core/models/event.model';
 import { fmtDate } from '../../../../core/util/format';
 
 @Component({
@@ -24,14 +24,14 @@ export class EventosPage {
   readonly activeViews = computed(() =>
     this.eventsSvc.active().map((e) => ({
       ...e,
-      kindLabel: EVENT_KIND_LABEL[e.kind],
+      schedule: scheduleLabel(e),
       startLabel: fmtDate(e.startDate),
     })),
   );
   readonly inactiveViews = computed(() =>
     this.eventsSvc.inactive().map((e) => ({
       ...e,
-      kindLabel: EVENT_KIND_LABEL[e.kind],
+      schedule: scheduleLabel(e),
       endedLabel: e.endedOn ? fmtDate(e.endedOn) : '',
     })),
   );

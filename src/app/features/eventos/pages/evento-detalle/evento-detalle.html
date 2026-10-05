@@ -13,7 +13,7 @@
 
   @if (event(); as ev) {
     <div class="title hn-head">{{ ev.name }}</div>
-    <div class="subtitle">{{ kindLabel() }} · desde {{ ev.startDate }}</div>
+    <div class="subtitle">{{ schedule() }} · desde {{ ev.startDate }}</div>
   }
 
   <div class="list">

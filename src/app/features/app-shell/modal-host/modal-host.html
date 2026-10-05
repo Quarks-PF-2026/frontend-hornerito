@@ -43,6 +43,31 @@
                   (input)="onInput(fld.key, $event)"
                 />
               }
+              @case ('time') {
+                <input
+                  class="hn-input"
+                  type="time"
+                  [value]="fld.value"
+                  (input)="onInput(fld.key, $event)"
+                />
+              }
+              @case ('weekdays') {
+                <div class="days" role="group" [attr.aria-label]="fld.label">
+                  @for (opt of fld.options; track opt.value) {
+                    <button
+                      class="hn-btn day"
+                      type="button"
+                      [class.hn-btn--primary]="opt.selected"
+                      [class.hn-btn--outline]="!opt.selected"
+                      [attr.aria-label]="opt.ariaLabel"
+                      [attr.aria-pressed]="opt.selected"
+                      (click)="onToggleDay(opt.value)"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  }
+                </div>
+              }
               @default {
                 <input
                   class="hn-input"
