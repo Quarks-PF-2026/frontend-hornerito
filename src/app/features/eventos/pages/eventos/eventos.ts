@@ -44,6 +44,11 @@ export class EventosPage {
     void this.router.navigate(['/app/eventos', id]);
   }
 
+  attendance(id: string, event: Event): void {
+    event.stopPropagation();
+    this.open(id);
+  }
+
   newEvent(): void {
     this.modal.newEvent();
   }

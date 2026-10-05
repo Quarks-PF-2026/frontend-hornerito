@@ -8,8 +8,11 @@
         </div>
         <span class="ico">📅</span>
       </div>
-      @if (canWrite()) {
-        <div class="actions">
+      <div class="actions">
+        <button class="hn-btn hn-btn--primary" type="button" (click)="attendance(e.id, $event)">
+          Asistencia
+        </button>
+        @if (canWrite()) {
           <button class="hn-btn hn-btn--outline main" type="button" (click)="edit(e.id, $event)">
             Editar
           </button>
@@ -20,8 +23,8 @@
           >
             Dar de baja
           </button>
-        </div>
-      }
+        }
+      </div>
     </div>
   } @empty {
     <div class="empty hn-card">
@@ -48,6 +51,11 @@
             <div class="meta">{{ e.schedule }} · baja {{ e.endedLabel }}</div>
           </div>
           <span class="ico">📅</span>
+        </div>
+        <div class="actions">
+          <button class="hn-btn hn-btn--outline" type="button" (click)="attendance(e.id, $event)">
+            Ver asistencia
+          </button>
         </div>
       </div>
     }
