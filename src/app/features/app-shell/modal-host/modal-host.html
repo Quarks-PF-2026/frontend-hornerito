@@ -43,6 +43,31 @@
                   (input)="onInput(fld.key, $event)"
                 />
               }
+              @case ('time') {
+                <input
+                  class="hn-input"
+                  type="time"
+                  [value]="fld.value"
+                  (input)="onInput(fld.key, $event)"
+                />
+              }
+              @case ('weekdays') {
+                <div class="days" role="group" [attr.aria-label]="fld.label">
+                  @for (opt of fld.options; track opt.value) {
+                    <button
+                      class="hn-btn day"
+                      type="button"
+                      [class.hn-btn--primary]="opt.selected"
+                      [class.hn-btn--outline]="!opt.selected"
+                      [attr.aria-label]="opt.ariaLabel"
+                      [attr.aria-pressed]="opt.selected"
+                      (click)="onToggleDay(opt.value)"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  }
+                </div>
+              }
               @default {
                 <input
                   class="hn-input"
@@ -61,10 +86,75 @@
           </div>
         }
 
+        @if (modal.isPost()) {
+          <div class="field">
+            <span class="hn-label">Fotos y videos</span>
+            @if (modal.attachments().length > 0) {
+              <div class="thumbs">
+                @for (a of modal.attachments(); track a.key; let i = $index) {
+                  <div class="thumb">
+                    @if (a.isVideo) {
+                      <video
+                        [src]="a.url + '#t=0.1'"
+                        preload="metadata"
+                        muted
+                        playsinline
+                        [attr.aria-label]="'Video adjunto ' + (i + 1)"
+                      ></video>
+                    } @else {
+                      <img [src]="a.url" [alt]="'Adjunto ' + (i + 1)" />
+                    }
+                    <button
+                      class="thumb-remove"
+                      type="button"
+                      [disabled]="modal.busy()"
+                      [attr.aria-label]="'Quitar adjunto ' + (i + 1)"
+                      (click)="modal.removeAttachment(a.key)"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+            @if (modal.canAddAttachment()) {
+              <label
+                class="pick hn-btn hn-btn--outline hn-btn--block"
+                [class.disabled]="modal.busy()"
+              >
+                <input
+                  type="file"
+                  multiple
+                  aria-describedby="attachments-hint"
+                  [accept]="modal.attachmentAccept"
+                  [disabled]="modal.busy()"
+                  (change)="onPickFiles($event)"
+                />
+                📎 Agregar fotos o videos
+              </label>
+            }
+            <div class="hint" id="attachments-hint">
+              Hasta 4. Imágenes JPG, PNG o WEBP (8 MB) y videos MP4, WEBM o MOV (50 MB).
+            </div>
+          </div>
+        }
+
         <div class="row">
-          <button class="hn-btn hn-btn--white btn" type="button" (click)="modal.close()">Cancelar</button>
-          <button class="hn-btn hn-btn--primary btn save" type="button" (click)="modal.save()">
-            {{ modal.saveLabel() }}
+          <button
+            class="hn-btn hn-btn--white btn"
+            type="button"
+            [disabled]="modal.busy()"
+            (click)="modal.close()"
+          >
+            Cancelar
+          </button>
+          <button
+            class="hn-btn hn-btn--primary btn save"
+            type="button"
+            [disabled]="modal.busy()"
+            (click)="modal.save()"
+          >
+            {{ modal.saveText() }}
           </button>
         </div>
       </div>
@@ -77,7 +167,9 @@
         <div class="confirm-title hn-head">{{ modal.confirmTitle() }}</div>
         <div class="confirm-text">{{ modal.confirmText() }}</div>
         <div class="row">
-          <button class="hn-btn hn-btn--white btn" type="button" (click)="modal.close()">Cancelar</button>
+          <button class="hn-btn hn-btn--white btn" type="button" (click)="modal.close()">
+            Cancelar
+          </button>
           <button class="hn-btn hn-btn--danger btn" type="button" (click)="modal.confirmAction()">
             {{ modal.confirmActionLabel() }}
           </button>
@@ -105,8 +197,12 @@
             </div>
             <div class="pub-desc">{{ o.description }}</div>
             <div class="pub-meta">
-              <div class="pub-meta-row"><span>📍</span><span>{{ o.address }}</span></div>
-              <div class="pub-meta-row"><span>📞</span><span>{{ o.contact }}</span></div>
+              <div class="pub-meta-row">
+                <span>📍</span><span>{{ o.address }}</span>
+              </div>
+              <div class="pub-meta-row">
+                <span>📞</span><span>{{ o.contact }}</span>
+              </div>
             </div>
             @if (openNeeds().length > 0) {
               <div class="pub-needs">

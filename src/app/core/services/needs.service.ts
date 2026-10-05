@@ -25,7 +25,8 @@ export class NeedsService {
   private toView(n: Need): NeedView {
     const sup = this.suppliesSvc.find(n.supplyId);
     const done = n.coveredQuantity >= n.requiredQuantity;
-    const closed = done || n.closedManually;
+    const expired = !done && !n.closedManually && n.deadline < new Date().toLocaleDateString('en-CA');
+    const closed = done || n.closedManually || expired;
     const pct = Math.min(100, Math.round((n.coveredQuantity / n.requiredQuantity) * 100));
     const barColor = done ? '#3F8B5C' : pct >= 50 ? '#C1783A' : '#D4A46A';
     return {
@@ -41,13 +42,16 @@ export class NeedsService {
       deadline: fmtDate(n.deadline),
       open: !closed,
       closed,
+      expired,
       cardOpacity: closed ? '.8' : '1',
-      badge: done ? 'Completada' : n.closedManually ? 'Cerrada' : 'Abierta',
+      badge: done ? 'Completada' : n.closedManually ? 'Cerrada' : expired ? 'Vencida' : 'Abierta',
       badgeBg: closed ? '#E6F0E7' : '#FBEFD4',
       badgeInk: closed ? '#2C6B45' : '#8A5E12',
       closedNote: done
         ? '✓ Objetivo cumplido — cerrada automáticamente'
-        : '✓ Cerrada manualmente — ya no recibe aportes',
+        : expired
+          ? 'Venció sin completarse — editá la fecha para reabrirla'
+          : '✓ Cerrada manualmente — ya no recibe aportes',
     };
   }
 

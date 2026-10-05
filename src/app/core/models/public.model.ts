@@ -1,4 +1,5 @@
 import { ScheduleDay } from './collection-point.model';
+import { PostMedia } from './media.model';
 
 /** Página genérica que devuelven los endpoints públicos. */
 export interface PublicPage<T> {
@@ -60,6 +61,7 @@ export interface PublicPost {
   title: string;
   content: string;
   createdAt: string;
+  media: PostMedia[];
 }
 
 /** Actividad de voluntariado abierta, tal como la ve un visitante. */

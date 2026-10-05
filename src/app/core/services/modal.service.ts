@@ -1,9 +1,25 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { lastValueFrom } from 'rxjs';
 import { CATS, UNITS } from '../models/catalog';
-import { EventKind } from '../models/event.model';
+import {
+  EventKind,
+  WEEKDAY_DISPLAY_ORDER,
+  WEEKDAY_LONG,
+  WEEKDAY_SHORT,
+} from '../models/event.model';
 import { PickedLocality, localityLabel } from '../models/org.model';
+import {
+  MediaResourceType,
+  POST_IMAGE_MAX_BYTES,
+  POST_MEDIA_ACCEPT,
+  POST_MEDIA_MAX,
+  POST_VIDEO_MAX_BYTES,
+  PostMedia,
+  mediaKindOf,
+} from '../models/media.model';
 import { EventsService } from './events.service';
+import { MediaService } from './media.service';
 import { OrgService } from './org.service';
 import { PostsService } from './posts.service';
 import { NeedsService } from './needs.service';
@@ -12,11 +28,14 @@ import { ToastService } from './toast.service';
 
 export type ModalKind =
   'org' | 'post' | 'need' | 'progress' | 'supply' | 'event' | 'confirm' | 'preview';
-export type FieldType = 'text' | 'textarea' | 'select' | 'date' | 'locality';
+export type FieldType = 'text' | 'textarea' | 'select' | 'date' | 'locality' | 'time' | 'weekdays';
 
 export interface SelectOption {
   value: string;
   label: string;
+  /** Solo `weekdays`: si el día está elegido. */
+  selected?: boolean;
+  ariaLabel?: string;
 }
 
 export interface FormField {
@@ -37,6 +56,20 @@ interface ModalState {
   sub?: 'post' | 'event';
 }
 
+/** Adjunto en el modal de publicación: ya guardado (`id`) o elegido y sin subir (`file`). */
+export interface AttachmentView {
+  key: string;
+  url: string;
+  isVideo: boolean;
+}
+
+interface PendingFile {
+  file: File;
+  kind: MediaResourceType;
+  /** Object URL para la miniatura; también sirve de clave. */
+  url: string;
+}
+
 const FORM_KINDS: ModalKind[] = ['org', 'post', 'need', 'progress', 'supply', 'event'];
 
 @Injectable({ providedIn: 'root' })
@@ -47,6 +80,7 @@ export class ModalService {
   private readonly suppliesSvc = inject(SuppliesService);
   private readonly eventsSvc = inject(EventsService);
   private readonly toast = inject(ToastService);
+  private readonly mediaSvc = inject(MediaService);
 
   private readonly _modal = signal<ModalState | null>(null);
   private readonly _form = signal<Record<string, string | boolean>>({});
@@ -55,6 +89,36 @@ export class ModalService {
   readonly modal = this._modal.asReadonly();
   readonly form = this._form.asReadonly();
   readonly errors = this._errors.asReadonly();
+
+  // Adjuntos del form `post`. Se aplican recién al guardar: el post nuevo
+  // todavía no tiene id contra el cual firmar la subida.
+  private readonly _savedMedia = signal<PostMedia[]>([]);
+  private readonly _removedMedia = signal<string[]>([]);
+  private readonly _pending = signal<PendingFile[]>([]);
+  private readonly _busy = signal(false);
+  /** "Subiendo 2/3…" mientras corre la secuencia de adjuntos. */
+  private readonly _progress = signal('');
+
+  readonly busy = this._busy.asReadonly();
+  readonly isPost = computed(() => this._modal()?.kind === 'post');
+  readonly attachments = computed<AttachmentView[]>(() => {
+    const removed = this._removedMedia();
+    return [
+      ...this._savedMedia()
+        .filter((m) => !removed.includes(m.id))
+        .map((m) => ({ key: m.id, url: m.url, isVideo: m.resourceType === 'video' })),
+      ...this._pending().map((p) => ({
+        key: p.url,
+        url: p.url,
+        isVideo: p.kind === 'video',
+      })),
+    ];
+  });
+  readonly canAddAttachment = computed(() => this.attachments().length < POST_MEDIA_MAX);
+  readonly attachmentAccept = POST_MEDIA_ACCEPT;
+  readonly saveText = computed(() =>
+    this._busy() ? `⏳ ${this._progress() || 'Guardando…'}` : this.saveLabel(),
+  );
 
   readonly isOpen = computed(() => this._modal() !== null);
   readonly isForm = computed(() => {
@@ -78,15 +142,69 @@ export class ModalService {
 
   // ---------------- apertura ----------------
   private open(state: ModalState, form: Record<string, string | boolean> = {}): void {
+    // Mismo motivo que en `close()`: abrir otro modal en medio de la subida
+    // borraría los adjuntos pendientes y `syncAttachments` cerraría el nuevo.
+    if (this._busy()) return;
+    this.resetAttachments();
     this._modal.set(state);
     this._form.set(form);
     this._errors.set({});
   }
 
   close(): void {
+    // Mientras se suben adjuntos el modal no se cierra: el que termina la
+    // secuencia es `syncAttachments`, y si se cerrara antes podría pisar otro
+    // modal abierto en el medio.
+    if (this._busy()) return;
+    this.resetAttachments();
     this._modal.set(null);
     this._form.set({});
     this._errors.set({});
+  }
+
+  private resetAttachments(): void {
+    this._pending().forEach((p) => URL.revokeObjectURL(p.url));
+    this._pending.set([]);
+    this._savedMedia.set([]);
+    this._removedMedia.set([]);
+  }
+
+  /**
+   * Validación solo para avisar rápido; la que manda es la del backend
+   * (tipo, tamaño y tope de adjuntos se revalidan al firmar y confirmar).
+   */
+  addAttachments(files: File[]): void {
+    const accepted: PendingFile[] = [];
+    for (const file of files) {
+      const kind = mediaKindOf(file);
+      if (this.attachments().length + accepted.length >= POST_MEDIA_MAX) {
+        this.toast.show(`Máximo ${POST_MEDIA_MAX} adjuntos por publicación`);
+        break;
+      }
+      if (!kind) {
+        this.toast.show(
+          `${file.name}: formato no admitido. Imágenes JPG, PNG o WEBP; videos MP4, WEBM o MOV`,
+        );
+        continue;
+      }
+      const isVideo = kind === 'video';
+      if (file.size > (isVideo ? POST_VIDEO_MAX_BYTES : POST_IMAGE_MAX_BYTES)) {
+        this.toast.show(`${file.name}: supera los ${isVideo ? 50 : 8} MB`);
+        continue;
+      }
+      accepted.push({ file, kind, url: URL.createObjectURL(file) });
+    }
+    this._pending.update((list) => [...list, ...accepted]);
+  }
+
+  removeAttachment(key: string): void {
+    const pending = this._pending().find((p) => p.url === key);
+    if (pending) {
+      URL.revokeObjectURL(pending.url);
+      this._pending.update((list) => list.filter((p) => p !== pending));
+    } else {
+      this._removedMedia.update((ids) => [...ids, key]);
+    }
   }
 
   editOrg(): void {
@@ -119,6 +237,7 @@ export class ModalService {
     const p = this.postsSvc.find(id);
     if (!p) return;
     this.open({ kind: 'post', mode: 'edit', id }, { title: p.title, content: p.content });
+    this._savedMedia.set(p.media ?? []);
   }
   confirmDeletePost(id: string): void {
     this.open({ kind: 'confirm', sub: 'post', id });
@@ -162,14 +281,22 @@ export class ModalService {
   }
 
   newEvent(): void {
-    this.open({ kind: 'event', mode: 'new' }, { name: '', kind: 'periodic', startDate: '' });
+    // Días como "0,3,5": el form es un Record de strings; se parsea al guardar.
+    this.open(
+      { kind: 'event', mode: 'new' },
+      { name: '', kind: 'periodic', startTime: '', weekdays: '0,1,2,3,4,5,6', startDate: '' },
+    );
   }
   editEvent(id: string): void {
     const ev = this.eventsSvc.find(id);
     if (!ev) return;
-    // Edición acotada al nombre (contrato §PUT /events/:id): cambiar tipo o
-    // fecha con asistencias ya cargadas da 409 en el backend.
-    this.open({ kind: 'event', mode: 'edit', id }, { name: ev.name });
+    // Nombre, hora y fecha (contrato §PUT /events/:id): cambiar la fecha con
+    // asistencias ya cargadas da 409 en el backend. `kind` va solo para el label;
+    // los días, como el tipo, no se editan.
+    this.open(
+      { kind: 'event', mode: 'edit', id },
+      { name: ev.name, kind: ev.kind, startTime: ev.startTime, startDate: ev.startDate },
+    );
   }
   confirmDeactivateEvent(id: string): void {
     this.open({ kind: 'confirm', sub: 'event', id });
@@ -179,6 +306,18 @@ export class ModalService {
   setField(key: string, value: string | boolean): void {
     this._form.update((f) => ({ ...f, [key]: value }));
     this._errors.update((e) => ({ ...e, [key]: '' }));
+  }
+
+  toggleWeekday(d: number): void {
+    const days = this.weekdays();
+    this.setField(
+      'weekdays',
+      (days.includes(d) ? days.filter((x) => x !== d) : [...days, d]).join(','),
+    );
+  }
+  private weekdays(): number[] {
+    const raw = this.str('weekdays');
+    return raw ? raw.split(',').map(Number) : [];
   }
 
   /**
@@ -247,7 +386,7 @@ export class ModalService {
       case 'event':
         return m.mode === 'new'
           ? 'Un evento periódico se repite; uno extraordinario tiene una única fecha.'
-          : 'Solo se puede corregir el nombre.';
+          : 'Con asistencias cargadas solo se pueden cambiar el nombre y la hora.';
       default:
         return '';
     }
@@ -330,10 +469,14 @@ export class ModalService {
           ),
         ];
       case 'event': {
-        if (m.mode !== 'new') {
-          return [this.text('name', 'Nombre del evento', 'Ej: Merienda', e)];
-        }
         const isOneOff = this.str('kind') === 'one_off';
+        if (m.mode !== 'new') {
+          return [
+            this.text('name', 'Nombre del evento', 'Ej: Merienda', e),
+            this.time('startTime', 'Hora de comienzo', e),
+            this.date('startDate', isOneOff ? 'Fecha' : 'Desde', e),
+          ];
+        }
         return [
           this.text('name', 'Nombre del evento', 'Ej: Merienda', e),
           this.select(
@@ -345,6 +488,8 @@ export class ModalService {
             ],
             e,
           ),
+          this.time('startTime', 'Hora de comienzo', e),
+          ...(isOneOff ? [] : [this.weekdaysField('weekdays', 'Días', e)]),
           this.date('startDate', isOneOff ? 'Fecha' : 'Desde', e),
         ];
       }
@@ -396,6 +541,22 @@ export class ModalService {
 
   private date(key: string, label: string, e: Record<string, string>): FormField {
     return { ...this.base(key, label, e), type: 'date', placeholder: 'AAAA-MM-DD' };
+  }
+  private time(key: string, label: string, e: Record<string, string>): FormField {
+    return { ...this.base(key, label, e), type: 'time', placeholder: 'HH:MM' };
+  }
+  private weekdaysField(key: string, label: string, e: Record<string, string>): FormField {
+    const days = this.weekdays();
+    return {
+      ...this.base(key, label, e),
+      type: 'weekdays',
+      options: WEEKDAY_DISPLAY_ORDER.map((d) => ({
+        value: String(d),
+        label: WEEKDAY_SHORT[d],
+        ariaLabel: WEEKDAY_LONG[d],
+        selected: days.includes(d),
+      })),
+    };
   }
 
   // ---------------- guardado ----------------
@@ -453,12 +614,11 @@ export class ModalService {
       const data = { title, content };
       const request$ =
         m.mode === 'new' ? this.postsSvc.create(data) : this.postsSvc.update(m.id as string, data);
+      this._busy.set(true);
       request$.subscribe({
-        next: () => {
-          this.close();
-          this.toast.show(m.mode === 'new' ? 'Publicación creada' : 'Publicación actualizada');
-        },
+        next: (post) => void this.syncAttachments(post.id, m.mode === 'new'),
         error: () => {
+          this._busy.set(false);
           this._errors.set({ title: 'No se pudo guardar. Intentá de nuevo.' });
         },
       });
@@ -470,7 +630,10 @@ export class ModalService {
       const deadline = this.str('deadline');
       if (!this.str('required') || isNaN(req) || req <= 0)
         errs['required'] = 'Ingresá una cantidad mayor a cero.';
+      // Sin excepción para la fecha original: si ya pasó, la necesidad está vencida y editarla es reabrirla.
       if (!deadline) errs['deadline'] = 'Elegí una fecha límite.';
+      else if (deadline < new Date().toLocaleDateString('en-CA'))
+        errs['deadline'] = 'La fecha límite no puede ser anterior a hoy.';
       if (this.fail(errs)) return;
       const data = { supplyId: this.str('supplyId'), requiredQuantity: req, deadline };
       const request$ =
@@ -534,13 +697,26 @@ export class ModalService {
 
     if (m.kind === 'event') {
       const name = this.str('name');
+      const startTime = this.str('startTime');
       if (!name.trim()) errs['name'] = 'El nombre es obligatorio.';
+      if (!startTime) errs['startTime'] = 'Elegí una hora.';
       if (m.mode === 'new') {
+        const kind = this.str('kind') as EventKind;
         const startDate = this.str('startDate');
+        const weekdays = this.weekdays();
+        if (kind === 'periodic' && weekdays.length === 0)
+          errs['weekdays'] = 'Elegí al menos un día.';
         if (!startDate) errs['startDate'] = 'Elegí una fecha.';
         if (this.fail(errs)) return;
         this.eventsSvc
-          .create({ name: name.trim(), kind: this.str('kind') as EventKind, startDate })
+          .create({
+            name: name.trim(),
+            kind,
+            startDate,
+            startTime,
+            // En `one_off` no viaja: el backend lo guarda en null.
+            ...(kind === 'periodic' ? { weekdays } : {}),
+          })
           .subscribe({
             next: () => {
               this.close();
@@ -552,16 +728,17 @@ export class ModalService {
           });
         return;
       }
+      const startDate = this.str('startDate');
+      if (!startDate) errs['startDate'] = 'Elegí una fecha.';
       if (this.fail(errs)) return;
-      this.eventsSvc.update(m.id as string, { name: name.trim() }).subscribe({
+      this.eventsSvc.update(m.id as string, { name: name.trim(), startTime, startDate }).subscribe({
         next: () => {
           this.close();
           this.toast.show('Evento actualizado');
         },
         error: (err: HttpErrorResponse) => {
-          this._errors.set({
-            name: err.error?.message ?? 'No se pudo guardar. Intentá de nuevo.',
-          });
+          const msg = err.error?.message ?? 'No se pudo guardar. Intentá de nuevo.';
+          this._errors.set(err.status === 409 ? { startDate: msg } : { name: msg });
         },
       });
     }
@@ -593,6 +770,47 @@ export class ModalService {
         },
       });
     }
+  }
+
+  /**
+   * Con el post ya guardado: primero borra los adjuntos quitados y después sube
+   * los nuevos, de a uno. Ese orden permite reemplazar un adjunto con el post
+   * lleno (si subiera primero, el backend rechazaría por tope). Una falla no
+   * corta la secuencia ni deshace el post: se avisa qué archivo quedó afuera.
+   */
+  private async syncAttachments(postId: string, isNew: boolean): Promise<void> {
+    const failed: string[] = [];
+    for (const id of this._removedMedia()) {
+      try {
+        await lastValueFrom(this.mediaSvc.remove(id));
+        this.postsSvc.patchMedia(postId, (list) => list.filter((x) => x.id !== id));
+      } catch {
+        failed.push('no se pudo quitar un adjunto');
+      }
+    }
+    const pending = this._pending();
+    for (const [i, p] of pending.entries()) {
+      this._progress.set(`Subiendo ${i + 1}/${pending.length}…`);
+      try {
+        const media = await lastValueFrom(this.mediaSvc.uploadAttachment(postId, p.file));
+        this.postsSvc.patchMedia(postId, (list) => [...list, media]);
+      } catch (err) {
+        // Nuestro backend responde `{ message }`; Cloudinary, `{ error: { message } }`.
+        const body = (err as HttpErrorResponse).error;
+        failed.push(
+          `${p.file.name}: ${body?.message ?? body?.error?.message ?? 'no se pudo subir'}`,
+        );
+      }
+    }
+    this._busy.set(false);
+    this._progress.set('');
+    this.close();
+    const saved = isNew ? 'Publicación creada' : 'Publicación actualizada';
+    this.toast.show(
+      failed.length
+        ? `${saved}, pero falló ${failed[0]}${failed.length > 1 ? ` (y ${failed.length - 1} más)` : ''}`
+        : saved,
+    );
   }
 
   private fail(errs: Record<string, string>): boolean {

@@ -16,6 +16,7 @@ import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 import { BottomSheet } from '../../../../shared/ui/bottom-sheet/bottom-sheet';
 import { FilePicker } from '../../../../shared/ui/file-picker/file-picker';
+import { PostMediaGrid } from '../../../../shared/ui/post-media/post-media';
 import { HttpErrorResponse } from '@angular/common/http';
 
 interface NeedRow {
@@ -76,7 +77,15 @@ interface PointRow {
 @Component({
   selector: 'app-organizacion-publica',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ProgressBar, MapPicker, RouterLink, BottomSheet, FilePicker, LocalityPipe],
+  imports: [
+    ProgressBar,
+    MapPicker,
+    RouterLink,
+    BottomSheet,
+    FilePicker,
+    LocalityPipe,
+    PostMediaGrid,
+  ],
   templateUrl: './organizacion-publica.html',
   styleUrl: './organizacion-publica.scss',
 })

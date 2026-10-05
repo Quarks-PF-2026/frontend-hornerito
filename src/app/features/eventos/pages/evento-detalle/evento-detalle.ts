@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EVENT_KIND_LABEL, EventOccurrence } from '../../../../core/models/event.model';
+import { EventOccurrence, scheduleLabel } from '../../../../core/models/event.model';
 import { EventsService } from '../../../../core/services/events.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { fmtDate } from '../../../../core/util/format';
@@ -39,9 +39,9 @@ export class EventoDetallePage {
   readonly rows = signal<OccurrenceRow[]>([]);
 
   readonly event = computed(() => this.eventsSvc.find(this.id));
-  readonly kindLabel = computed(() => {
+  readonly schedule = computed(() => {
     const ev = this.event();
-    return ev ? EVENT_KIND_LABEL[ev.kind] : '';
+    return ev ? scheduleLabel(ev) : '';
   });
 
   constructor() {
@@ -94,6 +94,15 @@ export class EventoDetallePage {
 
   back(): void {
     void this.router.navigate(['/app/eventos']);
+  }
+
+  /** Lleva al input de la ocurrencia más reciente sin cargar (o la más reciente). */
+  register(): void {
+    const list = this.rows();
+    const target = list.find((r) => r.count == null) ?? list[0];
+    const input = document.getElementById(`count-${target.date}`);
+    input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    input?.focus({ preventScroll: true });
   }
 
   onDraft(date: string, event: Event): void {

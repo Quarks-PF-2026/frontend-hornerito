@@ -21,6 +21,8 @@ export interface NeedView {
   deadline: string;
   open: boolean;
   closed: boolean;
+  /** Cerrada sólo por vencimiento: editar la fecha la reabre. */
+  expired: boolean;
   cardOpacity: string;
   badge: string;
   badgeBg: string;
