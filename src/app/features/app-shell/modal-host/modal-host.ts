@@ -21,7 +21,17 @@ export class ModalHost {
   readonly org = this.orgSvc.org;
   readonly openNeeds = this.needsSvc.openViews;
 
+  onPickFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.modal.addAttachments(Array.from(input.files ?? []));
+    // Permite volver a elegir el mismo archivo después de quitarlo.
+    input.value = '';
+  }
+
   onInput(key: string, event: Event): void {
-    this.modal.setField(key, (event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value);
+    this.modal.setField(
+      key,
+      (event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value,
+    );
   }
 }
