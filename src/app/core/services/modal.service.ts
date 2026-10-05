@@ -244,21 +244,24 @@ export class ModalService {
   }
 
   newNeed(): void {
+    this.eventsSvc.load().subscribe();
     const first = this.suppliesSvc.active()[0];
     this.open(
       { kind: 'need', mode: 'new' },
-      { supplyId: first ? String(first.id) : '', required: '', deadline: '' },
+      { supplyId: first ? String(first.id) : '', required: '', deadline: '', eventId: '' },
     );
   }
   editNeed(id: string): void {
     const n = this.needsSvc.find(id);
     if (!n) return;
+    this.eventsSvc.load().subscribe();
     this.open(
       { kind: 'need', mode: 'edit', id },
       {
         supplyId: String(n.supplyId),
         required: String(n.requiredQuantity),
         deadline: n.deadline,
+        eventId: n.eventId ?? '',
       },
     );
   }
@@ -448,6 +451,7 @@ export class ModalService {
           this.select('supplyId', 'Insumo', opts, e),
           this.text('required', 'Cantidad requerida', 'Ej: 50', e, 'numeric'),
           this.date('deadline', 'Fecha límite', e),
+          this.select('eventId', 'Evento (opcional)', this.eventOptions(this.str('eventId')), e),
         ];
       }
       case 'progress':
@@ -520,6 +524,16 @@ export class ModalService {
   }
   private area(key: string, label: string, ph: string, e: Record<string, string>): FormField {
     return { ...this.base(key, label, e), type: 'textarea', placeholder: ph };
+  }
+  /** Eventos vigentes, más el ya asociado aunque esté de baja (si no, editar lo desasociaría). */
+  private eventOptions(currentId: string): SelectOption[] {
+    const current = this.eventsSvc.find(currentId);
+    const list =
+      current && !current.active ? [...this.eventsSvc.active(), current] : this.eventsSvc.active();
+    return [
+      { value: '', label: 'Sin evento' },
+      ...list.map((ev) => ({ value: ev.id, label: ev.active ? ev.name : `${ev.name} (de baja)` })),
+    ];
   }
   private select(
     key: string,
@@ -635,7 +649,12 @@ export class ModalService {
       else if (deadline < new Date().toLocaleDateString('en-CA'))
         errs['deadline'] = 'La fecha límite no puede ser anterior a hoy.';
       if (this.fail(errs)) return;
-      const data = { supplyId: this.str('supplyId'), requiredQuantity: req, deadline };
+      const data = {
+        supplyId: this.str('supplyId'),
+        requiredQuantity: req,
+        deadline,
+        eventId: this.str('eventId') || null,
+      };
       const request$ =
         m.mode === 'new' ? this.needsSvc.create(data) : this.needsSvc.update(m.id as string, data);
       request$.subscribe({

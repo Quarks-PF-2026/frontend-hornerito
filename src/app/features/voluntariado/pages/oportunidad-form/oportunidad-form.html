@@ -62,6 +62,18 @@
     </div>
 
     <div class="field">
+      <label class="hn-label" for="opp-event">Evento (opcional)</label>
+      <select id="opp-event" class="hn-select" (change)="onField('eventId', $event)">
+        <option value="" [selected]="!d.eventId">Sin evento</option>
+        @for (ev of eventOptions(); track ev.id) {
+          <option [value]="ev.id" [selected]="ev.id === d.eventId">
+            {{ ev.name }}{{ ev.active ? '' : ' (de baja)' }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
       <label class="hn-label">Tipo de voluntario</label>
       <div class="type-row">
         <!--

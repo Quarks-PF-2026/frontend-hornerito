@@ -5,11 +5,14 @@ export interface Need {
   coveredQuantity: number;
   deadline: string; // ISO yyyy-mm-dd
   closedManually: boolean;
+  /** Evento al que sirve la necesidad; null si no está asociada. */
+  eventId: string | null;
 }
 
 /** Vista derivada de una necesidad, con estilos y textos calculados. */
 export interface NeedView {
   id: string;
+  eventId: string | null;
   supply: string;
   unit: string;
   icon: string;

@@ -10,6 +10,8 @@ export interface Opportunity {
   location: string;
   /** Tipo del catálogo de la organización; null si la actividad no se clasificó. */
   volunteerTypeId: string | null;
+  /** Evento al que sirve la actividad; null si no está asociada. */
+  eventId: string | null;
   capacity: number;
   acceptedCount: number;
   status: OpportunityStatus;
@@ -27,6 +29,7 @@ export interface OpportunityPatch {
   startsAt: string;
   location: string;
   volunteerTypeId: string | null;
+  eventId: string | null;
   capacity: number;
 }
 
@@ -44,6 +47,7 @@ export interface Application {
 /** Vista derivada de una oportunidad, con textos y estilos ya calculados. */
 export interface OpportunityView {
   id: string;
+  eventId: string | null;
   title: string;
   description: string;
   location: string;
