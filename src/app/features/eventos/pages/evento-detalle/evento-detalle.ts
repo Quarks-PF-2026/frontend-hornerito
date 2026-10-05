@@ -96,6 +96,15 @@ export class EventoDetallePage {
     void this.router.navigate(['/app/eventos']);
   }
 
+  /** Lleva al input de la ocurrencia más reciente sin cargar (o la más reciente). */
+  register(): void {
+    const list = this.rows();
+    const target = list.find((r) => r.count == null) ?? list[0];
+    const input = document.getElementById(`count-${target.date}`);
+    input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    input?.focus({ preventScroll: true });
+  }
+
   onDraft(date: string, event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.patchRow(date, { draft: value, error: '' });

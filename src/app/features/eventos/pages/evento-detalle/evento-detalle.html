@@ -16,12 +16,19 @@
     <div class="subtitle">{{ schedule() }} · desde {{ ev.startDate }}</div>
   }
 
+  @if (rows().length) {
+    <button class="hn-btn hn-btn--primary register" type="button" (click)="register()">
+      Registrar asistencia
+    </button>
+  }
+
   <div class="list">
     @for (r of rows(); track r.date) {
       <div class="row hn-card">
         <div class="date">{{ r.dateLabel }}</div>
         <div class="field-row">
           <input
+            [id]="'count-' + r.date"
             class="hn-input count"
             type="number"
             min="0"
@@ -30,6 +37,7 @@
             placeholder="Cantidad"
             [value]="r.draft"
             (input)="onDraft(r.date, $event)"
+            (keydown.enter)="save(r)"
           />
           <button
             class="hn-btn hn-btn--primary save"
