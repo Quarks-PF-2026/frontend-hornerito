@@ -586,7 +586,10 @@ export class ModalService {
       const deadline = this.str('deadline');
       if (!this.str('required') || isNaN(req) || req <= 0)
         errs['required'] = 'Ingresá una cantidad mayor a cero.';
+      const original = m.mode === 'edit' ? this.needsSvc.find(m.id as string)?.deadline : undefined;
       if (!deadline) errs['deadline'] = 'Elegí una fecha límite.';
+      else if (deadline !== original && deadline < new Date().toLocaleDateString('en-CA'))
+        errs['deadline'] = 'La fecha límite no puede ser anterior a hoy.';
       if (this.fail(errs)) return;
       const data = { supplyId: this.str('supplyId'), requiredQuantity: req, deadline };
       const request$ =
