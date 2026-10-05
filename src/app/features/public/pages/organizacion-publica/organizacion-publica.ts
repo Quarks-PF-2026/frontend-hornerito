@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { scheduleLines } from '../../../../core/models/collection-point.model';
+import { scheduleLabel } from '../../../../core/models/event.model';
 import { CAT_ICON, DEFAULT_CAT_ICON } from '../../../../core/models/catalog';
 import {
   MonetaryDonationPayload,
@@ -29,6 +30,7 @@ interface NeedRow {
   pct: number;
   color: string;
   deadline: string;
+  eventName: string;
 }
 
 /** A qué se está postulando: a una actividad concreta o a la organización. */
@@ -48,6 +50,13 @@ interface OpportunityRow {
   cupos: string;
   pct: number;
   color: string;
+  eventName: string;
+}
+
+interface EventRow {
+  id: string;
+  name: string;
+  schedule: string;
 }
 
 interface RequestForm {
@@ -111,8 +120,18 @@ export class OrganizacionPublicaPage {
         pct,
         color: pct >= 50 ? 'var(--hn-primary)' : 'var(--hn-canela-200)',
         deadline: fmtDate(need.deadline),
+        eventName: need.eventName ?? '',
       };
     }),
+  );
+
+  readonly events = computed<EventRow[]>(() =>
+    (this.org()?.events ?? []).map((ev) => ({
+      id: ev.id,
+      name: ev.name,
+      schedule:
+        ev.kind === 'one_off' ? `${fmtDate(ev.startDate)} · ${ev.startTime}` : scheduleLabel(ev),
+    })),
   );
 
   readonly points = computed<PointRow[]>(() =>
@@ -339,6 +358,7 @@ export class OrganizacionPublicaPage {
       location: opportunity.location,
       when: fmtDateTime(opportunity.startsAt),
       typeName: opportunity.volunteerTypeName ?? '',
+      eventName: opportunity.eventName ?? '',
       cupos: left === 1 ? 'Queda 1 lugar' : `Quedan ${left} lugares`,
       pct,
       color: pct >= 50 ? 'var(--hn-primary)' : 'var(--hn-canela-200)',

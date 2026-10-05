@@ -48,6 +48,20 @@
     </div>
   </header>
 
+  @if (events().length) {
+    <section class="block">
+      <h2 class="hn-head">Eventos</h2>
+      <div class="events">
+        @for (ev of events(); track ev.id) {
+          <article class="event hn-card">
+            <p class="event-name">📅 {{ ev.name }}</p>
+            <p class="event-when">{{ ev.schedule }}</p>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
   <section class="block">
     <h2 class="hn-head">Necesita ahora</h2>
     @if (needs().length) {
@@ -59,6 +73,9 @@
               <div>
                 <p class="supply">{{ need.supply }}</p>
                 <p class="deadline">Hasta el {{ need.deadline }}</p>
+                @if (need.eventName) {
+                  <p class="event-chip">Para: {{ need.eventName }}</p>
+                }
               </div>
             </div>
             <div class="need-progress">
@@ -187,6 +204,9 @@
                   <p class="op-title">{{ op.title }}</p>
                   <p class="op-when">🗓️ {{ op.when }}</p>
                   <p class="op-where">📍 {{ op.location }}</p>
+                  @if (op.eventName) {
+                    <p class="event-chip">Para: {{ op.eventName }}</p>
+                  }
                 </div>
                 @if (op.typeName) {
                   <span class="op-type">{{ op.typeName }}</span>

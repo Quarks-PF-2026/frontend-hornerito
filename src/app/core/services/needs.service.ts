@@ -7,7 +7,7 @@ import { Need, NeedView } from '../models/need.model';
 import { fmtDate } from '../util/format';
 import { SuppliesService } from './supplies.service';
 
-export type NeedPatch = Pick<Need, 'supplyId' | 'requiredQuantity' | 'deadline'>;
+export type NeedPatch = Pick<Need, 'supplyId' | 'requiredQuantity' | 'deadline' | 'eventId'>;
 
 @Injectable({ providedIn: 'root' })
 export class NeedsService {
@@ -31,6 +31,7 @@ export class NeedsService {
     const barColor = done ? '#3F8B5C' : pct >= 50 ? '#C1783A' : '#D4A46A';
     return {
       id: n.id,
+      eventId: n.eventId,
       supply: sup ? sup.name : 'Insumo',
       unit: sup ? sup.unit.toLowerCase() : '',
       icon: sup ? CAT_ICON[sup.category] ?? DEFAULT_CAT_ICON : DEFAULT_CAT_ICON,
@@ -73,6 +74,18 @@ export class NeedsService {
         this._needs.update((list) => list.map((n) => (n.id === id ? need : n))),
       ),
     );
+  }
+
+  /** Asocia (o con `null`, desasocia) la necesidad a un evento; el resto queda igual. */
+  setEvent(id: string, eventId: string | null): Observable<Need> {
+    const n = this.find(id);
+    if (!n) throw new Error('Necesidad desconocida');
+    return this.update(id, {
+      supplyId: n.supplyId,
+      requiredQuantity: n.requiredQuantity,
+      deadline: n.deadline,
+      eventId,
+    });
   }
 
   setProgress(id: string, coveredQuantity: number): Observable<Need> {

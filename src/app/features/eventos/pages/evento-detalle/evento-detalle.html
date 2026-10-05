@@ -62,4 +62,74 @@
       </div>
     }
   </div>
+
+  @if (event(); as ev) {
+    <section class="linked">
+      <h2 class="linked-title hn-head">Necesidades</h2>
+      @for (n of linkedNeeds(); track n.id) {
+        <div class="linked-row hn-card">
+          <div class="linked-text">
+            <div class="linked-name">{{ n.icon }} {{ n.supply }}</div>
+            <div class="linked-meta">
+              {{ n.covered }} de {{ n.required }} {{ n.unit }} · hasta {{ n.deadline }}
+            </div>
+          </div>
+          @if (canWrite() && n.open) {
+            <button
+              class="hn-btn hn-btn--outline unlink"
+              type="button"
+              (click)="setNeedEvent(n.id, null)"
+            >
+              Quitar
+            </button>
+          }
+        </div>
+      } @empty {
+        <div class="linked-empty">Ninguna necesidad asociada.</div>
+      }
+      @if (canWrite() && ev.active && freeNeeds().length) {
+        <select class="hn-select" aria-label="Asociar una necesidad" (change)="linkNeed($event)">
+          <option value="">Asociar una necesidad…</option>
+          @for (n of freeNeeds(); track n.id) {
+            <option [value]="n.id">{{ n.supply }} ({{ n.required }} {{ n.unit }})</option>
+          }
+        </select>
+      }
+    </section>
+
+    <section class="linked">
+      <h2 class="linked-title hn-head">Voluntariado</h2>
+      @for (o of linkedOpportunities(); track o.id) {
+        <div class="linked-row hn-card">
+          <div class="linked-text">
+            <div class="linked-name">{{ o.title }}</div>
+            <div class="linked-meta">{{ o.when }} · {{ o.cupos }}</div>
+          </div>
+          @if (canWrite() && o.status === 'open') {
+            <button
+              class="hn-btn hn-btn--outline unlink"
+              type="button"
+              (click)="setOpportunityEvent(o.id, null)"
+            >
+              Quitar
+            </button>
+          }
+        </div>
+      } @empty {
+        <div class="linked-empty">Ninguna actividad de voluntariado asociada.</div>
+      }
+      @if (canWrite() && ev.active && freeOpportunities().length) {
+        <select
+          class="hn-select"
+          aria-label="Asociar una actividad"
+          (change)="linkOpportunity($event)"
+        >
+          <option value="">Asociar una actividad…</option>
+          @for (o of freeOpportunities(); track o.id) {
+            <option [value]="o.id">{{ o.title }} · {{ o.when }}</option>
+          }
+        </select>
+      }
+    </section>
+  }
 }
