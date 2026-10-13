@@ -27,3 +27,12 @@ export interface NeedView {
   badgeInk: string;
   closedNote: string;
 }
+
+/** `GET /needs/suggestions` (QK-30): hasta 3, ya ordenados por el backend. */
+export interface NeedSuggestion {
+  supplyId: string;
+  supplyName: string;
+  category: string;
+  timesRequested: number;
+  lastRequestedAt: string; // 'YYYY-MM-DD'
+}

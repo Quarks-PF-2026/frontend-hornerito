@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EventOccurrence, OrgEvent } from '../models/event.model';
+import { AttendanceForecast, EventOccurrence, OrgEvent } from '../models/event.model';
 
 export type EventCreate = Pick<OrgEvent, 'name' | 'kind' | 'startDate'>;
 /** El PUT admite los tres campos, pero la UI de edición solo ofrece `name`
@@ -60,6 +60,11 @@ export class EventsService {
 
   setAttendance(id: string, date: string, count: number): Observable<AttendanceResult> {
     return this.http.put<AttendanceResult>(`${this.apiUrl}/${id}/attendance/${date}`, { count });
+  }
+
+  /** Sin cache, mismo criterio que `occurrences`: se pide al abrir el alta de necesidad. */
+  attendanceForecast(): Observable<AttendanceForecast[]> {
+    return this.http.get<AttendanceForecast[]>(`${this.apiUrl}/attendance-forecast`);
   }
 
   find(id: string): OrgEvent | undefined {

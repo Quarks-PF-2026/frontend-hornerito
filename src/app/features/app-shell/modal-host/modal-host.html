@@ -6,6 +6,34 @@
         <div class="title hn-head">{{ modal.title() }}</div>
         <div class="subtitle">{{ modal.subtitle() }}</div>
 
+        <!-- QK-30: solo llega con datos en el alta de necesidad. Banner y no
+             hn-toast: el toast es de texto y se cierra solo, y acá hacen falta
+             acciones que el usuario tenga tiempo de tocar. -->
+        @if (modal.suggestions().length > 0) {
+          <div class="suggest" role="region" aria-label="Insumos sugeridos">
+            <div class="suggest-head">
+              <span class="suggest-title">💡 Suele pedir</span>
+              <button
+                class="suggest-dismiss"
+                type="button"
+                aria-label="Descartar sugerencias"
+                title="Descartar"
+                (click)="modal.dismissSuggestions()"
+              >✕</button>
+            </div>
+            <div class="suggest-chips">
+              @for (sug of modal.suggestions(); track sug.supplyId) {
+                <button
+                  class="suggest-chip"
+                  type="button"
+                  [attr.aria-label]="'Usar ' + sug.supplyName + ' como insumo'"
+                  (click)="modal.acceptSuggestion(sug.supplyId)"
+                >+ {{ sug.supplyName }}</button>
+              }
+            </div>
+          </div>
+        }
+
         @for (fld of modal.fields(); track fld.key) {
           <div class="field">
             <label class="hn-label">{{ fld.label }}</label>
@@ -59,6 +87,32 @@
               <div class="hn-field-error">{{ fld.error }}</div>
             }
           </div>
+        }
+
+        <!-- QK-30: informativo, no prellena nada. Sin eventos periódicos no aparece. -->
+        @if (modal.forecastLines().length > 0) {
+          <section class="forecast" aria-labelledby="forecast-title">
+            <div id="forecast-title" class="forecast-title">Asistencia esperada próximos 7 días</div>
+            <ul class="forecast-list">
+              @for (ln of modal.forecastLines(); track ln.eventId) {
+                <li class="forecast-row">
+                  <span class="forecast-name">{{ ln.eventName }}</span>
+                  @if (ln.avgPerDay !== null) {
+                    <span class="forecast-value">
+                      ~{{ ln.avgPerDay }} personas/día
+                      @if (ln.trendLabel) {
+                        <span class="forecast-trend">
+                          <span aria-hidden="true">{{ ln.trendIcon }}</span> {{ ln.trendLabel }}
+                        </span>
+                      }
+                    </span>
+                  } @else {
+                    <span class="forecast-missing">{{ ln.missingNote }}</span>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
         }
 
         <div class="row">

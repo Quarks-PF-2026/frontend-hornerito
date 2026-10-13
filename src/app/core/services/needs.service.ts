@@ -3,7 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CAT_ICON, DEFAULT_CAT_ICON } from '../models/catalog';
-import { Need, NeedView } from '../models/need.model';
+import { Need, NeedSuggestion, NeedView } from '../models/need.model';
 import { fmtDate } from '../util/format';
 import { SuppliesService } from './supplies.service';
 
@@ -32,7 +32,7 @@ export class NeedsService {
       id: n.id,
       supply: sup ? sup.name : 'Insumo',
       unit: sup ? sup.unit.toLowerCase() : '',
-      icon: sup ? CAT_ICON[sup.category] ?? DEFAULT_CAT_ICON : DEFAULT_CAT_ICON,
+      icon: sup ? (CAT_ICON[sup.category] ?? DEFAULT_CAT_ICON) : DEFAULT_CAT_ICON,
       covered: n.coveredQuantity,
       required: n.requiredQuantity,
       pct,
@@ -64,29 +64,29 @@ export class NeedsService {
   }
 
   update(id: string, data: NeedPatch): Observable<Need> {
-    return this.http.put<Need>(`${this.apiUrl}/needs/${id}`, data).pipe(
-      tap((need) =>
-        this._needs.update((list) => list.map((n) => (n.id === id ? need : n))),
-      ),
-    );
+    return this.http
+      .put<Need>(`${this.apiUrl}/needs/${id}`, data)
+      .pipe(tap((need) => this._needs.update((list) => list.map((n) => (n.id === id ? need : n)))));
   }
 
   setProgress(id: string, coveredQuantity: number): Observable<Need> {
     return this.http
       .patch<Need>(`${this.apiUrl}/needs/${id}/progress`, { coveredQuantity })
-      .pipe(
-        tap((need) =>
-          this._needs.update((list) => list.map((n) => (n.id === id ? need : n))),
-        ),
-      );
+      .pipe(tap((need) => this._needs.update((list) => list.map((n) => (n.id === id ? need : n)))));
   }
 
   close(id: string): Observable<Need> {
-    return this.http.patch<Need>(`${this.apiUrl}/needs/${id}/close`, {}).pipe(
-      tap((need) =>
-        this._needs.update((list) => list.map((n) => (n.id === id ? need : n))),
-      ),
-    );
+    return this.http
+      .patch<Need>(`${this.apiUrl}/needs/${id}/close`, {})
+      .pipe(tap((need) => this._needs.update((list) => list.map((n) => (n.id === id ? need : n)))));
+  }
+
+  /**
+   * Sin signal: la sugerencia solo vive mientras está abierto el formulario de
+   * alta, así que la guarda el ModalService y muere con él.
+   */
+  suggestions(): Observable<NeedSuggestion[]> {
+    return this.http.get<NeedSuggestion[]>(`${this.apiUrl}/needs/suggestions`);
   }
 
   find(id: string): Need | undefined {

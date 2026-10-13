@@ -19,6 +19,99 @@
 .field {
   margin-bottom: 16px;
 }
+
+/* ---- Sugerencias y asistencia (QK-30) ---- */
+.suggest {
+  background: var(--hn-warning-bg);
+  border: 1px solid var(--hn-warning-border);
+  border-radius: var(--hn-radius-md);
+  padding: 10px 12px 12px;
+  margin-bottom: 18px;
+  animation: hn-fade 0.15s ease;
+}
+.suggest-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.suggest-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--hn-warning-ink);
+}
+.suggest-dismiss {
+  background: none;
+  border: 0;
+  color: var(--hn-warning-ink);
+  font-size: 15px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--hn-radius-pill);
+  cursor: pointer;
+}
+.suggest-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.suggest-chip {
+  background: var(--hn-card);
+  border: 1px solid var(--hn-warning-border);
+  color: var(--hn-ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: var(--hn-radius-pill);
+  cursor: pointer;
+}
+.suggest-chip:hover,
+.suggest-dismiss:hover {
+  background: var(--hn-cream-soft);
+}
+.forecast {
+  background: var(--hn-cream-soft);
+  border-radius: var(--hn-radius-md);
+  padding: 10px 12px;
+  margin-bottom: 18px;
+}
+.forecast-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hn-text);
+  margin-bottom: 6px;
+}
+.forecast-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.forecast-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.forecast-name {
+  font-weight: 600;
+  color: var(--hn-ink);
+}
+.forecast-value {
+  color: var(--hn-text);
+  text-align: right;
+}
+.forecast-trend {
+  margin-left: 6px;
+  color: var(--hn-text-2);
+}
+.forecast-missing {
+  color: var(--hn-muted);
+  text-align: right;
+}
 .row {
   display: flex;
   gap: 10px;

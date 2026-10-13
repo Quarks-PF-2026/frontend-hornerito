@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CATS, UNITS } from '../models/catalog';
-import { EventKind } from '../models/event.model';
+import { AttendanceForecast, AttendanceTrend, EventKind } from '../models/event.model';
+import { NeedSuggestion } from '../models/need.model';
 import { PickedLocality, localityLabel } from '../models/org.model';
 import { EventsService } from './events.service';
 import { OrgService } from './org.service';
@@ -37,6 +38,25 @@ interface ModalState {
   sub?: 'post' | 'event';
 }
 
+/** Una línea de "Asistencia esperada" ya resuelta para el template (QK-30). */
+export interface ForecastLine {
+  eventId: string;
+  eventName: string;
+  /** null = historial insuficiente; se muestra `missingNote` en su lugar. */
+  avgPerDay: number | null;
+  trendIcon: string;
+  trendLabel: string;
+  missingNote: string;
+}
+
+// El ícono va siempre acompañado del texto: la tendencia no puede depender
+// solo del emoji ni del color (accesibilidad, CA-7).
+const TREND: Record<AttendanceTrend, { icon: string; label: string }> = {
+  sube: { icon: '📈', label: 'en aumento' },
+  baja: { icon: '📉', label: 'en baja' },
+  estable: { icon: '➡️', label: 'estable' },
+};
+
 const FORM_KINDS: ModalKind[] = ['org', 'post', 'need', 'progress', 'supply', 'event'];
 
 @Injectable({ providedIn: 'root' })
@@ -51,6 +71,11 @@ export class ModalService {
   private readonly _modal = signal<ModalState | null>(null);
   private readonly _form = signal<Record<string, string | boolean>>({});
   private readonly _errors = signal<Record<string, string>>({});
+
+  // QK-30: datos de apoyo del alta de necesidad. Viven en el modal porque
+  // mueren con él; se piden de nuevo cada vez que se abre.
+  private readonly _suggestions = signal<NeedSuggestion[]>([]);
+  private readonly _forecast = signal<AttendanceForecast[]>([]);
 
   readonly modal = this._modal.asReadonly();
   readonly form = this._form.asReadonly();
@@ -78,12 +103,16 @@ export class ModalService {
 
   // ---------------- apertura ----------------
   private open(state: ModalState, form: Record<string, string | boolean> = {}): void {
+    this._suggestions.set([]);
+    this._forecast.set([]);
     this._modal.set(state);
     this._form.set(form);
     this._errors.set({});
   }
 
   close(): void {
+    this._suggestions.set([]);
+    this._forecast.set([]);
     this._modal.set(null);
     this._form.set({});
     this._errors.set({});
@@ -130,7 +159,59 @@ export class ModalService {
       { kind: 'need', mode: 'new' },
       { supplyId: first ? String(first.id) : '', required: '', deadline: '' },
     );
+    const state = this._modal();
+    // Las dos llamadas son de apoyo: si fallan, el formulario sigue igual y no
+    // se muestra nada (CA-5). El chequeo de `state` descarta una respuesta que
+    // llega cuando el usuario ya cerró o abrió otro modal.
+    this.needsSvc.suggestions().subscribe({
+      next: (list) => {
+        if (this._modal() === state) this._suggestions.set(list ?? []);
+      },
+      error: () => {},
+    });
+    this.eventsSvc.attendanceForecast().subscribe({
+      next: (list) => {
+        if (this._modal() === state) this._forecast.set(list ?? []);
+      },
+      error: () => {},
+    });
   }
+
+  /**
+   * Solo se ofrecen insumos que el select puede mostrar: uno dado de baja
+   * después de la sugerencia dejaría el select en blanco.
+   */
+  readonly suggestions = computed(() => {
+    const active = new Set(this.suppliesSvc.active().map((s) => String(s.id)));
+    return this._suggestions().filter((s) => active.has(s.supplyId));
+  });
+
+  /** Aceptar prellena solo el insumo; cantidad y fecha quedan a completar (CA-2). */
+  acceptSuggestion(supplyId: string): void {
+    this.setField('supplyId', supplyId);
+    this._suggestions.set([]);
+  }
+  /** Descartar deja el formulario como si no hubiera habido sugerencia (CA-4). */
+  dismissSuggestions(): void {
+    this._suggestions.set([]);
+  }
+
+  readonly forecastLines = computed<ForecastLine[]>(() =>
+    this._forecast().map((f) => {
+      const trend = f.trend ? TREND[f.trend] : null;
+      const sufficient = f.sufficientHistory && f.forecast.length > 0;
+      return {
+        eventId: f.eventId,
+        eventName: f.eventName,
+        avgPerDay: sufficient
+          ? Math.round(f.forecast.reduce((acc, d) => acc + d.expected, 0) / f.forecast.length)
+          : null,
+        trendIcon: trend?.icon ?? '',
+        trendLabel: trend?.label ?? '',
+        missingNote: `Faltan registros de asistencia para proyectar (${f.daysRecorded}/${f.minDaysRequired} días)`,
+      };
+    }),
+  );
   editNeed(id: string): void {
     const n = this.needsSvc.find(id);
     if (!n) return;
