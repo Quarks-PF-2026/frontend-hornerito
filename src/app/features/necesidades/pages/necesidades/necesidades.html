@@ -28,7 +28,12 @@
         </div>
       }
       @if (v.closed) {
-        <div class="closed">{{ v.closedNote }}</div>
+        <div class="closed">
+          {{ v.closedNote }}
+          @if (v.expired && canWrite()) {
+            <button class="hn-btn hn-btn--icon sq" type="button" title="Editar fecha" (click)="edit(v.id)">✎</button>
+          }
+        </div>
       }
     </div>
   } @empty {

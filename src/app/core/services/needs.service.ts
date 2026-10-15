@@ -7,7 +7,7 @@ import { Need, NeedSuggestion, NeedView } from '../models/need.model';
 import { fmtDate } from '../util/format';
 import { SuppliesService } from './supplies.service';
 
-export type NeedPatch = Pick<Need, 'supplyId' | 'requiredQuantity' | 'deadline'>;
+export type NeedPatch = Pick<Need, 'supplyId' | 'requiredQuantity' | 'deadline' | 'eventId'>;
 
 @Injectable({ providedIn: 'root' })
 export class NeedsService {
@@ -25,11 +25,13 @@ export class NeedsService {
   private toView(n: Need): NeedView {
     const sup = this.suppliesSvc.find(n.supplyId);
     const done = n.coveredQuantity >= n.requiredQuantity;
-    const closed = done || n.closedManually;
+    const expired = !done && !n.closedManually && n.deadline < new Date().toLocaleDateString('en-CA');
+    const closed = done || n.closedManually || expired;
     const pct = Math.min(100, Math.round((n.coveredQuantity / n.requiredQuantity) * 100));
     const barColor = done ? '#3F8B5C' : pct >= 50 ? '#C1783A' : '#D4A46A';
     return {
       id: n.id,
+      eventId: n.eventId,
       supply: sup ? sup.name : 'Insumo',
       unit: sup ? sup.unit.toLowerCase() : '',
       icon: sup ? (CAT_ICON[sup.category] ?? DEFAULT_CAT_ICON) : DEFAULT_CAT_ICON,
@@ -41,13 +43,16 @@ export class NeedsService {
       deadline: fmtDate(n.deadline),
       open: !closed,
       closed,
+      expired,
       cardOpacity: closed ? '.8' : '1',
-      badge: done ? 'Completada' : n.closedManually ? 'Cerrada' : 'Abierta',
+      badge: done ? 'Completada' : n.closedManually ? 'Cerrada' : expired ? 'Vencida' : 'Abierta',
       badgeBg: closed ? '#E6F0E7' : '#FBEFD4',
       badgeInk: closed ? '#2C6B45' : '#8A5E12',
       closedNote: done
         ? '✓ Objetivo cumplido — cerrada automáticamente'
-        : '✓ Cerrada manualmente — ya no recibe aportes',
+        : expired
+          ? 'Venció sin completarse — editá la fecha para reabrirla'
+          : '✓ Cerrada manualmente — ya no recibe aportes',
     };
   }
 
@@ -67,6 +72,18 @@ export class NeedsService {
     return this.http
       .put<Need>(`${this.apiUrl}/needs/${id}`, data)
       .pipe(tap((need) => this._needs.update((list) => list.map((n) => (n.id === id ? need : n)))));
+  }
+
+  /** Asocia (o con `null`, desasocia) la necesidad a un evento; el resto queda igual. */
+  setEvent(id: string, eventId: string | null): Observable<Need> {
+    const n = this.find(id);
+    if (!n) throw new Error('Necesidad desconocida');
+    return this.update(id, {
+      supplyId: n.supplyId,
+      requiredQuantity: n.requiredQuantity,
+      deadline: n.deadline,
+      eventId,
+    });
   }
 
   setProgress(id: string, coveredQuantity: number): Observable<Need> {

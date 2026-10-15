@@ -29,6 +29,8 @@ export interface OpportunityDraft {
   location: string;
   /** Id del tipo de voluntario; '' = sin tipo. */
   volunteerTypeId: string;
+  /** Id del evento; '' = sin evento. */
+  eventId: string;
   capacity: string;
 }
 
@@ -96,6 +98,24 @@ export class VolunteeringService {
     return this.decide(applicationId, 'reject');
   }
 
+  /** Asocia (o con `null`, desasocia) la actividad a un evento; el resto queda igual. */
+  setEvent(id: string, eventId: string | null): Observable<Opportunity> {
+    const o = this.find(id);
+    if (!o) throw new Error('Oportunidad desconocida');
+    const data: OpportunityPatch = {
+      title: o.title,
+      description: o.description,
+      startsAt: o.startsAt,
+      location: o.location,
+      volunteerTypeId: o.volunteerTypeId,
+      eventId,
+      capacity: o.capacity,
+    };
+    return this.http
+      .put<Opportunity>(`${this.apiUrl}/opportunities/${id}`, data)
+      .pipe(tap(() => this.load().subscribe()));
+  }
+
   // ---------------- formulario ----------------
   openNew(): void {
     this._errors.set({});
@@ -107,6 +127,7 @@ export class VolunteeringService {
       startsAt: '',
       location: '',
       volunteerTypeId: '',
+      eventId: '',
       capacity: '',
     });
   }
@@ -123,6 +144,7 @@ export class VolunteeringService {
       startsAt: toDatetimeLocal(opportunity.startsAt),
       location: opportunity.location,
       volunteerTypeId: opportunity.volunteerTypeId ?? '',
+      eventId: opportunity.eventId ?? '',
       capacity: String(opportunity.capacity),
     });
   }
@@ -153,6 +175,7 @@ export class VolunteeringService {
       startsAt: new Date(draft.startsAt).toISOString(),
       location: draft.location.trim(),
       volunteerTypeId: draft.volunteerTypeId || null,
+      eventId: draft.eventId || null,
       capacity: Number(draft.capacity),
     };
 
@@ -241,6 +264,7 @@ export class VolunteeringService {
     const badge = this.badgeFor(o);
     return {
       id: o.id,
+      eventId: o.eventId,
       title: o.title,
       description: o.description,
       location: o.location,

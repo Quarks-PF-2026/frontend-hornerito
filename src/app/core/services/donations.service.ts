@@ -131,7 +131,8 @@ export class DonationsService {
         (need) =>
           need.supplyId === supplyId &&
           !need.closedManually &&
-          need.coveredQuantity < need.requiredQuantity,
+          need.coveredQuantity < need.requiredQuantity &&
+          need.deadline >= new Date().toLocaleDateString('en-CA'),
       )
       .map((need) => ({
         id: need.id,

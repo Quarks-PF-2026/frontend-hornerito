@@ -3,10 +3,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { PostsService } from '../../../../core/services/posts.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { fmtDate } from '../../../../core/util/format';
+import { PostMediaGrid } from '../../../../shared/ui/post-media/post-media';
 
 @Component({
   selector: 'app-publicaciones',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [PostMediaGrid],
   templateUrl: './publicaciones.html',
   styleUrl: './publicaciones.scss',
 })

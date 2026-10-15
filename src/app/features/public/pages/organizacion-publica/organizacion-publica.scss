@@ -82,6 +82,7 @@
 }
 
 .needs,
+.events,
 .points,
 .posts,
 .bank {
@@ -324,4 +325,24 @@
 }
 .bank strong {
   word-break: break-all;
+}
+
+.event {
+  padding: 12px 16px;
+}
+.event-name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--hn-ink);
+}
+.event-when {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--hn-text-2);
+}
+.event-chip {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--hn-primary-strong);
 }

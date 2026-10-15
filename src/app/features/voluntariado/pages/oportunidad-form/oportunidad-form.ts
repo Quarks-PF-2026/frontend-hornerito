@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { EventsService } from '../../../../core/services/events.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { VolunteerTypesService } from '../../../../core/services/volunteer-types.service';
 import {
@@ -29,6 +30,7 @@ interface TypeSheet {
 export class OportunidadFormPage {
   private readonly volunteering = inject(VolunteeringService);
   private readonly volunteerTypes = inject(VolunteerTypesService);
+  private readonly events = inject(EventsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -46,10 +48,17 @@ export class OportunidadFormPage {
     const current = this.volunteerTypes.find(this.draft()?.volunteerTypeId ?? '');
     return current && !current.active ? [...active, current] : active;
   });
+  /** Eventos vigentes, más el ya asociado aunque esté de baja. */
+  readonly eventOptions = computed(() => {
+    const active = this.events.active();
+    const current = this.events.find(this.draft()?.eventId ?? '');
+    return current && !current.active ? [...active, current] : active;
+  });
   readonly typeSheet = signal<TypeSheet | null>(null);
 
   constructor() {
     this.volunteerTypes.load().subscribe();
+    this.events.load().subscribe();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {

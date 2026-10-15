@@ -1,4 +1,5 @@
 import { ScheduleDay } from './collection-point.model';
+import { PostMedia } from './media.model';
 
 /** Página genérica que devuelven los endpoints públicos. */
 export interface PublicPage<T> {
@@ -36,6 +37,8 @@ export interface PublicNeed {
   requiredQuantity: number;
   coveredQuantity: number;
   deadline: string;
+  eventId: string | null;
+  eventName: string | null;
 }
 
 /** Necesidad del feed global (`/public/needs`): trae de qué organización es. */
@@ -60,6 +63,7 @@ export interface PublicPost {
   title: string;
   content: string;
   createdAt: string;
+  media: PostMedia[];
 }
 
 /** Actividad de voluntariado abierta, tal como la ve un visitante. */
@@ -73,6 +77,8 @@ export interface PublicOpportunity {
   acceptedCount: number;
   volunteerTypeId: string | null;
   volunteerTypeName: string | null;
+  eventId: string | null;
+  eventName: string | null;
 }
 
 export interface PublicVolunteerType {
@@ -119,6 +125,16 @@ export interface MonetaryDonationPayload {
   donorContact?: string;
 }
 
+/** Evento activo de la organización, tal como lo ve un visitante. */
+export interface PublicEvent {
+  id: string;
+  name: string;
+  kind: 'periodic' | 'one_off';
+  startDate: string;
+  weekdays: number[] | null;
+  startTime: string;
+}
+
 export interface PublicOrgDetail {
   id: string;
   name: string;
@@ -133,6 +149,7 @@ export interface PublicOrgDetail {
   needs: PublicNeed[];
   collectionPoints: PublicCollectionPoint[];
   posts: PublicPost[];
+  events: PublicEvent[];
   volunteering: PublicVolunteering;
   donations: PublicDonations;
 }
