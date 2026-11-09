@@ -42,7 +42,9 @@ export class PublicService {
   }
 
   organization(id: string): Observable<PublicOrgDetail> {
-    return this.http.get<PublicOrgDetail>(`${this.apiUrl}/public/organizations/${id}`);
+    return this.http.get<PublicOrgDetail>(
+      `${this.apiUrl}/public/organizations/${encodeURIComponent(id)}`,
+    );
   }
 
   /**
@@ -57,7 +59,7 @@ export class PublicService {
     payload: VolunteerRequestPayload,
   ): Observable<{ id: string; status: string }> {
     return this.http.post<{ id: string; status: string }>(
-      `${this.apiUrl}/public/organizations/${organizationId}/volunteer-requests`,
+      `${this.apiUrl}/public/organizations/${encodeURIComponent(organizationId)}/volunteer-requests`,
       payload,
     );
   }
@@ -88,7 +90,7 @@ export class PublicService {
       form.append('receipt', receipt);
     }
     return this.http.post<{ id: string; status: string }>(
-      `${this.apiUrl}/public/organizations/${organizationId}/donations`,
+      `${this.apiUrl}/public/organizations/${encodeURIComponent(organizationId)}/donations`,
       form,
     );
   }
@@ -100,7 +102,9 @@ export class PublicService {
 
   /** Perfil público del donante (QK-110). 404 si no tiene perfil público. */
   donor(userId: string): Observable<DonorProfile> {
-    return this.http.get<DonorProfile>(`${this.apiUrl}/public/donors/${userId}`);
+    return this.http.get<DonorProfile>(
+      `${this.apiUrl}/public/donors/${encodeURIComponent(userId)}`,
+    );
   }
 
   needs(query: PublicQuery = {}): Observable<PublicPage<PublicFeedNeed>> {
