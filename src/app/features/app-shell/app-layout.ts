@@ -19,6 +19,7 @@ interface TabMeta {
 const TABS: Record<string, TabMeta> = {
   organizacion: { kicker: 'Tu organización', title: 'Mi comedor', fab: 'Editar' },
   publicaciones: { kicker: 'Difusión', title: 'Publicaciones', fab: 'Publicar' },
+  historias: { kicker: 'Difusión', title: 'Historias', fab: '' },
   necesidades: { kicker: 'Lo que hace falta', title: 'Necesidades', fab: 'Necesidad' },
   donaciones: { kicker: 'Lo que entra', title: 'Donaciones', fab: 'Donación' },
   puntos: { kicker: 'Dónde entregar', title: 'Puntos de recolección', fab: 'Punto' },
@@ -60,6 +61,8 @@ export class AppLayout {
       case 'validacion':
       // Perfil no crea nada: es un formulario de edición, no una lista.
       case 'perfil':
+      // Historias trae el formulario de alta en la misma pantalla.
+      case 'historias':
         return false;
       case 'organizacion':
         return this.auth.isOwner();
@@ -101,6 +104,7 @@ export class AppLayout {
   }
 
   readonly canManageMembers = this.auth.canManageMembers;
+  readonly canWriteContent = this.auth.canWriteContent;
   readonly isPlatformAdmin = this.auth.isPlatformAdmin;
   readonly canOperate = this.orgSvc.canOperate;
 

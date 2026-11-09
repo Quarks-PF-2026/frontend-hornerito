@@ -225,7 +225,8 @@
 
 // "Por vencer" (QK-108): fila horizontal con snap; la card imita la de la
 // ficha pública (organizacion-publica.scss).
-.expiring {
+.expiring,
+.donors {
   margin-bottom: 26px;
 }
 .expiring h2 {

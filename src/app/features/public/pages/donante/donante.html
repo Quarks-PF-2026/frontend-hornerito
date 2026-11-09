@@ -1,0 +1,34 @@
+@if (notFound()) {
+  <div class="notice hn-card">
+    <p class="notice-title hn-head">Este perfil no existe</p>
+    <p>Puede que el enlace esté mal o que la persona ya no tenga un perfil público.</p>
+    <a class="hn-btn hn-btn--primary" routerLink="/">Volver al inicio</a>
+  </div>
+} @else if (failed()) {
+  <div class="notice hn-card">
+    <p class="notice-title hn-head">No pudimos cargar este perfil</p>
+    <div class="notice-actions">
+      <button class="hn-btn hn-btn--outline" type="button" (click)="retry()">Reintentar</button>
+      <a class="hn-btn hn-btn--primary" routerLink="/">Volver al inicio</a>
+    </div>
+  </div>
+} @else if (loading()) {
+  <p class="quiet center">Cargando…</p>
+} @else if (view(); as v) {
+  <article class="profile hn-card">
+    <span class="avatar" aria-hidden="true">{{ v.initials }}</span>
+    <h1 class="hn-head">{{ v.name }}</h1>
+    <p class="quiet">Donante desde {{ v.since }}</p>
+
+    <dl class="stats">
+      <div>
+        <dt class="hn-label">Este mes</dt>
+        <dd>{{ v.month }}</dd>
+      </div>
+      <div>
+        <dt class="hn-label">En total</dt>
+        <dd>{{ v.total }}</dd>
+      </div>
+    </dl>
+  </article>
+}

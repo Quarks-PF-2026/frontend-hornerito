@@ -2,18 +2,25 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Media, MediaOwnerType, PostMedia, mediaKindOf } from '../models/media.model';
+import {
+  Media,
+  MediaOwnerType,
+  MediaResourceType,
+  PostMedia,
+  mediaKindOf,
+} from '../models/media.model';
 
 /**
  * Firma de una subida. `params` va tal cual al multipart de Cloudinary: la
  * firma los cubre a todos, así que no se agrega ni se quita ninguno.
  */
-interface UploadSignature {
+export interface UploadSignature {
   cloudName: string;
   params: {
     public_id: string;
     timestamp: number;
     allowed_formats: string;
+    overwrite?: string;
     api_key: string;
     signature: string;
   };
@@ -58,22 +65,37 @@ export class MediaService {
     // Quien llama ya validó el archivo; ante la duda se sube como imagen.
     const resourceType = mediaKindOf(file) ?? 'image';
     return this.http.post<UploadSignature>(`${base}/signature`, null).pipe(
-      switchMap(({ cloudName, params }) => {
-        const body = new FormData();
-        body.append('file', file);
-        for (const [key, value] of Object.entries(params)) body.append(key, String(value));
-        return this.http
-          .post(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, body)
-          .pipe(
-            switchMap(() =>
-              this.http.post<Media>(`${base}/confirm`, {
-                publicId: params.public_id,
-                resourceType,
-              }),
-            ),
-          );
-      }),
+      switchMap((signature) =>
+        this.uploadSigned(signature, file, resourceType).pipe(
+          switchMap(() =>
+            this.http.post<Media>(`${base}/confirm`, {
+              publicId: signature.params.public_id,
+              resourceType,
+            }),
+          ),
+        ),
+      ),
       map(({ id, url, resourceType, width, height }) => ({ id, url, resourceType, width, height })),
+    );
+  }
+
+  /**
+   * Paso del medio de toda subida directa: el archivo va del navegador a
+   * Cloudinary con la firma que armó el backend. Lo usan los adjuntos de
+   * publicación y las historias (QK-111); cada uno pide su firma y confirma
+   * contra su propio endpoint.
+   */
+  uploadSigned(
+    { cloudName, params }: UploadSignature,
+    file: File,
+    resourceType: MediaResourceType,
+  ): Observable<unknown> {
+    const body = new FormData();
+    body.append('file', file);
+    for (const [key, value] of Object.entries(params)) body.append(key, String(value));
+    return this.http.post(
+      `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+      body,
     );
   }
 

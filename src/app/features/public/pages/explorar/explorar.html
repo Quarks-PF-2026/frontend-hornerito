@@ -1,9 +1,24 @@
+@if (storyGroups().length) {
+  <section class="stories" aria-label="Historias de organizaciones">
+    <hn-story-bar [groups]="storyGroups()" (opened)="openStories($event)" />
+  </section>
+}
+
+@if (storyStart() !== null) {
+  <hn-story-viewer
+    [groups]="storyGroups()"
+    [start]="storyStart() ?? 0"
+    (viewed)="storyViewed($event)"
+    (closed)="closeStories()"
+  />
+}
+
 <section class="hero">
   <p class="eyebrow">Villa María y alrededores</p>
   <h1 class="hn-head">Mirá qué le falta hoy a un comedor cerca tuyo.</h1>
   <p class="lede">
-    Cada organización publica lo que necesita y dónde recibirlo. Elegí una, mirá su lista y
-    acercá lo que puedas.
+    Cada organización publica lo que necesita y dónde recibirlo. Elegí una, mirá su lista y acercá
+    lo que puedas.
   </p>
 
   <div class="search">
@@ -79,6 +94,12 @@
   </section>
 }
 
+@if (topDonors().length) {
+  <section class="donors">
+    <hn-donor-ranking heading="Top donantes del mes" [donors]="topDonors()" />
+  </section>
+}
+
 <section class="results">
   @if (failed()) {
     <div class="notice hn-card">
@@ -89,18 +110,29 @@
     <div class="notice hn-card">
       <p class="notice-title hn-head">Sin resultados</p>
       <p>
-        Probá con otro nombre o quitá el filtro de insumo o de localidad. Las organizaciones aparecen acá
-        cuando su cuenta queda validada.
+        Probá con otro nombre o quitá el filtro de insumo o de localidad. Las organizaciones
+        aparecen acá cuando su cuenta queda validada.
       </p>
     </div>
   }
 
   <div class="grid">
     @for (org of items(); track org.id) {
-      <article class="org hn-card" (click)="open(org.id)" tabindex="0" (keydown.enter)="open(org.id)">
-        <div class="cover" [style.background-image]="org.coverUrl ? 'url(' + org.coverUrl + ')' : null">
+      <article
+        class="org hn-card"
+        (click)="open(org.id)"
+        tabindex="0"
+        (keydown.enter)="open(org.id)"
+      >
+        <div
+          class="cover"
+          [style.background-image]="org.coverUrl ? 'url(' + org.coverUrl + ')' : null"
+        >
           @if (org.openNeedsCount > 0) {
-            <span class="count">{{ org.openNeedsCount }} {{ org.openNeedsCount === 1 ? 'necesidad' : 'necesidades' }}</span>
+            <span class="count"
+              >{{ org.openNeedsCount }}
+              {{ org.openNeedsCount === 1 ? 'necesidad' : 'necesidades' }}</span
+            >
           }
         </div>
 
@@ -123,7 +155,9 @@
           @if (org.categories.length) {
             <ul class="needs">
               @for (cat of org.categories; track cat) {
-                <li [style.background]="bg(cat)"><span aria-hidden="true">{{ icon(cat) }}</span> {{ cat }}</li>
+                <li [style.background]="bg(cat)">
+                  <span aria-hidden="true">{{ icon(cat) }}</span> {{ cat }}
+                </li>
               }
             </ul>
           } @else {
