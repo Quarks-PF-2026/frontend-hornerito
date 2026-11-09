@@ -10,14 +10,16 @@ import {
   VolunteerRequestPayload,
 } from '../../../../core/models/public.model';
 import { MIN_DONATION_AMOUNT, fmtMoney } from '../../../../core/models/monetary-donation.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { PublicService } from '../../../../core/services/public.service';
-import { fmtDate } from '../../../../core/util/format';
+import { fmtDate, initials } from '../../../../core/util/format';
 import { MapMarker, MapPicker } from '../../../../shared/ui/map-picker/map-picker';
 import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 import { BottomSheet } from '../../../../shared/ui/bottom-sheet/bottom-sheet';
 import { FilePicker } from '../../../../shared/ui/file-picker/file-picker';
 import { PostMediaGrid } from '../../../../shared/ui/post-media/post-media';
+import { DonorRanking } from '../../../../shared/ui/donor-ranking/donor-ranking';
 import { HttpErrorResponse } from '@angular/common/http';
 
 interface NeedRow {
@@ -73,6 +75,8 @@ interface DonationForm {
   operationNumber: string;
   donorName: string;
   donorContact: string;
+  /** Solo con sesión (QK-113). */
+  isAnonymous: boolean;
 }
 
 interface PointRow {
@@ -94,12 +98,16 @@ interface PointRow {
     FilePicker,
     LocalityPipe,
     PostMediaGrid,
+    DonorRanking,
   ],
   templateUrl: './organizacion-publica.html',
   styleUrl: './organizacion-publica.scss',
 })
 export class OrganizacionPublicaPage {
   private readonly api = inject(PublicService);
+  private readonly auth = inject(AuthService);
+  /** Con sesión el formulario se precarga y ofrece donar en forma anónima (QK-113). */
+  readonly authenticated = this.auth.authenticated;
   private readonly orgId = inject(ActivatedRoute).snapshot.paramMap.get('id') ?? '';
 
   readonly org = signal<PublicOrgDetail | null>(null);
@@ -194,14 +202,10 @@ export class OrganizacionPublicaPage {
     return contact.includes('@') ? `mailto:${contact}` : `tel:${contact.replace(/[^\d+]/g, '')}`;
   });
 
-  readonly initials = computed(() =>
-    (this.org()?.name ?? '')
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) => word[0]?.toUpperCase() ?? '')
-      .join(''),
-  );
+  readonly initials = computed(() => initials(this.org()?.name ?? ''));
+
+  /** Top 5 del mes (QK-115). `?? []` por si el backend todavía no manda el campo. */
+  readonly topDonors = computed(() => this.org()?.topDonors ?? []);
 
   constructor() {
     this.load();
@@ -281,7 +285,19 @@ export class OrganizacionPublicaPage {
 
   openDonation(): void {
     this.donationOpen.set(true);
-    this.donationForm.set(EMPTY_DONATION);
+    // Con sesión se precarga desde la sesión (QK-113): lo que edite vale solo
+    // para esta donación, no toca el perfil. Se toma de `AuthService` y no de
+    // GET /profile para no sumar un request por abrir el formulario; si algún
+    // flujo de sesión no dejó el nombre, el campo queda vacío y editable.
+    this.donationForm.set(
+      this.authenticated()
+        ? {
+            ...EMPTY_DONATION,
+            donorName: this.auth.currentName(),
+            donorContact: this.auth.currentEmail(),
+          }
+        : EMPTY_DONATION,
+    );
     this.donationErrors.set({});
     this.receipt.set(null);
     this.donatedAmount.set(null);
@@ -291,7 +307,11 @@ export class OrganizacionPublicaPage {
     this.donationOpen.set(false);
   }
 
-  updateDonationField(field: keyof DonationForm, value: string): void {
+  setAnonymous(isAnonymous: boolean): void {
+    this.donationForm.update((form) => ({ ...form, isAnonymous }));
+  }
+
+  updateDonationField(field: Exclude<keyof DonationForm, 'isAnonymous'>, value: string): void {
     this.donationForm.update((form) => ({ ...form, [field]: value }));
     if (this.donationErrors()[field]) {
       this.donationErrors.update(({ [field]: _drop, ...rest }) => rest);
@@ -328,6 +348,8 @@ export class OrganizacionPublicaPage {
     if (form.operationNumber.trim()) payload.operationNumber = form.operationNumber.trim();
     if (form.donorName.trim()) payload.donorName = form.donorName.trim();
     if (form.donorContact.trim()) payload.donorContact = form.donorContact.trim();
+    // Sin sesión no se manda: el backend no tiene a quién rankear.
+    if (this.authenticated()) payload.isAnonymous = form.isAnonymous;
 
     this.donating.set(true);
     this.api.declareDonation(this.orgId, payload, this.receipt()).subscribe({
@@ -398,6 +420,7 @@ const EMPTY_DONATION: DonationForm = {
   operationNumber: '',
   donorName: '',
   donorContact: '',
+  isAnonymous: false,
 };
 
 const DATE_TIME_FORMAT = new Intl.DateTimeFormat('es-AR', {

@@ -3,12 +3,14 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  DonorProfile,
   MonetaryDonationPayload,
   PublicFeedNeed,
   PublicLocality,
   PublicOrgDetail,
   PublicOrgSummary,
   PublicPage,
+  TopDonor,
   VolunteerRequestPayload,
 } from '../models/public.model';
 
@@ -61,8 +63,11 @@ export class PublicService {
   }
 
   /**
-   * Alguien sin cuenta declara una donación económica que ya transfirió
-   * (QK-20). Va por `FormData` y no JSON porque el comprobante viaja en el
+   * Alguien declara una donación económica que ya transfirió (QK-20). Si hay
+   * sesión, el `auth.interceptor` adosa el Bearer y el backend la asocia a la
+   * cuenta (QK-113): el front no manda ningún id de usuario.
+   *
+   * Va por `FormData` y no JSON porque el comprobante viaja en el
    * mismo request: para el donante, declarar y adjuntar son un solo acto.
    *
    * No se setea `Content-Type` a mano — el navegador tiene que agregar el
@@ -86,6 +91,16 @@ export class PublicService {
       `${this.apiUrl}/public/organizations/${organizationId}/donations`,
       form,
     );
+  }
+
+  /** Top 10 donantes del mes para el inicio (QK-114). */
+  topDonors(): Observable<TopDonor[]> {
+    return this.http.get<TopDonor[]>(`${this.apiUrl}/public/donors/top`);
+  }
+
+  /** Perfil público del donante (QK-110). 404 si no tiene perfil público. */
+  donor(userId: string): Observable<DonorProfile> {
+    return this.http.get<DonorProfile>(`${this.apiUrl}/public/donors/${userId}`);
   }
 
   needs(query: PublicQuery = {}): Observable<PublicPage<PublicFeedNeed>> {

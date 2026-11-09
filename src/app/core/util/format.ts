@@ -31,3 +31,13 @@ const PHONE_RE = /^\+?\d{8,15}$/;
 export function phoneOk(p: string): boolean {
   return PHONE_RE.test(p);
 }
+
+/** Dos iniciales en mayúscula para un avatar sin foto ('Comedor Los Pinos' → 'CL'). */
+export function initials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('');
+}

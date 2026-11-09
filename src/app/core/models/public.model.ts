@@ -123,6 +123,27 @@ export interface MonetaryDonationPayload {
   operationNumber?: string;
   donorName?: string;
   donorContact?: string;
+  /** Solo con sesión (QK-113): la organización ve los datos igual, pero el
+   * nombre no entra en los rankings públicos. Sin sesión no se manda. */
+  isAnonymous?: boolean;
+}
+
+/** Una fila de ranking de donantes del mes (QK-114 / QK-115). */
+export interface TopDonor {
+  position: number;
+  userId: string;
+  name: string;
+  total: number;
+}
+
+/** Perfil público del donante (QK-110). Nunca trae email ni teléfono. */
+export interface DonorProfile {
+  userId: string;
+  name: string;
+  /** ISO. */
+  memberSince: string;
+  monthTotal: number;
+  totalAmount: number;
 }
 
 /** Evento activo de la organización, tal como lo ve un visitante. */
@@ -152,4 +173,6 @@ export interface PublicOrgDetail {
   events: PublicEvent[];
   volunteering: PublicVolunteering;
   donations: PublicDonations;
+  /** Top 5 del mes (QK-115); vacío si no hay o si la org no recibe dinero. */
+  topDonors: TopDonor[];
 }

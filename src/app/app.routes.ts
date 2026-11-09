@@ -25,6 +25,12 @@ export const routes: Routes = [
             (m) => m.OrganizacionPublicaPage,
           ),
       },
+      {
+        // Perfil público del donante (QK-110): se llega desde los rankings.
+        path: 'donante/:id',
+        loadComponent: () =>
+          import('./features/public/pages/donante/donante').then((m) => m.DonantePage),
+      },
     ],
   },
   {

@@ -181,6 +181,12 @@
     </section>
   }
 
+  @if (topDonors().length) {
+    <section class="block">
+      <hn-donor-ranking heading="Quienes más donaron este mes" [donors]="topDonors()" />
+    </section>
+  }
+
   @if (showVolunteering()) {
     <section class="block">
       <h2 class="hn-head">Sumate como voluntario</h2>
@@ -429,6 +435,20 @@
         <p class="quiet">Si lo dejás, te mandamos el recibo y te avisamos cuando la confirmen.</p>
         @if (donationErrors()['donorContact']) {
           <p class="hn-field-error">{{ donationErrors()['donorContact'] }}</p>
+        }
+
+        @if (authenticated()) {
+          <label class="anon">
+            <input
+              type="checkbox"
+              [checked]="donationForm().isAnonymous"
+              (change)="setAnonymous($any($event.target).checked)"
+            />
+            <span>Donar en forma anónima</span>
+          </label>
+          <p class="quiet">
+            La organización verá tus datos, pero tu nombre no aparecerá en los rankings públicos.
+          </p>
         }
 
         @if (donationErrors()['form']) {

@@ -1,10 +1,23 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { CATS, CAT_BG, CAT_ICON, DEFAULT_CAT_ICON } from '../../../../core/models/catalog';
-import { PublicFeedNeed, PublicLocality, PublicOrgSummary } from '../../../../core/models/public.model';
+import {
+  PublicFeedNeed,
+  PublicLocality,
+  PublicOrgSummary,
+  TopDonor,
+} from '../../../../core/models/public.model';
 import { PublicService } from '../../../../core/services/public.service';
-import { dueLabel } from '../../../../core/util/format';
+import { dueLabel, initials } from '../../../../core/util/format';
 import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
+import { DonorRanking } from '../../../../shared/ui/donor-ranking/donor-ranking';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -46,7 +59,7 @@ function toExpiringRow(need: PublicFeedNeed): ExpiringRow {
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LocalityPipe, ProgressBar],
+  imports: [LocalityPipe, ProgressBar, DonorRanking],
   templateUrl: './explorar.html',
   styleUrl: './explorar.scss',
 })
@@ -64,11 +77,10 @@ export class ExplorarPage implements OnDestroy {
   readonly localities = signal<PublicLocality[]>([]);
   readonly locality = signal<string | null>(null);
   readonly expiring = signal<ExpiringRow[]>([]);
+  readonly topDonors = signal<TopDonor[]>([]);
 
   readonly hasMore = computed(() => this.items().length < this.total());
-  readonly empty = computed(
-    () => !this.loading() && !this.failed() && this.items().length === 0,
-  );
+  readonly empty = computed(() => !this.loading() && !this.failed() && this.items().length === 0);
 
   private page = 1;
   private debounce?: ReturnType<typeof setTimeout>;
@@ -76,6 +88,7 @@ export class ExplorarPage implements OnDestroy {
   constructor() {
     this.fetch();
     this.fetchExpiring();
+    this.fetchTopDonors();
     this.fetchLocalities();
   }
 
@@ -93,12 +106,7 @@ export class ExplorarPage implements OnDestroy {
 
   /** Iniciales para las organizaciones que todavía no cargaron su logo. */
   initials(name: string): string {
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) => word[0]?.toUpperCase() ?? '')
-      .join('');
+    return initials(name);
   }
 
   search(value: string): void {
@@ -144,6 +152,15 @@ export class ExplorarPage implements OnDestroy {
     });
   }
 
+  /** Top donantes del mes (QK-114). Fijo, como "Por vencer". */
+  private fetchTopDonors(): void {
+    this.api.topDonors().subscribe({
+      next: (donors) => this.topDonors.set(donors ?? []),
+      // Si falla, la sección no se muestra: no es motivo para ensuciar el inicio.
+      error: () => this.topDonors.set([]),
+    });
+  }
+
   /** Si falla, el selector no se muestra: se puede buscar igual sin él. */
   private fetchLocalities(): void {
     this.api.localities().subscribe({
@@ -164,9 +181,7 @@ export class ExplorarPage implements OnDestroy {
       })
       .subscribe({
         next: (result) => {
-          this.items.update((current) =>
-            append ? [...current, ...result.items] : result.items,
-          );
+          this.items.update((current) => (append ? [...current, ...result.items] : result.items));
           this.total.set(result.total);
           this.loading.set(false);
         },

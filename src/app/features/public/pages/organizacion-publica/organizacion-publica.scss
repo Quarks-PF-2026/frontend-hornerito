@@ -346,3 +346,12 @@
   font-weight: 700;
   color: var(--hn-primary-strong);
 }
+
+// Donar en forma anónima (QK-113), solo con sesión.
+.anon {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  font-weight: 600;
+  accent-color: var(--hn-primary);
+}
