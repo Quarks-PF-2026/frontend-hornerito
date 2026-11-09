@@ -1,0 +1,141 @@
+.form {
+  padding: 16px;
+}
+.form-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.form-head h2,
+.block h2 {
+  font-size: 18px;
+  margin: 0;
+}
+.count {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--hn-text-2);
+  white-space: nowrap;
+}
+.count.full {
+  color: var(--hn-danger-ink);
+}
+.hint,
+.quiet {
+  font-size: 13.5px;
+  color: var(--hn-muted);
+  line-height: 1.5;
+  margin: 6px 0 12px;
+}
+.hn-label {
+  margin-top: 14px;
+}
+.counter {
+  text-align: right;
+  font-size: 12px;
+  color: var(--hn-muted);
+  margin: 4px 0 0;
+}
+.publish {
+  margin-top: 18px;
+}
+
+// La vista previa usa el mismo encuadre que el visor: 9:16 con object-fit: cover.
+.preview {
+  position: relative;
+  width: 160px;
+  aspect-ratio: 9 / 16;
+  margin: 4px auto 6px;
+  border-radius: var(--hn-radius-md);
+  overflow: hidden;
+  background: var(--hn-story-bg);
+}
+.preview img,
+.preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.preview-text {
+  position: absolute;
+  inset: auto 0 0;
+  margin: 0;
+  padding: 18px 8px 8px;
+  background: linear-gradient(transparent, var(--hn-story-scrim) 40%);
+  color: var(--hn-story-ink);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.block {
+  margin-top: 24px;
+}
+.block h2 {
+  margin-bottom: 10px;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.story {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+.story.past {
+  opacity: 0.8;
+}
+.thumb {
+  width: 72px;
+  aspect-ratio: 9 / 16;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--hn-radius-sm);
+  background: var(--hn-cream-soft);
+}
+.story-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.when {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--hn-primary-strong);
+}
+.past .when {
+  color: var(--hn-muted);
+}
+.story-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--hn-text);
+  overflow-wrap: anywhere;
+}
+.story-link {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--hn-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.act {
+  align-self: flex-start;
+  margin-top: auto;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13.5px;
+  box-shadow: none;
+}

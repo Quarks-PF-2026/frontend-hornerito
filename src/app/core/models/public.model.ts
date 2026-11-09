@@ -1,5 +1,6 @@
 import { ScheduleDay } from './collection-point.model';
 import { PostMedia } from './media.model';
+import { Story } from './story.model';
 
 /** Página genérica que devuelven los endpoints públicos. */
 export interface PublicPage<T> {
@@ -175,4 +176,6 @@ export interface PublicOrgDetail {
   donations: PublicDonations;
   /** Top 5 del mes (QK-115); vacío si no hay o si la org no recibe dinero. */
   topDonors: TopDonor[];
+  /** Todas las vigentes, vistas o no (QK-111). */
+  stories: Story[];
 }

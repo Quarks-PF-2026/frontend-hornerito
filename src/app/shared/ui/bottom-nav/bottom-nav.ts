@@ -13,6 +13,8 @@ interface NavItem {
   bar?: true;
   /** Solo visible para dueño y administradores. */
   admin?: true;
+  /** Solo visible para quien escribe contenido (dueño, administradores y coordinador). */
+  writer?: true;
   /** Solo visible para el administrador de plataforma (QK-19). */
   platformAdmin?: true;
   /** Visible aunque la organización no esté validada: no opera sus datos. */
@@ -37,6 +39,13 @@ const NAV_ITEMS: NavItem[] = [
     key: 'publicaciones',
     label: 'Publicaciones',
     d: ['M3 11l16-6-3 15-5-4-3 3v-5'],
+  },
+  {
+    key: 'historias',
+    label: 'Historias',
+    writer: true,
+    d: ['M10 8.5 15.5 12 10 15.5z'],
+    c: [12, 12, 9],
   },
   {
     key: 'necesidades',
@@ -421,6 +430,8 @@ const LOGOUT_ICON = ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'M16 17l5-5-5-5'
 export class BottomNav {
   /** El tab Usuarios solo existe para dueño y administradores. */
   readonly canManageMembers = input(false);
+  /** El tab Historias solo existe para quien puede publicarlas (QK-111). */
+  readonly canWriteContent = input(false);
   /** El tab Validación solo existe para el administrador de plataforma. */
   readonly isPlatformAdmin = input(false);
   /** Organización validada; sin ella solo quedan los items `open`. */
@@ -443,6 +454,7 @@ export class BottomNav {
       (i) =>
         (i.open || this.canOperate()) &&
         (!i.admin || this.canManageMembers()) &&
+        (!i.writer || this.canWriteContent()) &&
         (!i.platformAdmin || this.isPlatformAdmin()),
     ),
   );

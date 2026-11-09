@@ -1,3 +1,18 @@
+@if (storyGroups().length) {
+  <section class="stories" aria-label="Historias de organizaciones">
+    <hn-story-bar [groups]="storyGroups()" (opened)="openStories($event)" />
+  </section>
+}
+
+@if (storyStart() !== null) {
+  <hn-story-viewer
+    [groups]="storyGroups()"
+    [start]="storyStart() ?? 0"
+    (viewed)="storyViewed($event)"
+    (closed)="closeStories()"
+  />
+}
+
 <section class="hero">
   <p class="eyebrow">Villa María y alrededores</p>
   <h1 class="hn-head">Mirá qué le falta hoy a un comedor cerca tuyo.</h1>

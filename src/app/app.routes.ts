@@ -107,6 +107,13 @@ export const routes: Routes = [
               ),
           },
           {
+            // Historias (QK-111): solo publican owner/admin/coordinador (§18).
+            path: 'historias',
+            canActivate: [contentWriterGuard],
+            loadComponent: () =>
+              import('./features/historias/pages/historias/historias').then((m) => m.HistoriasPage),
+          },
+          {
             path: 'necesidades',
             loadComponent: () =>
               import('./features/necesidades/pages/necesidades/necesidades').then(

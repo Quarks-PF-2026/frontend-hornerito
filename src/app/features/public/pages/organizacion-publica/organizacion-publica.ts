@@ -21,6 +21,9 @@ import { FilePicker } from '../../../../shared/ui/file-picker/file-picker';
 import { PostMediaGrid } from '../../../../shared/ui/post-media/post-media';
 import { DonorRanking } from '../../../../shared/ui/donor-ranking/donor-ranking';
 import { HttpErrorResponse } from '@angular/common/http';
+import { StoryGroup } from '../../../../core/models/story.model';
+import { StoryBar } from '../../../../shared/ui/story-bar/story-bar';
+import { StoryViewer } from '../../../../shared/ui/story-viewer/story-viewer';
 
 interface NeedRow {
   id: string;
@@ -99,6 +102,8 @@ interface PointRow {
     LocalityPipe,
     PostMediaGrid,
     DonorRanking,
+    StoryBar,
+    StoryViewer,
   ],
   templateUrl: './organizacion-publica.html',
   styleUrl: './organizacion-publica.scss',
@@ -207,8 +212,33 @@ export class OrganizacionPublicaPage {
   /** Top 5 del mes (QK-115). `?? []` por si el backend todavía no manda el campo. */
   readonly topDonors = computed(() => this.org()?.topDonors ?? []);
 
+  /**
+   * Todas las vigentes, vistas o no (§18), como un único grupo para reusar la
+   * barra y el visor del inicio. `?? []` por si el backend todavía no manda el campo.
+   */
+  readonly storyGroups = computed<StoryGroup[]>(() => {
+    const o = this.org();
+    return o?.stories?.length
+      ? [
+          {
+            organizationId: o.id,
+            organizationName: o.name,
+            organizationLogoUrl: o.logoUrl,
+            stories: o.stories,
+          },
+        ]
+      : [];
+  });
+  readonly storiesOpen = signal(false);
+
   constructor() {
     this.load();
+  }
+
+  /** Abrirla acá también la marca vista para el inicio (§18), solo con sesión. */
+  storyViewed(id: string): void {
+    if (!this.authenticated()) return;
+    this.api.markStoryViewed(id).subscribe({ error: () => undefined });
   }
 
   showContact(): void {

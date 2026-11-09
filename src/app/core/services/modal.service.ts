@@ -23,6 +23,7 @@ import { MediaService } from './media.service';
 import { OrgService } from './org.service';
 import { PostsService } from './posts.service';
 import { NeedsService } from './needs.service';
+import { StoriesService } from './stories.service';
 import { SuppliesService } from './supplies.service';
 import { ToastService } from './toast.service';
 
@@ -53,8 +54,28 @@ interface ModalState {
   kind: ModalKind;
   mode?: 'new' | 'edit';
   id?: number | string | null;
-  sub?: 'post' | 'event';
+  sub?: ConfirmSub;
 }
+
+type ConfirmSub = 'post' | 'event' | 'story';
+
+const CONFIRM_COPY: Record<ConfirmSub, { title: string; text: string; action: string }> = {
+  post: {
+    title: '¿Eliminar publicación?',
+    text: 'Esta acción no se puede deshacer. La publicación dejará de mostrarse en tu feed.',
+    action: 'Eliminar',
+  },
+  event: {
+    title: '¿Dar de baja el evento?',
+    text: 'Deja de ofrecerse para cargar nuevas ocurrencias. Las asistencias ya cargadas se conservan.',
+    action: 'Dar de baja',
+  },
+  story: {
+    title: '¿Eliminar historia?',
+    text: 'Deja de mostrarse en el inicio y en tu perfil público, y libera un lugar de las 20 vigentes.',
+    action: 'Eliminar',
+  },
+};
 
 /** Adjunto en el modal de publicación: ya guardado (`id`) o elegido y sin subir (`file`). */
 export interface AttachmentView {
@@ -81,6 +102,7 @@ export class ModalService {
   private readonly eventsSvc = inject(EventsService);
   private readonly toast = inject(ToastService);
   private readonly mediaSvc = inject(MediaService);
+  private readonly storiesSvc = inject(StoriesService);
 
   private readonly _modal = signal<ModalState | null>(null);
   private readonly _form = signal<Record<string, string | boolean>>({});
@@ -128,17 +150,10 @@ export class ModalService {
   readonly isConfirm = computed(() => this._modal()?.kind === 'confirm');
   readonly isPreview = computed(() => this._modal()?.kind === 'preview');
 
-  readonly confirmTitle = computed(() =>
-    this._modal()?.sub === 'event' ? '¿Dar de baja el evento?' : '¿Eliminar publicación?',
-  );
-  readonly confirmText = computed(() =>
-    this._modal()?.sub === 'event'
-      ? 'Deja de ofrecerse para cargar nuevas ocurrencias. Las asistencias ya cargadas se conservan.'
-      : 'Esta acción no se puede deshacer. La publicación dejará de mostrarse en tu feed.',
-  );
-  readonly confirmActionLabel = computed(() =>
-    this._modal()?.sub === 'event' ? 'Dar de baja' : 'Eliminar',
-  );
+  private readonly confirmCopy = computed(() => CONFIRM_COPY[this._modal()?.sub ?? 'post']);
+  readonly confirmTitle = computed(() => this.confirmCopy().title);
+  readonly confirmText = computed(() => this.confirmCopy().text);
+  readonly confirmActionLabel = computed(() => this.confirmCopy().action);
 
   // ---------------- apertura ----------------
   private open(state: ModalState, form: Record<string, string | boolean> = {}): void {
@@ -303,6 +318,9 @@ export class ModalService {
   }
   confirmDeactivateEvent(id: string): void {
     this.open({ kind: 'confirm', sub: 'event', id });
+  }
+  confirmDeleteStory(id: string): void {
+    this.open({ kind: 'confirm', sub: 'story', id });
   }
 
   // ---------------- edición de campos ----------------
@@ -786,6 +804,20 @@ export class ModalService {
         error: () => {
           this.close();
           this.toast.show('No se pudo dar de baja el evento');
+        },
+      });
+    } else if (m.sub === 'story') {
+      this.storiesSvc.remove(m.id as string).subscribe({
+        next: () => {
+          this.close();
+          this.toast.show('Historia eliminada');
+        },
+        error: (err: { error?: { message?: unknown } }) => {
+          this.close();
+          const message = err?.error?.message;
+          this.toast.show(
+            typeof message === 'string' ? message : 'No se pudo eliminar la historia',
+          );
         },
       });
     }

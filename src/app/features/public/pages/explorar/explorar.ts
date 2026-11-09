@@ -14,11 +14,15 @@ import {
   PublicOrgSummary,
   TopDonor,
 } from '../../../../core/models/public.model';
+import { StoryGroup } from '../../../../core/models/story.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { PublicService } from '../../../../core/services/public.service';
 import { dueLabel, initials } from '../../../../core/util/format';
 import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 import { DonorRanking } from '../../../../shared/ui/donor-ranking/donor-ranking';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
+import { StoryBar } from '../../../../shared/ui/story-bar/story-bar';
+import { StoryViewer } from '../../../../shared/ui/story-viewer/story-viewer';
 
 const SEARCH_DEBOUNCE_MS = 300;
 /** "Por vencer" (QK-108): ventana y tope del carrusel. */
@@ -59,13 +63,14 @@ function toExpiringRow(need: PublicFeedNeed): ExpiringRow {
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LocalityPipe, ProgressBar, DonorRanking],
+  imports: [LocalityPipe, ProgressBar, DonorRanking, StoryBar, StoryViewer],
   templateUrl: './explorar.html',
   styleUrl: './explorar.scss',
 })
 export class ExplorarPage implements OnDestroy {
   private readonly api = inject(PublicService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
   readonly cats = CATS;
   readonly items = signal<PublicOrgSummary[]>([]);
@@ -78,18 +83,24 @@ export class ExplorarPage implements OnDestroy {
   readonly locality = signal<string | null>(null);
   readonly expiring = signal<ExpiringRow[]>([]);
   readonly topDonors = signal<TopDonor[]>([]);
+  readonly storyGroups = signal<StoryGroup[]>([]);
+  /** Grupo con el que se abrió el visor; null con el visor cerrado. */
+  readonly storyStart = signal<number | null>(null);
 
   readonly hasMore = computed(() => this.items().length < this.total());
   readonly empty = computed(() => !this.loading() && !this.failed() && this.items().length === 0);
 
   private page = 1;
   private debounce?: ReturnType<typeof setTimeout>;
+  /** Vistas de esta apertura del visor; se descuentan de la barra al cerrarlo. */
+  private readonly seenStories = new Set<string>();
 
   constructor() {
     this.fetch();
     this.fetchExpiring();
     this.fetchTopDonors();
     this.fetchLocalities();
+    this.fetchStories();
   }
 
   ngOnDestroy(): void {
@@ -129,6 +140,34 @@ export class ExplorarPage implements OnDestroy {
     void this.router.navigate(['/organizacion', id]);
   }
 
+  openStories(index: number): void {
+    this.storyStart.set(index);
+  }
+
+  /** Sin sesión no hay a quién atribuirle la vista (§18): no se manda nada. */
+  storyViewed(id: string): void {
+    if (!this.auth.authenticated()) return;
+    this.seenStories.add(id);
+    this.api.markStoryViewed(id).subscribe({ error: () => undefined });
+  }
+
+  /**
+   * Las vistas se sacan recién al cerrar, no al mostrarlas: si no, la barra y
+   * los grupos del visor se reacomodarían a mitad de la visualización. Una
+   * organización sin nada sin ver sale de la barra.
+   */
+  closeStories(): void {
+    this.storyStart.set(null);
+    if (!this.seenStories.size) return;
+    const seen = new Set(this.seenStories);
+    this.seenStories.clear();
+    this.storyGroups.update((groups) =>
+      groups
+        .map((g) => ({ ...g, stories: g.stories.filter((s) => !seen.has(s.id)) }))
+        .filter((g) => g.stories.length > 0),
+    );
+  }
+
   more(): void {
     this.page += 1;
     this.fetch(true);
@@ -158,6 +197,14 @@ export class ExplorarPage implements OnDestroy {
       next: (donors) => this.topDonors.set(donors ?? []),
       // Si falla, la sección no se muestra: no es motivo para ensuciar el inicio.
       error: () => this.topDonors.set([]),
+    });
+  }
+
+  /** Si falla, la barra no se muestra: no es motivo para ensuciar el inicio. */
+  private fetchStories(): void {
+    this.api.stories().subscribe({
+      next: (groups) => this.storyGroups.set((groups ?? []).filter((g) => g.stories?.length)),
+      error: () => this.storyGroups.set([]),
     });
   }
 

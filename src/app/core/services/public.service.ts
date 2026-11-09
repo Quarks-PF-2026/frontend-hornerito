@@ -13,6 +13,7 @@ import {
   TopDonor,
   VolunteerRequestPayload,
 } from '../models/public.model';
+import { StoryGroup } from '../models/story.model';
 
 export interface PublicQuery {
   q?: string;
@@ -104,6 +105,22 @@ export class PublicService {
   donor(userId: string): Observable<DonorProfile> {
     return this.http.get<DonorProfile>(
       `${this.apiUrl}/public/donors/${encodeURIComponent(userId)}`,
+    );
+  }
+
+  /**
+   * Historias vigentes para la barra del inicio (QK-111). Con sesión el
+   * interceptor manda el Bearer y el backend ya saca las vistas.
+   */
+  stories(): Observable<StoryGroup[]> {
+    return this.http.get<StoryGroup[]>(`${this.apiUrl}/public/stories`);
+  }
+
+  /** Marca una historia como vista. Sin sesión no tiene efecto: quien llama lo evita. */
+  markStoryViewed(id: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/public/stories/${encodeURIComponent(id)}/view`,
+      null,
     );
   }
 

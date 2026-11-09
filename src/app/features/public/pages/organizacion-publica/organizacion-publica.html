@@ -48,6 +48,21 @@
     </div>
   </header>
 
+  @if (storyGroups().length) {
+    <section class="block">
+      <h2 class="hn-head">Historias</h2>
+      <hn-story-bar [groups]="storyGroups()" (opened)="storiesOpen.set(true)" />
+    </section>
+  }
+
+  @if (storiesOpen()) {
+    <hn-story-viewer
+      [groups]="storyGroups()"
+      (viewed)="storyViewed($event)"
+      (closed)="storiesOpen.set(false)"
+    />
+  }
+
   @if (events().length) {
     <section class="block">
       <h2 class="hn-head">Eventos</h2>
