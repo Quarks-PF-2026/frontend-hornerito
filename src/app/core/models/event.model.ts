@@ -20,6 +20,24 @@ export interface EventOccurrence {
   count: number | null;
 }
 
+export const EVENT_KIND_LABEL: Record<EventKind, string> = {
+  periodic: 'Periódico',
+  one_off: 'Extraordinario',
+};
+
+export type AttendanceTrend = 'sube' | 'baja' | 'estable';
+
+/** `GET /events/attendance-forecast` (QK-30): uno por evento periódico activo. */
+export interface AttendanceForecast {
+  eventId: string;
+  eventName: string;
+  daysRecorded: number;
+  minDaysRequired: number;
+  sufficientHistory: boolean;
+  trend: AttendanceTrend | null;
+  forecast: { date: string; expected: number }[];
+}
+
 /** Indexado como `Date.getDay()`: 0=domingo. */
 export const WEEKDAY_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 /** Para lectores de pantalla: "Mié" se lee mal. */

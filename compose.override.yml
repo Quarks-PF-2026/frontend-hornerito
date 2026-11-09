@@ -7,5 +7,9 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+    # El volumen anónimo de node_modules sobrevive a los rebuilds y queda viejo
+    # cuando alguien agrega una dependencia. `npm install` al arrancar lo
+    # sincroniza con el lockfile; si no cambió nada tarda un par de segundos.
+    command: sh -c "npm install --no-audit --no-fund && npm start -- --host 0.0.0.0 --poll 2000"
     environment:
       - CHOKIDAR_USEPOLLING=true

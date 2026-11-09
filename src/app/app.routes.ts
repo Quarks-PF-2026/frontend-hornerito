@@ -25,6 +25,12 @@ export const routes: Routes = [
             (m) => m.OrganizacionPublicaPage,
           ),
       },
+      {
+        // Perfil público del donante (QK-110): se llega desde los rankings.
+        path: 'donante/:id',
+        loadComponent: () =>
+          import('./features/public/pages/donante/donante').then((m) => m.DonantePage),
+      },
     ],
   },
   {
@@ -99,6 +105,13 @@ export const routes: Routes = [
               import('./features/publicaciones/pages/publicaciones/publicaciones').then(
                 (m) => m.PublicacionesPage,
               ),
+          },
+          {
+            // Historias (QK-111): solo publican owner/admin/coordinador (§18).
+            path: 'historias',
+            canActivate: [contentWriterGuard],
+            loadComponent: () =>
+              import('./features/historias/pages/historias/historias').then((m) => m.HistoriasPage),
           },
           {
             path: 'necesidades',

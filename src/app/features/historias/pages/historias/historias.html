@@ -1,0 +1,143 @@
+<section class="hn-card form" aria-labelledby="new-story-title">
+  <div class="form-head">
+    <h2 id="new-story-title" class="hn-head">Nueva historia</h2>
+    <span class="count" [class.full]="full()">{{ active().length }}/{{ maxActive }} vigentes</span>
+  </div>
+  <p class="hint">
+    Imagen JPEG, PNG o WebP (hasta 8 MB) o video MP4 o WebM (hasta 30 s y 20 MB). En vertical 9:16
+    se ve mejor. Vence a los 7 días.
+  </p>
+
+  @if (full()) {
+    <p class="hn-field-error">
+      Llegaste a {{ maxActive }} historias vigentes. Eliminá una o esperá a que venza para publicar
+      otra.
+    </p>
+  } @else {
+    <hn-file-picker
+      [accept]="accept"
+      label="Elegir imagen o video"
+      changeLabel="Cambiar archivo"
+      [file]="file()"
+      (picked)="pick($event)"
+    />
+    @if (fileError()) {
+      <p class="hn-field-error" role="alert">{{ fileError() }}</p>
+    }
+    @if (checking()) {
+      <p class="hint">Revisando el video…</p>
+    }
+
+    @if (previewUrl(); as url) {
+      <div class="preview">
+        @if (kind() === 'video') {
+          <video
+            [src]="url"
+            controls
+            muted
+            playsinline
+            aria-label="Vista previa de la historia"
+          ></video>
+        } @else {
+          <img [src]="url" alt="Vista previa de la historia" />
+        }
+        @if (text().trim()) {
+          <p class="preview-text">{{ text() }}</p>
+        }
+      </div>
+    }
+
+    <label class="hn-label" for="story-text">Texto (opcional)</label>
+    <textarea
+      id="story-text"
+      class="hn-textarea"
+      rows="3"
+      [maxLength]="textMax"
+      [value]="text()"
+      (input)="text.set($any($event.target).value)"
+    ></textarea>
+    <p class="counter" aria-live="polite">{{ textCount() }}</p>
+
+    <label class="hn-label" for="story-link">Enlace (opcional)</label>
+    <input
+      id="story-link"
+      class="hn-input"
+      type="url"
+      inputmode="url"
+      placeholder="https://"
+      autocomplete="off"
+      [value]="link()"
+      (input)="link.set($any($event.target).value)"
+    />
+    @if (linkError()) {
+      <p class="hn-field-error">{{ linkError() }}</p>
+    }
+
+    <button
+      class="hn-btn hn-btn--primary hn-btn--block publish"
+      type="button"
+      [disabled]="!canPublish()"
+      (click)="publish()"
+    >
+      {{ busy() ? 'Subiendo…' : 'Publicar' }}
+    </button>
+  }
+</section>
+
+<section class="block" aria-labelledby="active-title">
+  <h2 id="active-title" class="hn-head">Vigentes</h2>
+  @if (active().length) {
+    <div class="list">
+      @for (s of active(); track s.id) {
+        <article class="hn-card story">
+          @if (s.isVideo) {
+            <video class="thumb" [src]="s.mediaUrl" preload="metadata" muted playsinline></video>
+          } @else {
+            <img class="thumb" [src]="s.mediaUrl" alt="" loading="lazy" />
+          }
+          <div class="story-body">
+            <p class="when">{{ s.when }}</p>
+            @if (s.text) {
+              <p class="story-text">{{ s.text }}</p>
+            }
+            @if (s.linkUrl) {
+              <p class="story-link">🔗 {{ s.linkUrl }}</p>
+            }
+            <button class="hn-btn hn-btn--danger-soft act" type="button" (click)="remove(s.id)">
+              Eliminar
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <p class="quiet">Todavía no hay historias vigentes.</p>
+  }
+</section>
+
+@if (expired().length) {
+  <section class="block" aria-labelledby="expired-title">
+    <h2 id="expired-title" class="hn-head">Vencidas</h2>
+    <p class="quiet">Historial de solo lectura: ya no se muestran en el inicio ni en tu perfil.</p>
+    <div class="list">
+      @for (s of expired(); track s.id) {
+        <article class="hn-card story past">
+          @if (s.isVideo) {
+            <video class="thumb" [src]="s.mediaUrl" preload="metadata" muted playsinline></video>
+          } @else {
+            <img class="thumb" [src]="s.mediaUrl" alt="" loading="lazy" />
+          }
+          <div class="story-body">
+            <p class="when">{{ s.when }}</p>
+            @if (s.text) {
+              <p class="story-text">{{ s.text }}</p>
+            }
+            @if (s.linkUrl) {
+              <p class="story-link">🔗 {{ s.linkUrl }}</p>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+}

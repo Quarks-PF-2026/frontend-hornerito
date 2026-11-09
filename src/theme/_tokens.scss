@@ -73,6 +73,12 @@
   --hn-radius-xl: 22px;
   --hn-radius-pill: 999px;
 
+  // ---- Visor de historias (QK-111) ----
+  // Fondo casi negro y velo para que el texto encima de cualquier foto se lea.
+  --hn-story-bg: #120903;
+  --hn-story-scrim: rgba(18, 9, 3, 0.62);
+  --hn-story-ink: #ffffff;
+
   // ---- Sombras ----
   --hn-shadow-card: 0 6px 18px -12px rgba(90, 50, 10, 0.25);
   --hn-shadow-cta: 0 8px 20px -6px rgba(160, 78, 34, 0.55);

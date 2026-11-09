@@ -3,14 +3,17 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  DonorProfile,
   MonetaryDonationPayload,
   PublicFeedNeed,
   PublicLocality,
   PublicOrgDetail,
   PublicOrgSummary,
   PublicPage,
+  TopDonor,
   VolunteerRequestPayload,
 } from '../models/public.model';
+import { StoryGroup } from '../models/story.model';
 
 export interface PublicQuery {
   q?: string;
@@ -40,7 +43,9 @@ export class PublicService {
   }
 
   organization(id: string): Observable<PublicOrgDetail> {
-    return this.http.get<PublicOrgDetail>(`${this.apiUrl}/public/organizations/${id}`);
+    return this.http.get<PublicOrgDetail>(
+      `${this.apiUrl}/public/organizations/${encodeURIComponent(id)}`,
+    );
   }
 
   /**
@@ -55,14 +60,17 @@ export class PublicService {
     payload: VolunteerRequestPayload,
   ): Observable<{ id: string; status: string }> {
     return this.http.post<{ id: string; status: string }>(
-      `${this.apiUrl}/public/organizations/${organizationId}/volunteer-requests`,
+      `${this.apiUrl}/public/organizations/${encodeURIComponent(organizationId)}/volunteer-requests`,
       payload,
     );
   }
 
   /**
-   * Alguien sin cuenta declara una donación económica que ya transfirió
-   * (QK-20). Va por `FormData` y no JSON porque el comprobante viaja en el
+   * Alguien declara una donación económica que ya transfirió (QK-20). Si hay
+   * sesión, el `auth.interceptor` adosa el Bearer y el backend la asocia a la
+   * cuenta (QK-113): el front no manda ningún id de usuario.
+   *
+   * Va por `FormData` y no JSON porque el comprobante viaja en el
    * mismo request: para el donante, declarar y adjuntar son un solo acto.
    *
    * No se setea `Content-Type` a mano — el navegador tiene que agregar el
@@ -83,8 +91,36 @@ export class PublicService {
       form.append('receipt', receipt);
     }
     return this.http.post<{ id: string; status: string }>(
-      `${this.apiUrl}/public/organizations/${organizationId}/donations`,
+      `${this.apiUrl}/public/organizations/${encodeURIComponent(organizationId)}/donations`,
       form,
+    );
+  }
+
+  /** Top 10 donantes del mes para el inicio (QK-114). */
+  topDonors(): Observable<TopDonor[]> {
+    return this.http.get<TopDonor[]>(`${this.apiUrl}/public/donors/top`);
+  }
+
+  /** Perfil público del donante (QK-110). 404 si no tiene perfil público. */
+  donor(userId: string): Observable<DonorProfile> {
+    return this.http.get<DonorProfile>(
+      `${this.apiUrl}/public/donors/${encodeURIComponent(userId)}`,
+    );
+  }
+
+  /**
+   * Historias vigentes para la barra del inicio (QK-111). Con sesión el
+   * interceptor manda el Bearer y el backend ya saca las vistas.
+   */
+  stories(): Observable<StoryGroup[]> {
+    return this.http.get<StoryGroup[]>(`${this.apiUrl}/public/stories`);
+  }
+
+  /** Marca una historia como vista. Sin sesión no tiene efecto: quien llama lo evita. */
+  markStoryViewed(id: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/public/stories/${encodeURIComponent(id)}/view`,
+      null,
     );
   }
 
