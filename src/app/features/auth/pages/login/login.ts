@@ -26,7 +26,11 @@ export class LoginPage {
     }
     this.auth.login(this.email(), this.pass()).subscribe((r) => {
       if (r.ok) {
-        this.router.navigateByUrl('/app');
+        // Sin organización (un donante) el panel solo le ofrece crear un
+        // comedor: va al inicio. El admin de plataforma sin organización entra
+        // igual al panel, porque ahí vive la validación.
+        const hasOrgAccess = !!this.auth.role() || this.auth.isPlatformAdmin();
+        this.router.navigateByUrl(hasOrgAccess ? '/app' : '/');
         return;
       }
       this.loginErr.set(r.error);

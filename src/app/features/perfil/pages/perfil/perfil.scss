@@ -23,3 +23,64 @@
   color: var(--hn-muted);
   cursor: not-allowed;
 }
+
+.back {
+  display: block;
+  max-width: 620px;
+  margin: 0 auto 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hn-primary-strong);
+  text-decoration: none;
+}
+
+.link {
+  color: var(--hn-primary-strong);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.empty {
+  margin: 0 0 6px;
+  color: var(--hn-ink-2);
+}
+
+.donations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.donation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--hn-border-soft);
+
+  &:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+.donation-main {
+  min-width: 0;
+
+  .hint {
+    margin-top: 2px;
+  }
+}
+
+.donation-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.amount {
+  font-weight: 700;
+  white-space: nowrap;
+}

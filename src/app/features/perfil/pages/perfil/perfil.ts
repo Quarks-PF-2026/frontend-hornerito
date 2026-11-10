@@ -1,20 +1,34 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { phoneOk } from '../../../../core/util/format';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { Badge } from '../../../../shared/ui/badge/badge';
 
 @Component({
   selector: 'app-perfil',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, Badge],
   templateUrl: './perfil.html',
   styleUrl: './perfil.scss',
 })
 export class PerfilPage {
   private readonly profileSvc = inject(ProfileService);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
 
   readonly loading = signal(true);
+
+  // Quien tiene organización vuelve por el menú del panel; el donante "puro" no tiene menú.
+  readonly showBackHome = computed(() => !this.auth.role() && !this.auth.isPlatformAdmin());
+
+  // --- Mis donaciones ---
+  readonly donations = this.profileSvc.donationViews;
+  readonly donationsLoading = signal(true);
+  readonly donationsError = signal(false);
+  readonly noDonations = computed(() => this.donations().length === 0);
 
   // --- Datos personales ---
   readonly email = signal('');
@@ -41,6 +55,14 @@ export class PerfilPage {
       error: () => {
         this.loading.set(false);
         this.toast.show('No pudimos cargar tu perfil. Probá de nuevo más tarde.');
+      },
+    });
+    // Pedido aparte: si el historial falla, el resto del perfil sigue usable.
+    this.profileSvc.loadDonations().subscribe({
+      next: () => this.donationsLoading.set(false),
+      error: () => {
+        this.donationsLoading.set(false);
+        this.donationsError.set(true);
       },
     });
   }
@@ -83,7 +105,8 @@ export class PerfilPage {
 
     if (!current) errs['currentPassword'] = 'Ingresá tu contraseña actual.';
     if (!next) errs['newPassword'] = 'Ingresá una nueva contraseña.';
-    else if (next.length < 8) errs['newPassword'] = 'La nueva contraseña debe tener al menos 8 caracteres.';
+    else if (next.length < 8)
+      errs['newPassword'] = 'La nueva contraseña debe tener al menos 8 caracteres.';
     if (!confirm) errs['confirmNewPassword'] = 'Repetí la nueva contraseña.';
     else if (confirm !== next) errs['confirmNewPassword'] = 'Las contraseñas no coinciden.';
 

@@ -1,6 +1,45 @@
+@if (showBackHome()) {
+  <a class="back" routerLink="/">‹ Volver al inicio</a>
+}
+
 @if (loading()) {
   <div class="hint">Cargando tu perfil…</div>
 } @else {
+  <div class="hn-card section">
+    <div class="section-title hn-head">Mis donaciones</div>
+
+    @if (donationsLoading()) {
+      <div class="hint">Cargando tus donaciones…</div>
+    } @else if (donationsError()) {
+      <div class="hint">No pudimos cargar tus donaciones. Probá de nuevo más tarde.</div>
+    } @else if (noDonations()) {
+      <p class="empty">Todavía no donaste.</p>
+      <a class="link" routerLink="/">Explorá comedores cerca tuyo</a>
+    } @else {
+      <ul class="donations">
+        @for (d of donations(); track d.id) {
+          <li class="donation">
+            <div class="donation-main">
+              <a class="link" [routerLink]="['/organizacion', d.organizationId]">{{
+                d.organizationName
+              }}</a>
+              <div class="hint">
+                {{ d.date }}
+                @if (d.isAnonymous) {
+                  · Anónima
+                }
+              </div>
+            </div>
+            <div class="donation-side">
+              <span class="amount">{{ d.amountLabel }}</span>
+              <hn-badge [label]="d.statusLabel" [bg]="d.statusBg" [ink]="d.statusInk" />
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
   <div class="hn-card section">
     <div class="section-title hn-head">Datos personales</div>
 
