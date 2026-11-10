@@ -84,7 +84,6 @@
 .needs,
 .events,
 .points,
-.posts,
 .bank {
   display: grid;
   gap: 12px;
@@ -97,8 +96,7 @@
 }
 
 .need,
-.point,
-.post {
+.point {
   padding: 14px 16px;
 }
 
@@ -175,18 +173,108 @@
   text-decoration: none;
 }
 
-.post h3 {
-  font-family: var(--hn-font-head);
-  font-size: 16px;
-  margin: 0 0 6px;
-  color: var(--hn-ink);
-}
-.post p {
-  margin: 0;
+/* Grilla de publicaciones estilo Instagram: cuadros 1:1 pegados, la primera
+   media de portada. Abrir uno lo muestra en hn-post-viewer. */
+.count {
+  font-family: var(--hn-font-body);
   font-size: 14px;
-  line-height: 1.5;
-  color: var(--hn-text);
-  white-space: pre-wrap;
+  font-weight: 600;
+  color: var(--hn-muted);
+}
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  list-style: none;
+  margin: 0 -18px;
+  padding: 0;
+}
+@media (min-width: 700px) {
+  .post-grid {
+    gap: 6px;
+    margin: 0;
+  }
+  .tile {
+    border-radius: var(--hn-radius-sm);
+  }
+}
+.tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: var(--hn-cream-soft);
+  cursor: pointer;
+  font: inherit;
+}
+.tile img,
+.tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tile-text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  background: linear-gradient(135deg, var(--hn-canela-100), var(--hn-canela-200));
+  color: var(--hn-canela-900);
+  font-family: var(--hn-font-head);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.tile-text span {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* El título sobre la foto aparece al pasar el mouse; en táctil no hay hover. */
+.tile-title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  background: var(--hn-story-scrim);
+  color: var(--hn-story-ink);
+  font-weight: 700;
+  font-size: 13.5px;
+  text-align: center;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+@media (hover: hover) {
+  .tile:hover .tile-title {
+    opacity: 1;
+  }
+}
+.tile:focus-visible {
+  outline: 3px solid var(--hn-primary);
+  outline-offset: -3px;
+}
+.tile:focus-visible .tile-title {
+  opacity: 1;
+}
+.badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: var(--hn-story-ink);
+  font-size: 15px;
+  line-height: 1;
+  text-shadow: 0 1px 3px var(--hn-story-scrim);
+  pointer-events: none;
 }
 
 .quiet {

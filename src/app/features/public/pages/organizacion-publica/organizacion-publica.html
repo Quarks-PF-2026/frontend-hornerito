@@ -269,19 +269,58 @@
     </section>
   }
 
-  @if (o.posts.length) {
+  @if (postTiles().length) {
     <section class="block">
-      <h2 class="hn-head">Novedades</h2>
-      <div class="posts">
-        @for (post of o.posts; track post.id) {
-          <article class="post hn-card">
-            <h3>{{ post.title }}</h3>
-            <p>{{ post.content }}</p>
-            <hn-post-media [media]="post.media" [alt]="post.title" />
-          </article>
+      <h2 class="hn-head">
+        Publicaciones <span class="count">{{ postTiles().length }}</span>
+      </h2>
+      <ul class="post-grid">
+        @for (tile of postTiles(); track tile.id; let i = $index) {
+          <li>
+            <button
+              class="tile"
+              type="button"
+              [attr.aria-label]="'Ver publicación: ' + tile.title"
+              (click)="postIndex.set(i)"
+            >
+              @if (tile.coverUrl; as url) {
+                @if (tile.coverIsVideo) {
+                  <video
+                    [src]="url"
+                    muted
+                    playsinline
+                    preload="metadata"
+                    aria-hidden="true"
+                  ></video>
+                } @else {
+                  <img [src]="url" alt="" loading="lazy" />
+                }
+                <span class="tile-title" aria-hidden="true">{{ tile.title }}</span>
+              } @else {
+                <span class="tile-text" aria-hidden="true"
+                  ><span>{{ tile.title }}</span></span
+                >
+              }
+              @if (tile.coverIsVideo) {
+                <span class="badge" aria-hidden="true">▶</span>
+              } @else if (tile.multi) {
+                <span class="badge" aria-hidden="true">⧉</span>
+              }
+            </button>
+          </li>
         }
-      </div>
+      </ul>
     </section>
+  }
+
+  @if (postIndex() !== null) {
+    <hn-post-viewer
+      [posts]="o.posts"
+      [start]="postIndex() ?? 0"
+      [orgName]="o.name"
+      [orgLogoUrl]="o.logoUrl"
+      (closed)="postIndex.set(null)"
+    />
   }
 
   @if (requestTarget(); as target) {
