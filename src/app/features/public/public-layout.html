@@ -8,7 +8,11 @@
   </a>
 
   @if (authenticated()) {
-    <a class="hn-btn hn-btn--outline" routerLink="/app">Mi organización</a>
+    @if (hasOrgAccess()) {
+      <a class="hn-btn hn-btn--outline" routerLink="/app">Mi organización</a>
+    } @else {
+      <a class="hn-btn hn-btn--outline" routerLink="/app/perfil">Mi perfil</a>
+    }
   } @else {
     <a class="hn-btn hn-btn--primary" routerLink="/login">Ingresar</a>
   }

@@ -57,20 +57,29 @@ export function fmtMoney(amount: number): string {
   return MONEY.format(amount);
 }
 
+/** Etiqueta y colores del `hn-badge` de estado, compartidos entre el panel y el perfil. */
+export function monetaryStatusBadge(status: MonetaryDonationStatus): {
+  label: string;
+  bg: string;
+  ink: string;
+} {
+  return { label: STATUS_LABEL[status], ...STATUS_COLOR[status] };
+}
+
 export function toMonetaryView(
   donation: MonetaryDonation,
   fmtDate: (iso: string) => string,
 ): MonetaryDonationView {
-  const color = STATUS_COLOR[donation.status];
+  const badge = monetaryStatusBadge(donation.status);
   return {
     ...donation,
     donor: donation.donorName?.trim() || 'Anónimo',
     amountLabel: fmtMoney(donation.amount),
     // `createdAt` viene con hora; `fmtDate` espera 'YYYY-MM-DD'.
     date: fmtDate(donation.createdAt.slice(0, 10)),
-    statusLabel: STATUS_LABEL[donation.status],
-    statusBg: color.bg,
-    statusInk: color.ink,
+    statusLabel: badge.label,
+    statusBg: badge.bg,
+    statusInk: badge.ink,
     decidable: donation.status === 'declarada',
   };
 }
