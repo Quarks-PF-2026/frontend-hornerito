@@ -61,6 +61,8 @@ export class OrganizacionPage {
 
   readonly org = this.orgSvc.org;
   readonly canEditOrg = this.auth.isOwner;
+  /** Una cuenta donante no crea organización (DOMAIN §3); null = sesión vieja, criterio previo. */
+  readonly canCreateOrg = computed(() => this.auth.accountType() !== 'donor');
   /** Cargar imágenes lo permite el mismo rol que administra usuarios. */
   readonly canEditImages = this.auth.canManageMembers;
   readonly st = computed(() => {

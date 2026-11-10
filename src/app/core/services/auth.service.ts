@@ -18,9 +18,25 @@ export interface RegisterResponse {
   verificationMailSent: boolean;
 }
 
+/** Elegido al registrarse; los donantes son mayoría, por eso es el default. */
+export type AccountType = 'donor' | 'organization';
+
+/** localStorage es editable a mano: un valor desconocido cuenta como sesión vieja. */
+function storedAccountType(): AccountType | null {
+  const value = localStorage.getItem('accountType');
+  return value === 'donor' || value === 'organization' ? value : null;
+}
+
 export interface LoginResponse {
   accessToken: string;
-  user: { id: string; name: string; email: string; isPlatformAdmin: boolean; phone: string | null };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    isPlatformAdmin: boolean;
+    phone: string | null;
+    accountType: AccountType;
+  };
   role: MemberRole | null;
 }
 
@@ -55,6 +71,23 @@ export class AuthService {
   private readonly _isPlatformAdmin = signal(localStorage.getItem('isPlatformAdmin') === 'true');
   readonly isPlatformAdmin = this._isPlatformAdmin.asReadonly();
 
+  /**
+   * Tipo de cuenta elegido al registrarse. null si la sesión es anterior al
+   * campo: cae en el criterio viejo (rol o admin de plataforma).
+   */
+  private readonly _accountType = signal<AccountType | null>(storedAccountType());
+  readonly accountType = this._accountType.asReadonly();
+
+  /**
+   * Si el usuario entra al panel (/app) o se queda en el sitio público. Una
+   * cuenta de organización todavía sin comedor también entra: ahí es donde lo
+   * carga. Como el rol, solo arma el menú y el destino del login: el backend
+   * autoriza cada request.
+   */
+  readonly hasPanelAccess = computed(
+    () => !!this._role() || this._isPlatformAdmin() || this._accountType() === 'organization',
+  );
+
   /** Correo de la sesión activa, para no ofrecerse acciones sobre uno mismo. */
   private readonly _currentEmail = signal(localStorage.getItem('userEmail') ?? '');
   readonly currentEmail = this._currentEmail.asReadonly();
@@ -85,6 +118,7 @@ export class AuthService {
     password: string,
     confirmPassword: string,
     acceptedTerms: boolean,
+    accountType: AccountType,
   ): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${this.apiUrl}/auth/register`, {
       name,
@@ -92,6 +126,7 @@ export class AuthService {
       password,
       confirmPassword,
       acceptedTerms,
+      accountType,
     });
   }
 
@@ -121,6 +156,7 @@ export class AuthService {
             res.user.isPlatformAdmin,
             res.user.name,
             res.user.phone,
+            res.user.accountType,
           ),
         ),
         map((): LoginResult => ({ ok: true, unverified: false, error: '' })),
@@ -139,7 +175,8 @@ export class AuthService {
    * Guarda la sesión; la usan el login, la aceptación de una invitación y el
    * cambio de organización activa. `name`/`phone` son opcionales porque no
    * todos esos flujos los devuelven todavía (QK-11 solo lo confirmó para
-   * login) — si faltan, se conserva lo que ya había en la sesión.
+   * login) — si faltan, se conserva lo que ya había en la sesión. Lo mismo
+   * con `accountType`, por si un backend viejo no lo manda.
    */
   startSession(
     accessToken: string,
@@ -148,6 +185,7 @@ export class AuthService {
     isPlatformAdmin: boolean,
     name?: string,
     phone?: string | null,
+    accountType?: AccountType,
   ): void {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('userEmail', email);
@@ -169,6 +207,10 @@ export class AuthService {
     this._authenticated.set(true);
     if (name !== undefined) this.setSessionName(name);
     if (phone !== undefined) this.setSessionPhone(phone);
+    if (accountType !== undefined) {
+      localStorage.setItem('accountType', accountType);
+      this._accountType.set(accountType);
+    }
   }
 
   /**
@@ -203,11 +245,13 @@ export class AuthService {
     localStorage.removeItem('isPlatformAdmin');
     localStorage.removeItem('userName');
     localStorage.removeItem('userPhone');
+    localStorage.removeItem('accountType');
     this._role.set(null);
     this._isPlatformAdmin.set(false);
     this._currentEmail.set('');
     this._currentName.set('');
     this._currentPhone.set(null);
+    this._accountType.set(null);
     this._authenticated.set(false);
     this.router.navigateByUrl('/login');
   }

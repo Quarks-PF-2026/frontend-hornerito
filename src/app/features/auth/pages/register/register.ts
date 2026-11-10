@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AccountType, AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -13,6 +13,20 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class RegisterPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+
+  /** Donante por defecto: es la mayoría de quienes se registran. */
+  readonly accountType = signal<AccountType>('donor');
+  readonly lead = computed(() =>
+    this.accountType() === 'organization'
+      ? 'Creá la cuenta de tu comedor. Después cargás sus datos y lo validamos.'
+      : 'Creá tu cuenta para donar y seguir tus aportes.',
+  );
+  // Quien registra un comedor es una persona: se aclara que el nombre es el suyo.
+  readonly nameLabel = computed(() =>
+    this.accountType() === 'organization'
+      ? 'Tu nombre y apellido (responsable)'
+      : 'Nombre y apellido',
+  );
 
   readonly name = signal('');
   readonly email = signal('');
@@ -52,26 +66,28 @@ export class RegisterPage {
     this.errors.set({});
     this.serverErr.set('');
     this.submitting.set(true);
-    this.auth.register(name.trim(), email.trim(), pass, confirm, this.terms()).subscribe({
-      next: (res) => {
-        this.submitting.set(false);
-        this.auth.registeredEmail.set(email);
-        // Estricto contra false: una respuesta sin el campo no dispara la alerta.
-        this.auth.verificationMailSent.set(res.verificationMailSent !== false);
-        this.router.navigateByUrl('/verify');
-      },
-      error: (err: HttpErrorResponse) => {
-        this.submitting.set(false);
-        if (err.status === 409) {
-          this.errors.set({ email: 'Este correo ya está en uso. ¿Querés iniciar sesión?' });
-        } else {
-          // Un 5xx trae el texto genérico de Nest ("Internal server error"),
-          // que no le sirve a nadie: ahí va el mensaje propio.
-          const generic = 'No pudimos crear tu cuenta. Intentá de nuevo en unos minutos.';
-          this.serverErr.set(err.status >= 500 ? generic : (err.error?.message ?? generic));
-        }
-      },
-    });
+    this.auth
+      .register(name.trim(), email.trim(), pass, confirm, this.terms(), this.accountType())
+      .subscribe({
+        next: (res) => {
+          this.submitting.set(false);
+          this.auth.registeredEmail.set(email);
+          // Estricto contra false: una respuesta sin el campo no dispara la alerta.
+          this.auth.verificationMailSent.set(res.verificationMailSent !== false);
+          this.router.navigateByUrl('/verify');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.submitting.set(false);
+          if (err.status === 409) {
+            this.errors.set({ email: 'Este correo ya está en uso. ¿Querés iniciar sesión?' });
+          } else {
+            // Un 5xx trae el texto genérico de Nest ("Internal server error"),
+            // que no le sirve a nadie: ahí va el mensaje propio.
+            const generic = 'No pudimos crear tu cuenta. Intentá de nuevo en unos minutos.';
+            this.serverErr.set(err.status >= 500 ? generic : (err.error?.message ?? generic));
+          }
+        },
+      });
   }
 
   goLogin(): void {

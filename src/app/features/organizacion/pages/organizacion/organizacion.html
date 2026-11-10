@@ -27,8 +27,8 @@
           El dueño de la organización tiene que corregir los datos para volver a enviarla a
           validación.
         }
-        Hasta que se valide no se pueden gestionar necesidades, insumos, donaciones,
-        publicaciones, puntos de recolección ni voluntariado.
+        Hasta que se valide no se pueden gestionar necesidades, insumos, donaciones, publicaciones,
+        puntos de recolección ni voluntariado.
       </div>
     }
   </div>
@@ -114,10 +114,17 @@
 } @else {
   <div class="empty hn-card">
     <div class="empty-icon">🍲</div>
-    <div class="empty-title hn-head">Todavía no cargaste tu organización</div>
-    <div class="empty-text">
-      Completá los datos de tu comedor para que donantes y voluntarios puedan conocerlo.
-    </div>
-    <button class="hn-btn hn-btn--primary" type="button" (click)="edit()">Cargar datos</button>
+    @if (canCreateOrg()) {
+      <div class="empty-title hn-head">Todavía no cargaste tu organización</div>
+      <div class="empty-text">
+        Completá los datos de tu comedor para que donantes y voluntarios puedan conocerlo.
+      </div>
+      <button class="hn-btn hn-btn--primary" type="button" (click)="edit()">Cargar datos</button>
+    } @else {
+      <div class="empty-title hn-head">Tu cuenta es de donante</div>
+      <div class="empty-text">
+        Para gestionar un comedor, creá una cuenta de organización con otro correo.
+      </div>
+    }
   </div>
 }

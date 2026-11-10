@@ -123,6 +123,14 @@ export class OrganizacionPublicaPage {
   private readonly auth = inject(AuthService);
   /** Con sesión el formulario se precarga y ofrece donar en forma anónima (QK-113). */
   readonly authenticated = this.auth.authenticated;
+  /**
+   * La donación queda asociada a la cuenta solo si es donante: una cuenta de
+   * organización dona como sin sesión (DOMAIN §7), así que no tiene sentido
+   * ofrecerle donar en forma anónima.
+   */
+  readonly linksDonation = computed(
+    () => this.authenticated() && this.auth.accountType() !== 'organization',
+  );
   private readonly orgId = inject(ActivatedRoute).snapshot.paramMap.get('id') ?? '';
 
   readonly org = signal<PublicOrgDetail | null>(null);
@@ -405,7 +413,7 @@ export class OrganizacionPublicaPage {
     if (form.donorName.trim()) payload.donorName = form.donorName.trim();
     if (form.donorContact.trim()) payload.donorContact = form.donorContact.trim();
     // Sin sesión no se manda: el backend no tiene a quién rankear.
-    if (this.authenticated()) payload.isAnonymous = form.isAnonymous;
+    if (this.linksDonation()) payload.isAnonymous = form.isAnonymous;
 
     this.donating.set(true);
     this.api.declareDonation(this.orgId, payload, this.receipt()).subscribe({

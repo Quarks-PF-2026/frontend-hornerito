@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -23,5 +23,5 @@ export class PublicLayout {
    * organización" lo dejaba frente a "Cargar datos" de un comedor que no tiene.
    * Mismo criterio que el destino del login.
    */
-  readonly hasOrgAccess = computed(() => !!this.auth.role() || this.auth.isPlatformAdmin());
+  readonly hasOrgAccess = this.auth.hasPanelAccess;
 }
