@@ -18,12 +18,12 @@ import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 import { BottomSheet } from '../../../../shared/ui/bottom-sheet/bottom-sheet';
 import { FilePicker } from '../../../../shared/ui/file-picker/file-picker';
-import { PostMediaGrid } from '../../../../shared/ui/post-media/post-media';
 import { DonorRanking } from '../../../../shared/ui/donor-ranking/donor-ranking';
 import { HttpErrorResponse } from '@angular/common/http';
 import { StoryGroup } from '../../../../core/models/story.model';
 import { StoryBar } from '../../../../shared/ui/story-bar/story-bar';
 import { StoryViewer } from '../../../../shared/ui/story-viewer/story-viewer';
+import { PostViewer } from '../../../../shared/ui/post-viewer/post-viewer';
 
 interface NeedRow {
   id: string;
@@ -82,6 +82,16 @@ interface DonationForm {
   isAnonymous: boolean;
 }
 
+/** Cuadro de la grilla de publicaciones: la primera media hace de portada. */
+interface PostTile {
+  id: string;
+  title: string;
+  coverUrl: string | null;
+  coverIsVideo: boolean;
+  /** Más de un adjunto: lleva el ícono de carrusel. */
+  multi: boolean;
+}
+
 interface PointRow {
   id: string;
   name: string;
@@ -100,10 +110,10 @@ interface PointRow {
     BottomSheet,
     FilePicker,
     LocalityPipe,
-    PostMediaGrid,
     DonorRanking,
     StoryBar,
     StoryViewer,
+    PostViewer,
   ],
   templateUrl: './organizacion-publica.html',
   styleUrl: './organizacion-publica.scss',
@@ -230,6 +240,22 @@ export class OrganizacionPublicaPage {
       : [];
   });
   readonly storiesOpen = signal(false);
+
+  /** Grilla estilo Instagram; sin adjuntos el cuadro muestra el título. */
+  readonly postTiles = computed<PostTile[]>(() =>
+    (this.org()?.posts ?? []).map((post) => {
+      const cover = post.media[0];
+      return {
+        id: post.id,
+        title: post.title,
+        coverUrl: cover?.url ?? null,
+        coverIsVideo: cover?.resourceType === 'video',
+        multi: post.media.length > 1,
+      };
+    }),
+  );
+  /** Publicación abierta en el visor; null con el visor cerrado. */
+  readonly postIndex = signal<number | null>(null);
 
   constructor() {
     this.load();

@@ -62,13 +62,19 @@ Base `.hn-btn` + un modificador de variante, nunca estilos de botón inline:
 ## Componentes compartidos (`src/app/shared/ui/*`)
 
 Antes de construir un elemento de UI nuevo, revisar si ya existe: `badge`, `bottom-nav`,
-`bottom-sheet`, `progress-bar`, `toast`, `top-bar`. Estos son los bloques de bajo nivel del
+`bottom-sheet`, `post-viewer`, `progress-bar`, `toast`, `top-bar`. Estos son los bloques de bajo nivel del
 design system — cualquier patrón repetido (sheet/modal, badge de estado, barra de progreso)
 se agrega ahí, no duplicado por feature.
 
 `hn-bottom-sheet` es el ejemplo de referencia para responsive: mobile = sheet nativo
 (slide-up, handle), desktop (`min-width: 768px`) = modal centrado. Cualquier overlay nuevo
 debe seguir el mismo patrón en vez de quedar mobile-only.
+
+`hn-post-viewer` es el overlay de publicación estilo Instagram que se abre desde la grilla del
+perfil público: mobile = pantalla completa, desktop (`min-width: 768px`) = modal de 2 columnas
+(media | texto). Los adjuntos se recorren con `scroll-snap` nativo (sin librería de carrusel);
+←/→ cambian de publicación, Esc cierra, y el foco queda atrapado y se restaura al cerrar
+(mismo patrón que `hn-story-viewer`).
 
 ## Iconografía
 

@@ -82,7 +82,7 @@ Las cinco reglas duras, resumidas en una línea cada una — el detalle está en
 
 1. **Nunca hardcodear color/radio/sombra de marca.** Usar los tokens `--hn-*` de `src/theme/_tokens.scss`. Si falta un token, agregarlo ahí, no un valor suelto en el componente.
 2. **Reusar utilidades globales antes de escribir CSS nuevo**: `.hn-head`, `.hn-label`, `.hn-input`/`.hn-textarea`/`.hn-select`, `.hn-card`, `.hn-btn` + modificador (`--primary`, `--outline`, `--white`, `--danger`, `--danger-soft`, `--icon`, `--block`), `.hn-fill`, `.hn-scroll`.
-3. **Revisar `shared/ui/*` antes de construir un elemento de UI nuevo** (badge, bottom-sheet, bottom-nav, image-upload, map-picker, progress-bar, toast, top-bar). Un patrón repetido va ahí, no duplicado por feature.
+3. **Revisar `shared/ui/*` antes de construir un elemento de UI nuevo** (badge, bottom-sheet, bottom-nav, image-upload, map-picker, post-viewer, progress-bar, toast, top-bar). Un patrón repetido va ahí, no duplicado por feature.
 4. **Overlays (sheet/modal/drawer) deben ser responsive** siguiendo el patrón de `hn-bottom-sheet`: mobile = comportamiento nativo actual, desktop (`min-width: 768px`) = presentación tipo modal centrado. No dejar componentes nuevos mobile-only si se muestran también en desktop.
 5. **Tipografía**: headings con `--hn-font-head` (clase `.hn-head`), cuerpo con `--hn-font-body` (heredado, no reasignar por componente).
 

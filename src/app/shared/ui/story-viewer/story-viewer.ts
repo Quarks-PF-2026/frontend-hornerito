@@ -366,7 +366,9 @@ export class StoryViewer implements OnInit {
 
   ngOnInit(): void {
     const start = this.start();
-    this.groupIndex.set(start >= 0 && start < this.groups().length ? start : 0);
+    const gi = start >= 0 && start < this.groups().length ? start : 0;
+    this.groupIndex.set(gi);
+    this.storyIndex.set(this.firstUnseen(gi));
     this.show();
   }
 
@@ -375,8 +377,9 @@ export class StoryViewer implements OnInit {
     if (this.storyIndex() < stories.length - 1) {
       this.storyIndex.update((i) => i + 1);
     } else if (this.groupIndex() < this.groups().length - 1) {
-      this.groupIndex.update((i) => i + 1);
-      this.storyIndex.set(0);
+      const gi = this.groupIndex() + 1;
+      this.groupIndex.set(gi);
+      this.storyIndex.set(this.firstUnseen(gi));
     } else {
       this.close();
       return;
@@ -442,6 +445,16 @@ export class StoryViewer implements OnInit {
         this.trapFocus(event);
         break;
     }
+  }
+
+  /**
+   * Cada organización arranca en su primera historia sin ver, como cualquier
+   * visor de historias; si ya vio todas, desde el principio. Sin `seen` (perfil
+   * público o visitante) todas cuentan como no vistas: arranca en la primera.
+   */
+  private firstUnseen(groupIndex: number): number {
+    const i = (this.groups()[groupIndex]?.stories ?? []).findIndex((s) => !s.seen);
+    return i === -1 ? 0 : i;
   }
 
   private show(): void {

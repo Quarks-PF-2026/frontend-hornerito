@@ -5,6 +5,7 @@ import { initials } from '../../../core/util/format';
 /**
  * Fila horizontal de organizaciones con historias (QK-111). Solo dibuja y
  * avisa qué grupo se tocó: abrir el visor y marcar vistas es de la página.
+ * Un grupo con todas sus historias vistas lleva el aro apagado (§18).
  */
 @Component({
   selector: 'hn-story-bar',
@@ -16,10 +17,10 @@ import { initials } from '../../../core/util/format';
           <button
             type="button"
             class="story"
-            [attr.aria-label]="'Ver historias de ' + item.name"
+            [attr.aria-label]="'Ver historias de ' + item.name + (item.seen ? ' (ya vistas)' : '')"
             (click)="opened.emit(i)"
           >
-            <span class="ring">
+            <span class="ring" [class.seen]="item.seen">
               <span class="avatar">
                 @if (item.logoUrl) {
                   <img [src]="item.logoUrl" alt="" />
@@ -63,6 +64,10 @@ import { initials } from '../../../core/util/format';
         padding: 3px;
         border-radius: var(--hn-radius-pill);
         background: linear-gradient(135deg, var(--hn-canela-200), var(--hn-primary-strong));
+      }
+      /* Ya vistas: aro neutro, como cualquier barra de historias. */
+      .ring.seen {
+        background: var(--hn-border);
       }
       .avatar {
         width: 62px;
@@ -110,6 +115,7 @@ export class StoryBar {
       name: g.organizationName,
       logoUrl: g.organizationLogoUrl,
       initials: initials(g.organizationName),
+      seen: g.stories.every((s) => s.seen),
     })),
   );
 }

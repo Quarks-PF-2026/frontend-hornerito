@@ -11,6 +11,11 @@ export interface Story {
   linkUrl: string | null;
   createdAt: string;
   expiresAt: string;
+  /**
+   * Solo en `GET /public/stories`: si quien mira ya la vio (§18). Opcional
+   * porque el perfil público y el panel no lo mandan; ausente cuenta como no vista.
+   */
+  seen?: boolean;
 }
 
 /** `GET /stories`: las vencidas quedan como historial de solo lectura. */

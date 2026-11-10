@@ -92,7 +92,7 @@ export class ExplorarPage implements OnDestroy {
 
   private page = 1;
   private debounce?: ReturnType<typeof setTimeout>;
-  /** Vistas de esta apertura del visor; se descuentan de la barra al cerrarlo. */
+  /** Vistas de esta apertura del visor; se marcan en la barra al cerrarlo. */
   private readonly seenStories = new Set<string>();
 
   constructor() {
@@ -152,19 +152,27 @@ export class ExplorarPage implements OnDestroy {
   }
 
   /**
-   * Las vistas se sacan recién al cerrar, no al mostrarlas: si no, la barra y
-   * los grupos del visor se reacomodarían a mitad de la visualización. Una
-   * organización sin nada sin ver sale de la barra.
+   * Las vistas se marcan recién al cerrar, no al mostrarlas: si no, la barra y
+   * los grupos del visor se reacomodarían a mitad de la visualización. Nada
+   * sale de la barra (§18): una organización con todo visto pasa al final y
+   * cada bloque va por historia más reciente, el mismo orden que arma el
+   * backend, para que recargar no reacomode la barra.
    */
   closeStories(): void {
     this.storyStart.set(null);
     if (!this.seenStories.size) return;
     const seen = new Set(this.seenStories);
     this.seenStories.clear();
+    const allSeen = (g: StoryGroup) => g.stories.every((s) => s.seen);
+    // Las historias vienen de la más vieja a la más nueva: la última es la más reciente.
+    const latest = (g: StoryGroup) => Date.parse(g.stories[g.stories.length - 1]?.createdAt ?? '');
     this.storyGroups.update((groups) =>
       groups
-        .map((g) => ({ ...g, stories: g.stories.filter((s) => !seen.has(s.id)) }))
-        .filter((g) => g.stories.length > 0),
+        .map((g) => ({
+          ...g,
+          stories: g.stories.map((s) => (seen.has(s.id) ? { ...s, seen: true } : s)),
+        }))
+        .sort((a, b) => Number(allSeen(a)) - Number(allSeen(b)) || latest(b) - latest(a)),
     );
   }
 
