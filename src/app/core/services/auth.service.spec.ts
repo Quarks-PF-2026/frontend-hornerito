@@ -25,7 +25,7 @@ describe('AuthService', () => {
   describe('register', () => {
     it('posts registration data to the backend', () => {
       service
-        .register('María González', 'maria@example.com', 'password1', 'password1', true)
+        .register('María González', 'maria@example.com', 'password1', 'password1', true, 'donor')
         .subscribe();
 
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/register`);
@@ -36,6 +36,7 @@ describe('AuthService', () => {
         password: 'password1',
         confirmPassword: 'password1',
         acceptedTerms: true,
+        accountType: 'donor',
       });
       req.flush({ email: 'maria@example.com' });
     });
@@ -47,7 +48,10 @@ describe('AuthService', () => {
       service.login('maria@example.com', 'password1').subscribe((r) => (result = r));
 
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
-      req.flush({ accessToken: 'jwt', user: { id: '1', name: 'María', email: 'maria@example.com' } });
+      req.flush({
+        accessToken: 'jwt',
+        user: { id: '1', name: 'María', email: 'maria@example.com' },
+      });
 
       expect(result).toEqual({ ok: true, unverified: false, error: '' });
       expect(service.authenticated()).toBe(true);
@@ -144,7 +148,9 @@ describe('AuthService', () => {
       let valid: boolean | undefined;
       service.verifyResetToken('valid-token').subscribe((r) => (valid = r));
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/auth/verify-reset-token?token=valid-token`);
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/auth/verify-reset-token?token=valid-token`,
+      );
       expect(req.request.method).toBe('GET');
       req.flush(null);
 
@@ -155,7 +161,9 @@ describe('AuthService', () => {
       let valid: boolean | undefined;
       service.verifyResetToken('invalid-token').subscribe((r) => (valid = r));
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/auth/verify-reset-token?token=invalid-token`);
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/auth/verify-reset-token?token=invalid-token`,
+      );
       req.flush({ message: 'Expiró' }, { status: 400, statusText: 'Bad Request' });
 
       expect(valid).toBe(false);
@@ -184,10 +192,7 @@ describe('AuthService', () => {
       service.resetPassword('token', 'newpass123', 'newpass123').subscribe((r) => (result = r));
 
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/reset-password`);
-      req.flush(
-        { message: 'El enlace expiró.' },
-        { status: 400, statusText: 'Bad Request' },
-      );
+      req.flush({ message: 'El enlace expiró.' }, { status: 400, statusText: 'Bad Request' });
 
       expect(result).toEqual({ ok: false, error: 'El enlace expiró.' });
     });
