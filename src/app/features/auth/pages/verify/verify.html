@@ -22,13 +22,25 @@
       Ir a iniciar sesión
     </button>
   } @else {
+    @if (!mailSent()) {
+      <div class="banner banner--warning" role="alert">
+        <div class="ico">⚠️</div>
+        <div class="banner-warning-text">
+          Creamos tu cuenta, pero no pudimos enviarte el correo de verificación. Tocá «Reenviar» en
+          unos minutos.
+        </div>
+      </div>
+    }
     <div class="icon">✉️</div>
     <h1 class="hn-head">Revisá tu correo</h1>
-    <p class="text">
-      Te enviamos un correo de verificación a<br />
-      <b>{{ email() || 'tu correo' }}</b>.<br />
-      Validá tu email para empezar a usar Hornerito.
-    </p>
+    @if (mailSent()) {
+      <p class="text">
+        Te enviamos un correo de verificación a<br />
+        <b>{{ email() || 'tu correo' }}</b
+        >.<br />
+        Validá tu email para empezar a usar Hornerito.
+      </p>
+    }
     <div class="pill">¡Cuenta creada con éxito!</div>
     <button class="hn-btn hn-btn--primary cta" type="button" (click)="goLogin()">
       Ir a iniciar sesión

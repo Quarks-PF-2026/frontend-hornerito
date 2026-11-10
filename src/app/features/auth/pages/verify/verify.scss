@@ -72,3 +72,27 @@ h1 {
   line-height: 1.5;
   color: var(--hn-muted);
 }
+.banner {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  border-radius: var(--hn-radius-lg);
+  padding: 13px 16px;
+  margin-bottom: 24px;
+}
+.banner--warning {
+  background: var(--hn-warning-bg);
+  border: 1.5px solid var(--hn-warning-border);
+}
+.banner .ico {
+  font-size: 18px;
+}
+.banner-warning-text {
+  color: var(--hn-warning-ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}

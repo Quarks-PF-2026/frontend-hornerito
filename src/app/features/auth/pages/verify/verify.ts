@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -18,6 +19,7 @@ export class VerifyPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly email = this.auth.registeredEmail;
+  readonly mailSent = this.auth.verificationMailSent;
 
   readonly checking = signal(false);
   readonly verified = signal(false);
@@ -54,15 +56,25 @@ export class VerifyPage implements OnInit {
       next: (r) => {
         this.resending.set(false);
         this.resendMsg.set(r.message);
+        // El reenvío salió: la alerta del registro ya no aplica. Solo si fue al
+        // mismo correo del registro; si se editó el campo, el texto "Te
+        // enviamos un correo a <registro>" seguiría siendo falso.
+        if (email === this.email()) this.mailSent.set(true);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.resending.set(false);
-        this.resendMsg.set('No pudimos reenviar el correo. Intentá de nuevo en unos minutos.');
+        // 503 = el backend no pudo mandar el correo y trae un mensaje
+        // accionable; cualquier otro error queda en el genérico.
+        const generic = 'No pudimos reenviar el correo. Intentá de nuevo en unos minutos.';
+        this.resendMsg.set(err.status === 503 ? (err.error?.message ?? generic) : generic);
       },
     });
   }
 
   goLogin(): void {
+    // El aviso es del registro que acaba de pasar; una visita posterior a
+    // /verify en la misma pestaña no tiene que heredarlo.
+    this.mailSent.set(true);
     this.router.navigateByUrl('/login');
   }
 }
