@@ -36,7 +36,8 @@ export class RegisterPage {
 
     if (!name.trim()) errs['name'] = 'Ingresá tu nombre y apellido.';
     if (!email.trim()) errs['email'] = 'Ingresá tu correo electrónico.';
-    else if (!this.auth.emailOk(email.trim())) errs['email'] = 'El correo no tiene un formato válido.';
+    else if (!this.auth.emailOk(email.trim()))
+      errs['email'] = 'El correo no tiene un formato válido.';
     if (!pass) errs['pass'] = 'Ingresá una contraseña.';
     else if (pass.length < 8) errs['pass'] = 'La contraseña debe tener al menos 8 caracteres.';
     if (!confirm) errs['confirm'] = 'Repetí la contraseña.';
@@ -52,9 +53,11 @@ export class RegisterPage {
     this.serverErr.set('');
     this.submitting.set(true);
     this.auth.register(name.trim(), email.trim(), pass, confirm, this.terms()).subscribe({
-      next: () => {
+      next: (res) => {
         this.submitting.set(false);
         this.auth.registeredEmail.set(email);
+        // Estricto contra false: una respuesta sin el campo no dispara la alerta.
+        this.auth.verificationMailSent.set(res.verificationMailSent !== false);
         this.router.navigateByUrl('/verify');
       },
       error: (err: HttpErrorResponse) => {
@@ -62,9 +65,10 @@ export class RegisterPage {
         if (err.status === 409) {
           this.errors.set({ email: 'Este correo ya está en uso. ¿Querés iniciar sesión?' });
         } else {
-          this.serverErr.set(
-            err.error?.message ?? 'No pudimos crear tu cuenta. Intentá de nuevo en unos minutos.',
-          );
+          // Un 5xx trae el texto genérico de Nest ("Internal server error"),
+          // que no le sirve a nadie: ahí va el mensaje propio.
+          const generic = 'No pudimos crear tu cuenta. Intentá de nuevo en unos minutos.';
+          this.serverErr.set(err.status >= 500 ? generic : (err.error?.message ?? generic));
         }
       },
     });

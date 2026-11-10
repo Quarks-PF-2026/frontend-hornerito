@@ -12,6 +12,12 @@ export interface LoginResult {
   error: string;
 }
 
+export interface RegisterResponse {
+  email: string;
+  /** false si la cuenta se creó pero el correo de verificación no salió. */
+  verificationMailSent: boolean;
+}
+
 export interface LoginResponse {
   accessToken: string;
   user: { id: string; name: string; email: string; isPlatformAdmin: boolean; phone: string | null };
@@ -65,6 +71,11 @@ export class AuthService {
 
   /** Correo del último registro, para la pantalla de verificación. */
   readonly registeredEmail = signal('');
+  /**
+   * Si el correo de verificación de ese registro salió. Arranca en true para
+   * que una carga en frío de /verify no muestre una alerta que no corresponde.
+   */
+  readonly verificationMailSent = signal(true);
 
   emailOk = emailOk;
 
@@ -74,8 +85,8 @@ export class AuthService {
     password: string,
     confirmPassword: string,
     acceptedTerms: boolean,
-  ): Observable<{ email: string }> {
-    return this.http.post<{ email: string }>(`${this.apiUrl}/auth/register`, {
+  ): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/auth/register`, {
       name,
       email,
       password,
@@ -99,26 +110,29 @@ export class AuthService {
   }
 
   login(email: string, pass: string): Observable<LoginResult> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password: pass }).pipe(
-      tap((res) =>
-        this.startSession(
-          res.accessToken,
-          res.role,
-          res.user.email,
-          res.user.isPlatformAdmin,
-          res.user.name,
-          res.user.phone,
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password: pass })
+      .pipe(
+        tap((res) =>
+          this.startSession(
+            res.accessToken,
+            res.role,
+            res.user.email,
+            res.user.isPlatformAdmin,
+            res.user.name,
+            res.user.phone,
+          ),
         ),
-      ),
-      map((): LoginResult => ({ ok: true, unverified: false, error: '' })),
-      catchError((err: HttpErrorResponse) => {
-        const unverified = Boolean(err.error?.unverified);
-        const error = unverified
-          ? ''
-          : (err.error?.message ?? 'Correo o contraseña incorrectos. Revisá los datos e intentá de nuevo.');
-        return of<LoginResult>({ ok: false, unverified, error });
-      }),
-    );
+        map((): LoginResult => ({ ok: true, unverified: false, error: '' })),
+        catchError((err: HttpErrorResponse) => {
+          const unverified = Boolean(err.error?.unverified);
+          const error = unverified
+            ? ''
+            : (err.error?.message ??
+              'Correo o contraseña incorrectos. Revisá los datos e intentá de nuevo.');
+          return of<LoginResult>({ ok: false, unverified, error });
+        }),
+      );
   }
 
   /**
@@ -222,8 +236,7 @@ export class AuthService {
         map(() => ({ ok: true, error: '' })),
         catchError((err: HttpErrorResponse) => {
           const error =
-            err.error?.message ??
-            'No se pudo restablecer la contraseña. Intentá de nuevo.';
+            err.error?.message ?? 'No se pudo restablecer la contraseña. Intentá de nuevo.';
           return of({ ok: false, error });
         }),
       );
