@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MemberRole } from '../models/member.model';
-import { AuthService } from './auth.service';
+import { AccountType, AuthService } from './auth.service';
 
 export interface InvitationPreview {
   organizationName: string;
@@ -15,7 +15,13 @@ export interface InvitationPreview {
 interface AcceptResponse {
   accessToken: string;
   /** El contrato de QK-19 no garantiza el flag acá: si falta, cuenta como false. */
-  user: { id: string; name: string; email: string; isPlatformAdmin?: boolean };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    isPlatformAdmin?: boolean;
+    accountType?: AccountType;
+  };
   role: MemberRole | null;
   organizationId: string;
 }
@@ -42,6 +48,8 @@ export class InvitationsService {
             res.user.email,
             res.user.isPlatformAdmin === true,
             res.user.name,
+            undefined,
+            res.user.accountType,
           ),
         ),
       );

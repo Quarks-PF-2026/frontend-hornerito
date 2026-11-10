@@ -491,7 +491,7 @@
           <p class="hn-field-error">{{ donationErrors()['donorContact'] }}</p>
         }
 
-        @if (authenticated()) {
+        @if (linksDonation()) {
           <label class="anon">
             <input
               type="checkbox"

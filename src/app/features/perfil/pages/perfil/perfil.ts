@@ -22,7 +22,7 @@ export class PerfilPage {
   readonly loading = signal(true);
 
   // Quien tiene organización vuelve por el menú del panel; el donante "puro" no tiene menú.
-  readonly showBackHome = computed(() => !this.auth.role() && !this.auth.isPlatformAdmin());
+  readonly showBackHome = computed(() => !this.auth.hasPanelAccess());
 
   // --- Mis donaciones ---
   readonly donations = this.profileSvc.donationViews;

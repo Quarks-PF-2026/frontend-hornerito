@@ -13,9 +13,36 @@
   </div>
 
   <div class="body">
-    <button class="hn-btn hn-btn--outline back-desktop" type="button" (click)="goLogin()">‹ Volver</button>
+    <button class="hn-btn hn-btn--outline back-desktop" type="button" (click)="goLogin()">
+      ‹ Volver
+    </button>
     <h1 class="hn-head desktop-title">Crear cuenta</h1>
-    <p class="lead">Creá tu cuenta para donar, seguir tus aportes o sumar tu comedor.</p>
+    <p class="lead">{{ lead() }}</p>
+
+    <div class="account-type" role="group" aria-label="Tipo de cuenta">
+      <button
+        class="hn-btn type"
+        type="button"
+        [class.hn-btn--primary]="accountType() === 'donor'"
+        [class.hn-btn--outline]="accountType() !== 'donor'"
+        [attr.aria-pressed]="accountType() === 'donor'"
+        (click)="accountType.set('donor')"
+      >
+        <span class="type-ico" aria-hidden="true">🤝</span>
+        Quiero donar
+      </button>
+      <button
+        class="hn-btn type"
+        type="button"
+        [class.hn-btn--primary]="accountType() === 'organization'"
+        [class.hn-btn--outline]="accountType() !== 'organization'"
+        [attr.aria-pressed]="accountType() === 'organization'"
+        (click)="accountType.set('organization')"
+      >
+        <span class="type-ico" aria-hidden="true">🍲</span>
+        Tengo un comedor u organización
+      </button>
+    </div>
 
     @if (serverErr()) {
       <div class="banner banner--error">
@@ -24,7 +51,7 @@
       </div>
     }
 
-    <label class="hn-label" for="r-name">Nombre y apellido</label>
+    <label class="hn-label" for="r-name">{{ nameLabel() }}</label>
     <input
       id="r-name"
       class="hn-input"
