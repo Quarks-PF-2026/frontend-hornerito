@@ -255,6 +255,15 @@
   border: 1px solid var(--hn-border);
   cursor: pointer;
 }
+.need--more {
+  flex-basis: min(160px, 50vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 700;
+  color: var(--hn-primary);
+}
 .need-head {
   display: flex;
   align-items: center;
