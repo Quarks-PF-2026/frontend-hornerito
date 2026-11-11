@@ -25,8 +25,11 @@ import { StoryBar } from '../../../../shared/ui/story-bar/story-bar';
 import { StoryViewer } from '../../../../shared/ui/story-viewer/story-viewer';
 
 const SEARCH_DEBOUNCE_MS = 300;
-/** "Por vencer" (QK-108): ventana y tope del carrusel. */
-const EXPIRING_DAYS = 7;
+/**
+ * "Por vencer" (QK-108): las abiertas que vencen primero, de a N por página, sin ventana fija.
+ * Con ventana de 7 días el carrusel quedaba vacío cuando ninguna vencía tan
+ * pronto, justo cuando más visibilidad hacía falta.
+ */
 const EXPIRING_MAX = 8;
 
 interface ExpiringRow {
@@ -82,6 +85,9 @@ export class ExplorarPage implements OnDestroy {
   readonly localities = signal<PublicLocality[]>([]);
   readonly locality = signal<string | null>(null);
   readonly expiring = signal<ExpiringRow[]>([]);
+  readonly expiringTotal = signal(0);
+  readonly expiringLoading = signal(false);
+  readonly hasMoreExpiring = computed(() => this.expiring().length < this.expiringTotal());
   readonly topDonors = signal<TopDonor[]>([]);
   readonly storyGroups = signal<StoryGroup[]>([]);
   /** Grupo con el que se abrió el visor; null con el visor cerrado. */
@@ -91,6 +97,7 @@ export class ExplorarPage implements OnDestroy {
   readonly empty = computed(() => !this.loading() && !this.failed() && this.items().length === 0);
 
   private page = 1;
+  private expiringPage = 1;
   private debounce?: ReturnType<typeof setTimeout>;
   /** Vistas de esta apertura del visor; se marcan en la barra al cerrarlo. */
   private readonly seenStories = new Set<string>();
@@ -176,6 +183,12 @@ export class ExplorarPage implements OnDestroy {
     );
   }
 
+  moreExpiring(): void {
+    if (this.expiringLoading()) return;
+    this.expiringPage += 1;
+    this.fetchExpiring(true);
+  }
+
   more(): void {
     this.page += 1;
     this.fetch(true);
@@ -190,12 +203,26 @@ export class ExplorarPage implements OnDestroy {
     this.fetch();
   }
 
-  /** Fija: no depende de la búsqueda ni de los chips. */
-  private fetchExpiring(): void {
-    this.api.needs({ withinDays: EXPIRING_DAYS, pageSize: EXPIRING_MAX }).subscribe({
-      next: (result) => this.expiring.set(result.items.map(toExpiringRow)),
-      // Si falla, la sección no se muestra: la grilla de organizaciones sigue sola.
-      error: () => this.expiring.set([]),
+  /**
+   * Fija: no depende de la búsqueda ni de los chips. Paginada: el backend
+   * ordena por vencimiento y, a igual fecha, la menos cubierta primero.
+   */
+  private fetchExpiring(append = false): void {
+    this.expiringLoading.set(true);
+    this.api.needs({ page: this.expiringPage, pageSize: EXPIRING_MAX }).subscribe({
+      next: (result) => {
+        const rows = result.items.map(toExpiringRow);
+        this.expiring.update((current) => (append ? [...current, ...rows] : rows));
+        this.expiringTotal.set(result.total);
+        this.expiringLoading.set(false);
+      },
+      // Si falla la primera página la sección no se muestra; si falla "Ver más",
+      // queda lo ya cargado y se vuelve a la página anterior para reintentar.
+      error: () => {
+        if (append) this.expiringPage -= 1;
+        else this.expiring.set([]);
+        this.expiringLoading.set(false);
+      },
     });
   }
 

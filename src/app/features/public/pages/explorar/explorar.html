@@ -69,7 +69,7 @@
 @if (expiring().length) {
   <section class="expiring" aria-labelledby="expiring-title">
     <h2 id="expiring-title" class="hn-head">Por vencer</h2>
-    <p class="quiet">Necesidades que cierran en los próximos días.</p>
+    <p class="quiet">Las necesidades abiertas que vencen primero.</p>
     <div class="rail">
       @for (need of expiring(); track need.id) {
         <button type="button" class="need hn-card" (click)="open(need.organizationId)">
@@ -88,6 +88,16 @@
             </div>
             <hn-progress-bar [pct]="need.pct" [color]="need.color" [height]="8" />
           </div>
+        </button>
+      }
+      @if (hasMoreExpiring()) {
+        <button
+          type="button"
+          class="need need--more hn-card"
+          [disabled]="expiringLoading()"
+          (click)="moreExpiring()"
+        >
+          {{ expiringLoading() ? 'Cargando…' : 'Ver más necesidades' }}
         </button>
       }
     </div>
