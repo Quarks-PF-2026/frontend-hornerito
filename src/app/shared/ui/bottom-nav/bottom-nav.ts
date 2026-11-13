@@ -21,6 +21,8 @@ interface NavItem {
   open?: true;
   /** Dato de la persona: lo ve también quien no tiene organización (donante). */
   personal?: true;
+  /** Destino fuera del panel (ej. el inicio público); si falta, es `/app/<key>`. */
+  href?: string;
 }
 
 /**
@@ -30,6 +32,15 @@ interface NavItem {
  * de mobile.
  */
 const NAV_ITEMS: NavItem[] = [
+  {
+    // Salida al inicio público: desde el panel no había forma de volver.
+    key: 'inicio',
+    label: 'Inicio',
+    href: '/',
+    open: true,
+    d: ['M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5z'],
+    c: [12, 12, 9],
+  },
   {
     key: 'organizacion',
     label: 'Mi comedor',
@@ -145,7 +156,12 @@ const LOGOUT_ICON = ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'M16 17l5-5-5-5'
   template: `
     <nav class="nav">
       @for (it of items(); track it.key) {
-        <a [routerLink]="'/app/' + it.key" routerLinkActive="active" [class.secondary]="!it.bar">
+        <a
+          [routerLink]="it.href ?? '/app/' + it.key"
+          [routerLinkActiveOptions]="{ exact: !!it.href }"
+          routerLinkActive="active"
+          [class.secondary]="!it.bar"
+        >
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -218,7 +234,8 @@ const LOGOUT_ICON = ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'M16 17l5-5-5-5'
         >
           @for (it of items(); track it.key) {
             <a
-              [routerLink]="'/app/' + it.key"
+              [routerLink]="it.href ?? '/app/' + it.key"
+              [routerLinkActiveOptions]="{ exact: !!it.href }"
               routerLinkActive="active"
               (click)="menuOpen.set(false)"
             >
