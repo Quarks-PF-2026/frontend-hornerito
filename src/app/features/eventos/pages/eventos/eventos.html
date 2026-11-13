@@ -42,22 +42,25 @@
   }
 
   @if (inactiveViews().length > 0) {
-    <div class="section hn-head">Dados de baja</div>
-    @for (e of inactiveViews(); track e.id) {
-      <div class="event hn-card inactive" (click)="open(e.id)">
-        <div class="head">
-          <div class="head-titles">
-            <div class="name">{{ e.name }}</div>
-            <div class="meta">{{ e.schedule }} · baja {{ e.endedLabel }}</div>
+    <!-- Los eventos nunca se borran (DOMAIN §16): los de baja quedan plegados. -->
+    <details class="inactive-group">
+      <summary class="section hn-head">Dados de baja ({{ inactiveViews().length }})</summary>
+      @for (e of inactiveViews(); track e.id) {
+        <div class="event hn-card inactive" (click)="open(e.id)">
+          <div class="head">
+            <div class="head-titles">
+              <div class="name">{{ e.name }}</div>
+              <div class="meta">{{ e.schedule }} · baja {{ e.endedLabel }}</div>
+            </div>
+            <span class="ico">📅</span>
           </div>
-          <span class="ico">📅</span>
+          <div class="actions">
+            <button class="hn-btn hn-btn--outline" type="button" (click)="attendance(e.id, $event)">
+              Ver asistencia
+            </button>
+          </div>
         </div>
-        <div class="actions">
-          <button class="hn-btn hn-btn--outline" type="button" (click)="attendance(e.id, $event)">
-            Ver asistencia
-          </button>
-        </div>
-      </div>
-    }
+      }
+    </details>
   }
 </div>

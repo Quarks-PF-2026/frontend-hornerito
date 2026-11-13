@@ -31,6 +31,15 @@
 
 .row {
   padding: 14px 16px;
+  transition: box-shadow 200ms ease;
+}
+.row.flash {
+  box-shadow: 0 0 0 2px var(--hn-primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
 }
 .date {
   font-weight: 700;

@@ -44,6 +44,13 @@ export class EventoDetallePage {
   readonly loading = signal(true);
   readonly notFound = signal(false);
   readonly rows = signal<OccurrenceRow[]>([]);
+  /**
+   * El botón "Registrar asistencia" solo lleva al primer día sin cargar: si ya
+   * están todos cargados no tiene a dónde ir y parecía no hacer nada.
+   */
+  readonly hasPending = computed(() => this.rows().some((r) => r.count == null));
+  /** Día resaltado un instante al llegar desde el botón. */
+  readonly flashDate = signal<string | null>(null);
 
   readonly canWrite = this.auth.canWriteContent;
 
@@ -157,11 +164,14 @@ export class EventoDetallePage {
 
   /** Lleva al input de la ocurrencia más reciente sin cargar (o la más reciente). */
   register(): void {
-    const list = this.rows();
-    const target = list.find((r) => r.count == null) ?? list[0];
-    const input = document.getElementById(`count-${target.date}`);
-    input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const target = this.rows().find((r) => r.count == null);
+    if (!target) return;
+    const input = document.getElementById(`count-${target.date}`) as HTMLInputElement | null;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    input?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
     input?.focus({ preventScroll: true });
+    this.flashDate.set(target.date);
+    setTimeout(() => this.flashDate.set(null), 1200);
   }
 
   onDraft(date: string, event: Event): void {

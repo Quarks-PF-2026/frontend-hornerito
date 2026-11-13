@@ -53,6 +53,35 @@
   font-size: 15px;
   margin: 22px 0 10px;
 }
+summary.section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--hn-text-2);
+}
+summary.section::-webkit-details-marker {
+  display: none;
+}
+summary.section::before {
+  content: '▸';
+  transition: transform 150ms ease;
+}
+.inactive-group[open] summary.section::before {
+  transform: rotate(90deg);
+}
+summary.section:focus-visible {
+  outline: 2px solid var(--hn-primary);
+  outline-offset: 2px;
+  border-radius: var(--hn-radius-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  summary.section::before {
+    transition: none;
+  }
+}
 
 .empty {
   padding: 30px 22px;

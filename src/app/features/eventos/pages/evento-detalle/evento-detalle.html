@@ -16,7 +16,7 @@
     <div class="subtitle">{{ schedule() }} · {{ when() }}</div>
   }
 
-  @if (rows().length) {
+  @if (hasPending()) {
     <button class="hn-btn hn-btn--primary register" type="button" (click)="register()">
       Registrar asistencia
     </button>
@@ -24,7 +24,7 @@
 
   <div class="list">
     @for (r of rows(); track r.date) {
-      <div class="row hn-card">
+      <div class="row hn-card" [class.flash]="flashDate() === r.date">
         <div class="date">{{ r.dateLabel }}</div>
         <div class="field-row">
           <input
