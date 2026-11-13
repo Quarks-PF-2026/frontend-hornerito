@@ -245,6 +245,39 @@
 .rail::-webkit-scrollbar {
   display: none;
 }
+// ponytail: flechas siempre visibles en desktop, sin ocultarse en los extremos.
+.rail-wrap {
+  position: relative;
+}
+.rail-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  transform: translateY(-50%);
+  border: 1px solid var(--hn-border);
+  border-radius: 50%;
+  background: var(--hn-card);
+  color: var(--hn-ink);
+  box-shadow: var(--hn-shadow-card);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+// Fuera del borde de las tarjetas para no tapar su texto.
+.rail-arrow--prev {
+  left: -40px;
+}
+.rail-arrow--next {
+  right: -40px;
+}
+// En táctil se desliza con el dedo.
+@media (hover: none) {
+  .rail-arrow {
+    display: none;
+  }
+}
 .need {
   flex: 0 0 min(260px, 78vw);
   scroll-snap-align: start;

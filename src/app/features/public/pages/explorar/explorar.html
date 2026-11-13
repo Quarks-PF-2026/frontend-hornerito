@@ -70,7 +70,24 @@
   <section class="expiring" aria-labelledby="expiring-title">
     <h2 id="expiring-title" class="hn-head">Por vencer</h2>
     <p class="quiet">Las necesidades abiertas que vencen primero.</p>
-    <div class="rail">
+    <div class="rail-wrap">
+    <button
+      type="button"
+      class="rail-arrow rail-arrow--prev"
+      aria-label="Ver necesidades anteriores"
+      (click)="rail.scrollBy({ left: -rail.clientWidth * 0.8, behavior: 'smooth' })"
+    >
+      ‹
+    </button>
+    <button
+      type="button"
+      class="rail-arrow rail-arrow--next"
+      aria-label="Ver más necesidades por vencer"
+      (click)="rail.scrollBy({ left: rail.clientWidth * 0.8, behavior: 'smooth' })"
+    >
+      ›
+    </button>
+    <div class="rail" #rail>
       @for (need of expiring(); track need.id) {
         <button type="button" class="need hn-card" (click)="open(need.organizationId)">
           <div class="need-head">
@@ -100,6 +117,7 @@
           {{ expiringLoading() ? 'Cargando…' : 'Ver más necesidades' }}
         </button>
       }
+    </div>
     </div>
   </section>
 }
