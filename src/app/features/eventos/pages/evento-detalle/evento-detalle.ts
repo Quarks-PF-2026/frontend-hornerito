@@ -8,7 +8,7 @@ import { NeedsService } from '../../../../core/services/needs.service';
 import { SuppliesService } from '../../../../core/services/supplies.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { VolunteeringService } from '../../../../core/services/volunteering.service';
-import { fmtDate } from '../../../../core/util/format';
+import { daysUntil, fmtDate } from '../../../../core/util/format';
 
 interface OccurrenceRow {
   date: string;
@@ -90,8 +90,15 @@ export class EventoDetallePage {
   }
 
   private loadOccurrences(): void {
-    // Default del backend: últimos 30 días. No hace falta un selector de rango.
-    this.eventsSvc.occurrences(this.id).subscribe({
+    // Default del backend: últimos 30 días. No hace falta un selector de rango
+    // para los periódicos, pero un extraordinario tiene una sola ocurrencia, en
+    // su fecha: si quedó fuera de esa ventana la pantalla salía vacía y no se
+    // podía cargar ni corregir su asistencia. Se pide exactamente esa fecha, solo
+    // si ya llegó: para un extraordinario el backend no recorta las futuras, y
+    // cargar asistencia a futuro no está permitido (DOMAIN §16).
+    const ev = this.event();
+    const day = ev?.kind === 'one_off' && daysUntil(ev.startDate) <= 0 ? ev.startDate : undefined;
+    this.eventsSvc.occurrences(this.id, day, day).subscribe({
       next: (occ) => {
         // Backend devuelve asc; en pantalla va más reciente primero.
         this.rows.set([...occ].reverse().map((o) => this.toRow(o)));
