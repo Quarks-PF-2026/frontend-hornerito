@@ -19,6 +19,8 @@ interface NavItem {
   platformAdmin?: true;
   /** Visible aunque la organización no esté validada: no opera sus datos. */
   open?: true;
+  /** Dato de la persona: lo ve también quien no tiene organización (donante). */
+  personal?: true;
 }
 
 /**
@@ -113,6 +115,7 @@ const NAV_ITEMS: NavItem[] = [
     // Dato de la persona, no de la organización (QK-11): visible sin importar
     // el estado de validación.
     open: true,
+    personal: true,
     d: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M4.5 20c0-4 3.5-6.5 7.5-6.5s7.5 2.5 7.5 6.5'],
   },
 ];
@@ -437,6 +440,11 @@ export class BottomNav {
   /** Organización validada; sin ella solo quedan los items `open`. */
   readonly canOperate = input(false);
   /**
+   * Cuenta con organización o admin de plataforma (AuthService.hasPanelAccess).
+   * Un donante entra a /app solo por Mi Perfil: no ve los destinos del comedor.
+   */
+  readonly hasPanelAccess = input(false);
+  /**
    * Segmento activo, ya resuelto por AppLayout (colapsa sub-vistas como
    * `puntos/nuevo` → `puntos`). Se usa para iluminar el botón Menú cuando la
    * ruta actual vive adentro del drawer, donde no hay un `routerLinkActive`
@@ -452,6 +460,7 @@ export class BottomNav {
   readonly items = computed(() =>
     NAV_ITEMS.filter(
       (i) =>
+        (i.personal || this.hasPanelAccess()) &&
         (i.open || this.canOperate()) &&
         (!i.admin || this.canManageMembers()) &&
         (!i.writer || this.canWriteContent()) &&
