@@ -107,6 +107,7 @@ export class AppLayout {
   readonly canWriteContent = this.auth.canWriteContent;
   readonly isPlatformAdmin = this.auth.isPlatformAdmin;
   readonly canOperate = this.orgSvc.canOperate;
+  readonly hasPanelAccess = this.auth.hasPanelAccess;
 
   logout(): void {
     this.auth.logout();
