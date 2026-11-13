@@ -68,36 +68,51 @@
 
 @if (expiring().length) {
   <section class="expiring" aria-labelledby="expiring-title">
-    <h2 id="expiring-title" class="hn-head">Por vencer</h2>
-    <p class="quiet">Las necesidades abiertas que vencen primero.</p>
-    <div class="rail-wrap">
-    <button
-      type="button"
-      class="rail-arrow rail-arrow--prev"
-      aria-label="Ver necesidades anteriores"
-      (click)="rail.scrollBy({ left: -rail.clientWidth * 0.8, behavior: 'smooth' })"
+    <div class="expiring-header">
+      <div>
+        <h2 id="expiring-title" class="hn-head">Por vencer</h2>
+        <p class="quiet">Las necesidades abiertas que vencen primero.</p>
+      </div>
+      <div class="rail-nav">
+        <button
+          type="button"
+          class="rail-arrow"
+          aria-label="Ver necesidades anteriores"
+          [disabled]="railAtStart()"
+          (click)="scrollRail(rail, -1)"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <button
+          type="button"
+          class="rail-arrow"
+          aria-label="Ver más necesidades por vencer"
+          [disabled]="railAtEnd()"
+          (click)="scrollRail(rail, 1)"
+        >
+          <span aria-hidden="true">›</span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="rail"
+      #rail
+      [class.rail--fade-start]="!railAtStart()"
+      [class.rail--fade-end]="!railAtEnd()"
+      (scroll)="onRailScroll(rail)"
     >
-      ‹
-    </button>
-    <button
-      type="button"
-      class="rail-arrow rail-arrow--next"
-      aria-label="Ver más necesidades por vencer"
-      (click)="rail.scrollBy({ left: rail.clientWidth * 0.8, behavior: 'smooth' })"
-    >
-      ›
-    </button>
-    <div class="rail" #rail>
       @for (need of expiring(); track need.id) {
         <button type="button" class="need hn-card" (click)="open(need.organizationId)">
           <div class="need-head">
-            <span class="ico" aria-hidden="true">{{ need.icon }}</span>
-            <div>
+            <span class="ico" aria-hidden="true" [style.background]="need.catBg">{{ need.icon }}</span>
+            <div class="need-title">
               <p class="supply">{{ need.supply }}</p>
               <p class="org-name">{{ need.organization }}</p>
             </div>
           </div>
-          <p class="due">{{ need.due }}</p>
+          <span class="due" [class]="'due due--' + need.urgency">
+            <span aria-hidden="true">⏳</span> {{ need.due }}
+          </span>
           <div class="need-progress">
             <div class="row">
               <span>{{ need.covered }} de {{ need.required }} {{ need.unit }}</span>
@@ -114,10 +129,10 @@
           [disabled]="expiringLoading()"
           (click)="moreExpiring()"
         >
+          <span class="more-ico" aria-hidden="true">→</span>
           {{ expiringLoading() ? 'Cargando…' : 'Ver más necesidades' }}
         </button>
       }
-    </div>
     </div>
   </section>
 }

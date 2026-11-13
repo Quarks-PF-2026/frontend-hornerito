@@ -10,12 +10,17 @@ export function fmtDate(iso: string): string {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** 'YYYY-MM-DD' → 'Vence hoy' | 'Vence mañana' | 'Vence en N días' (QK-108). */
-export function dueLabel(iso: string, today = new Date()): string {
+/** Días de calendario desde hoy hasta 'YYYY-MM-DD' (0 o negativo = hoy o pasado). */
+export function daysUntil(iso: string, today = new Date()): number {
   const [y, m, d] = iso.split('-').map(Number);
   // Medianoche local en ambos lados: el día calendario, sin corrimiento por UTC.
   const from = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const days = Math.round((new Date(y, m - 1, d).getTime() - from.getTime()) / DAY_MS);
+  return Math.round((new Date(y, m - 1, d).getTime() - from.getTime()) / DAY_MS);
+}
+
+/** 'YYYY-MM-DD' → 'Vence hoy' | 'Vence mañana' | 'Vence en N días' (QK-108). */
+export function dueLabel(iso: string, today = new Date()): string {
+  const days = daysUntil(iso, today);
   if (days <= 0) return 'Vence hoy';
   if (days === 1) return 'Vence mañana';
   return `Vence en ${days} días`;
