@@ -36,17 +36,11 @@
 
   @if (localities().length) {
     <div class="search">
-      <select
-        class="hn-select"
-        aria-label="Filtrar por localidad"
-        [value]="locality() ?? ''"
-        (change)="filterByLocality($any($event.target).value)"
-      >
-        <option value="">Todas las localidades</option>
-        @for (l of localities(); track l.locality + (l.province ?? '')) {
-          <option [value]="l.locality">{{ l.locality | hnLocality: l.province }}</option>
-        }
-      </select>
+      <hn-locality-combobox
+        [localities]="localities()"
+        [value]="locality()"
+        (changed)="filterByLocality($event ?? '')"
+      />
     </div>
   }
 
@@ -104,7 +98,9 @@
       @for (need of expiring(); track need.id) {
         <button type="button" class="need hn-card" (click)="open(need.organizationId)">
           <div class="need-head">
-            <span class="ico" aria-hidden="true" [style.background]="need.catBg">{{ need.icon }}</span>
+            <span class="ico" aria-hidden="true" [style.background]="need.catBg">{{
+              need.icon
+            }}</span>
             <div class="need-title">
               <p class="supply">{{ need.supply }}</p>
               <p class="org-name">{{ need.organization }}</p>
