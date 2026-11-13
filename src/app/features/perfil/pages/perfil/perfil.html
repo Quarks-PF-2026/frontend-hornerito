@@ -1,5 +1,8 @@
 @if (showBackHome()) {
-  <a class="back" routerLink="/">‹ Volver al inicio</a>
+  <div class="donor-nav">
+    <a class="back" routerLink="/">‹ Volver al inicio</a>
+    <button class="logout" type="button" (click)="logout()">Cerrar sesión</button>
+  </div>
 }
 
 @if (loading()) {

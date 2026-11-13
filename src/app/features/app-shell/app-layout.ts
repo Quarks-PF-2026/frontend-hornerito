@@ -34,7 +34,7 @@ const TABS: Record<string, TabMeta> = {
 @Component({
   selector: 'app-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'hn-fill' },
+  host: { class: 'hn-fill', '[class.solo]': '!hasPanelAccess()' },
   imports: [RouterOutlet, TopBar, BottomNav, Toast, ModalHost],
   templateUrl: './app-layout.html',
   styleUrl: './app-layout.scss',
