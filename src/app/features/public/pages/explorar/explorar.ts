@@ -19,6 +19,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { PublicService } from '../../../../core/services/public.service';
 import { daysUntil, dueLabel, initials } from '../../../../core/util/format';
 import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
+import { LocalityCombobox } from '../../../../shared/ui/locality-combobox/locality-combobox';
 import { DonorRanking } from '../../../../shared/ui/donor-ranking/donor-ranking';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
 import { StoryBar } from '../../../../shared/ui/story-bar/story-bar';
@@ -81,7 +82,7 @@ function toExpiringRow(need: PublicFeedNeed): ExpiringRow {
 @Component({
   selector: 'app-explorar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LocalityPipe, ProgressBar, DonorRanking, StoryBar, StoryViewer],
+  imports: [LocalityPipe, LocalityCombobox, ProgressBar, DonorRanking, StoryBar, StoryViewer],
   templateUrl: './explorar.html',
   styleUrl: './explorar.scss',
 })
