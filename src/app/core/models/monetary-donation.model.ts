@@ -14,6 +14,9 @@ export interface MonetaryDonation {
   receiptUrl: string | null;
   donorName: string | null;
   donorContact: string | null;
+  /** Id del perfil público (`/donante/:id`, QK-110). Solo viene cuando esta
+   * donación garantiza que el perfil existe; nunca para una anónima. */
+  donorProfileId: string | null;
   rejectReason: string | null;
   decidedAt: string | null;
   createdAt: string;

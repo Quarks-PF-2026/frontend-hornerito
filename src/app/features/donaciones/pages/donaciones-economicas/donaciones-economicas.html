@@ -43,7 +43,13 @@
       <div class="head">
         <div class="head-titles">
           <div class="amount hn-head">{{ row.amountLabel }}</div>
-          <div class="donor">{{ row.donor }}</div>
+          @if (row.donorProfileId) {
+            <a class="donor donor-link" [routerLink]="['/donante', row.donorProfileId]">{{
+              row.donor
+            }}</a>
+          } @else {
+            <div class="donor">{{ row.donor }}</div>
+          }
         </div>
         <hn-badge [label]="row.statusLabel" [bg]="row.statusBg" [ink]="row.statusInk" />
       </div>
@@ -149,7 +155,9 @@
         <a class="hn-btn hn-btn--outline" [href]="row.receiptUrl" target="_blank" rel="noopener">
           Abrir original
         </a>
-        <button class="hn-btn hn-btn--primary" type="button" (click)="closeReceipt()">Cerrar</button>
+        <button class="hn-btn hn-btn--primary" type="button" (click)="closeReceipt()">
+          Cerrar
+        </button>
       </div>
     </div>
   </hn-bottom-sheet>

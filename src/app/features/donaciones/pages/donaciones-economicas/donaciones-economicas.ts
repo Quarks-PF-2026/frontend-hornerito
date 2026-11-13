@@ -7,6 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { monetaryTotals } from '../../../../core/models/donation-filters';
 import {
   MonetaryDonationStatus,
@@ -23,12 +24,13 @@ type StatusFilter = MonetaryDonationStatus | '';
 
 /**
  * Pestaña de donaciones económicas del historial (QK-23). Nació como pantalla
- * propia en QK-20; ahora se embebe en `/app/donaciones` y por eso no navega.
+ * propia en QK-20; ahora se embebe en `/app/donaciones` y por eso no navega,
+ * salvo el nombre del donante, que enlaza a su perfil público cuando lo tiene.
  */
 @Component({
   selector: 'app-donaciones-economicas',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Badge, BottomSheet],
+  imports: [Badge, BottomSheet, RouterLink],
   templateUrl: './donaciones-economicas.html',
   styleUrl: './donaciones-economicas.scss',
 })
@@ -94,19 +96,15 @@ export class DonacionesEconomicasPage {
   }
 
   private reload(): void {
-    this.donations
-      .load({ status: this.filter(), from: this.from(), to: this.to() })
-      .subscribe({
-        error: (err: HttpErrorResponse) => {
-          // El 400 del backend trae el motivo (por ejemplo, rango dado vuelta).
-          const message = (err.error as { message?: string | string[] })?.message;
-          this.toast.show(
-            Array.isArray(message)
-              ? message[0]
-              : (message ?? 'No se pudieron cargar las donaciones'),
-          );
-        },
-      });
+    this.donations.load({ status: this.filter(), from: this.from(), to: this.to() }).subscribe({
+      error: (err: HttpErrorResponse) => {
+        // El 400 del backend trae el motivo (por ejemplo, rango dado vuelta).
+        const message = (err.error as { message?: string | string[] })?.message;
+        this.toast.show(
+          Array.isArray(message) ? message[0] : (message ?? 'No se pudieron cargar las donaciones'),
+        );
+      },
+    });
   }
 
   confirm(row: MonetaryDonationView): void {
