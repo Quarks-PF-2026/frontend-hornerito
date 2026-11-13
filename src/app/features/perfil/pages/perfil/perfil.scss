@@ -24,14 +24,38 @@
   cursor: not-allowed;
 }
 
-.back {
-  display: block;
+.donor-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   max-width: 620px;
   margin: 0 auto 14px;
+}
+.back,
+.logout {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
   font-size: 14px;
   font-weight: 600;
   color: var(--hn-primary-strong);
   text-decoration: none;
+}
+.logout {
+  padding: 0 14px;
+  border: 1px solid var(--hn-border);
+  border-radius: var(--hn-radius-pill);
+  background: var(--hn-card);
+  font-family: inherit;
+  cursor: pointer;
+}
+.logout:hover {
+  background: var(--hn-cream-soft);
+}
+.back:focus-visible,
+.logout:focus-visible {
+  outline: 2px solid var(--hn-primary);
+  outline-offset: 2px;
 }
 
 .link {

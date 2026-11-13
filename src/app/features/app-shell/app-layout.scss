@@ -5,6 +5,11 @@
   padding: 18px 18px 110px;
 }
 
+// Sin barra inferior (donante): no hace falta reservarle espacio.
+:host(.solo) .content {
+  padding-bottom: 40px;
+}
+
 .fab {
   position: absolute;
   right: 20px;
@@ -48,6 +53,12 @@
   }
   hn-bottom-nav {
     grid-area: side;
+  }
+  :host(.hn-fill.solo) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "top"
+      "main";
   }
   .fab {
     right: 36px;
