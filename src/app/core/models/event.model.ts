@@ -1,3 +1,5 @@
+import { fmtDate } from '../util/format';
+
 export type EventKind = 'periodic' | 'one_off';
 
 export interface OrgEvent {
@@ -53,6 +55,14 @@ export const WEEKDAY_LONG = [
 
 /** Orden de pantalla: la semana arranca el lunes, como se la piensa acá. */
 export const WEEKDAY_DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+/**
+ * Cuándo ocurre: un extraordinario pasa un solo día ("el 28 sep"); un periódico
+ * se repite a partir de su inicio ("desde 28 sep").
+ */
+export function whenLabel(ev: Pick<OrgEvent, 'kind' | 'startDate'>): string {
+  return `${ev.kind === 'one_off' ? 'el' : 'desde'} ${fmtDate(ev.startDate)}`;
+}
 
 export function scheduleLabel(ev: Pick<OrgEvent, 'kind' | 'weekdays' | 'startTime'>): string {
   if (ev.kind === 'one_off') return `Extraordinario · ${ev.startTime}`;

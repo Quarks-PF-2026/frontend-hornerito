@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EventOccurrence, scheduleLabel } from '../../../../core/models/event.model';
+import { EventOccurrence, scheduleLabel, whenLabel } from '../../../../core/models/event.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EventsService } from '../../../../core/services/events.service';
 import { NeedsService } from '../../../../core/services/needs.service';
@@ -61,6 +61,10 @@ export class EventoDetallePage {
   readonly schedule = computed(() => {
     const ev = this.event();
     return ev ? scheduleLabel(ev) : '';
+  });
+  readonly when = computed(() => {
+    const ev = this.event();
+    return ev ? whenLabel(ev) : '';
   });
 
   constructor() {

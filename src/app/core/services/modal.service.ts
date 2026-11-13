@@ -677,7 +677,8 @@ export class ModalService {
   // ---------------- guardado ----------------
   save(): void {
     const m = this._modal();
-    if (!m) return;
+    // Con un guardado en curso, un segundo clic (o Enter) no dispara otro pedido.
+    if (!m || this._busy()) return;
     const errs: Record<string, string> = {};
 
     if (m.kind === 'org') {
@@ -828,6 +829,8 @@ export class ModalService {
           errs['weekdays'] = 'Elegí al menos un día.';
         if (!startDate) errs['startDate'] = 'Elegí una fecha.';
         if (this.fail(errs)) return;
+        // Sin esto un doble clic creaba el evento dos veces (pasó el 2026-09-28).
+        this._busy.set(true);
         this.eventsSvc
           .create({
             name: name.trim(),
@@ -839,10 +842,13 @@ export class ModalService {
           })
           .subscribe({
             next: () => {
+              // `close()` no cierra mientras está ocupado: primero se libera.
+              this._busy.set(false);
               this.close();
               this.toast.show('Evento creado');
             },
             error: (err: HttpErrorResponse) => {
+              this._busy.set(false);
               this._errors.set({ name: err.error?.message ?? 'No se pudo crear el evento.' });
             },
           });
@@ -851,12 +857,15 @@ export class ModalService {
       const startDate = this.str('startDate');
       if (!startDate) errs['startDate'] = 'Elegí una fecha.';
       if (this.fail(errs)) return;
+      this._busy.set(true);
       this.eventsSvc.update(m.id as string, { name: name.trim(), startTime, startDate }).subscribe({
         next: () => {
+          this._busy.set(false);
           this.close();
           this.toast.show('Evento actualizado');
         },
         error: (err: HttpErrorResponse) => {
+          this._busy.set(false);
           const msg = err.error?.message ?? 'No se pudo guardar. Intentá de nuevo.';
           this._errors.set(err.status === 409 ? { startDate: msg } : { name: msg });
         },

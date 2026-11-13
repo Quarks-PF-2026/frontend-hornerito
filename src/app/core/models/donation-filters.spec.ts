@@ -3,10 +3,7 @@ import { DonationView } from './donation.model';
 import { MonetaryDonationStatus, MonetaryDonationView } from './monetary-donation.model';
 import { inPersonTotals, monetaryTotals, toHttpParams } from './donation-filters';
 
-function monetary(
-  status: MonetaryDonationStatus,
-  amount: number,
-): MonetaryDonationView {
+function monetary(status: MonetaryDonationStatus, amount: number): MonetaryDonationView {
   return {
     id: `m-${status}-${amount}`,
     amount,
@@ -16,6 +13,7 @@ function monetary(
     receiptUrl: null,
     donorName: null,
     donorContact: null,
+    donorProfileId: null,
     rejectReason: null,
     decidedAt: null,
     createdAt: '2026-08-20T12:00:00.000Z',
