@@ -20,6 +20,13 @@
             Tu cuenta existe pero todavía no validaste tu email. Revisá tu casilla antes de
             ingresar.
           </div>
+          @if (resendMsg()) {
+            <div class="banner-text resend-msg" role="status">{{ resendMsg() }}</div>
+          } @else {
+            <button class="resend-link" type="button" [disabled]="resending()" (click)="resend()">
+              {{ resending() ? 'Enviando…' : '¿No te llegó? Reenviar correo' }}
+            </button>
+          }
         </div>
       </div>
     }
