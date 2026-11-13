@@ -12,6 +12,21 @@
   font-size: 15px;
 }
 
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hn-primary-strong);
+  text-decoration: none;
+}
+.back:focus-visible {
+  outline: 2px solid var(--hn-primary);
+  outline-offset: 2px;
+}
+
 .cover {
   height: 150px;
   background: linear-gradient(150deg, var(--hn-canela-200), var(--hn-canela-700));
