@@ -75,6 +75,13 @@
   text-overflow: ellipsis;
 }
 
+.donor-link {
+  display: block;
+  color: var(--hn-primary-strong);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;
