@@ -17,7 +17,7 @@ import {
 import { StoryGroup } from '../../../../core/models/story.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PublicService } from '../../../../core/services/public.service';
-import { dueLabel, initials } from '../../../../core/util/format';
+import { daysUntil, dueLabel, initials } from '../../../../core/util/format';
 import { LocalityPipe } from '../../../../shared/pipes/locality.pipe';
 import { DonorRanking } from '../../../../shared/ui/donor-ranking/donor-ranking';
 import { ProgressBar } from '../../../../shared/ui/progress-bar/progress-bar';
@@ -44,11 +44,26 @@ interface ExpiringRow {
   pct: number;
   color: string;
   due: string;
+  catBg: string;
+  urgency: Urgency;
+}
+
+/**
+ * Solo énfasis visual del chip de vencimiento, no una regla de negocio: el
+ * orden y qué está abierto lo decide el backend. Umbrales: una y dos semanas.
+ */
+type Urgency = 'high' | 'mid' | 'low';
+function urgencyOf(days: number): Urgency {
+  if (days <= 7) return 'high';
+  if (days <= 14) return 'mid';
+  return 'low';
 }
 
 function toExpiringRow(need: PublicFeedNeed): ExpiringRow {
   const pct = Math.min(100, Math.round((need.coveredQuantity / need.requiredQuantity) * 100));
   return {
+    catBg: CAT_BG[need.supplyCategory] ?? 'var(--hn-cream-soft)',
+    urgency: urgencyOf(daysUntil(need.deadline)),
     id: need.id,
     organizationId: need.organizationId,
     organization: need.organizationName,
@@ -88,6 +103,9 @@ export class ExplorarPage implements OnDestroy {
   readonly expiringTotal = signal(0);
   readonly expiringLoading = signal(false);
   readonly hasMoreExpiring = computed(() => this.expiring().length < this.expiringTotal());
+  /** Posición del carrusel: apaga la flecha y el fundido del extremo alcanzado. */
+  readonly railAtStart = signal(true);
+  readonly railAtEnd = signal(false);
   readonly topDonors = signal<TopDonor[]>([]);
   readonly storyGroups = signal<StoryGroup[]>([]);
   /** Grupo con el que se abrió el visor; null con el visor cerrado. */
@@ -112,6 +130,18 @@ export class ExplorarPage implements OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.debounce);
+  }
+
+  /** Avanza o retrocede casi una pantalla del carrusel; sin animación si el usuario pidió menos movimiento. */
+  scrollRail(rail: HTMLElement, dir: 1 | -1): void {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    rail.scrollBy({ left: dir * rail.clientWidth * 0.8, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  onRailScroll(rail: HTMLElement): void {
+    // 1px de tolerancia: el zoom del navegador deja scrollLeft fraccionario.
+    this.railAtStart.set(rail.scrollLeft <= 1);
+    this.railAtEnd.set(rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1);
   }
 
   icon(category: string): string {
@@ -213,6 +243,8 @@ export class ExplorarPage implements OnDestroy {
       next: (result) => {
         const rows = result.items.map(toExpiringRow);
         this.expiring.update((current) => (append ? [...current, ...rows] : rows));
+        // Llegaron tarjetas nuevas a la derecha: ya no se está en el final.
+        if (append && rows.length) this.railAtEnd.set(false);
         this.expiringTotal.set(result.total);
         this.expiringLoading.set(false);
       },
